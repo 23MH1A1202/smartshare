@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Motion Core: Nexus</title>
+    <title>Motion Core: Architect</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,6 +14,7 @@
             --primary: #00f3ff;
             --secondary: #bc13fe;
             --alert: #ff2a6d;
+            --gold: #ffd700;
             --bg-glass: rgba(10, 15, 20, 0.65);
             --border-glass: rgba(255, 255, 255, 0.1);
         }
@@ -29,10 +30,10 @@
         /* --- UI OVERLAY LAYER --- */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
-            pointer-events: none; /* Let clicks pass through to 3D */
+            pointer-events: none;
             display: flex; flex-direction: column; justify-content: space-between;
             padding: 20px; box-sizing: border-box;
-            background: radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.8) 100%); /* Vignette */
+            background: radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.8) 100%);
         }
 
         /* --- HUD ELEMENTS --- */
@@ -48,10 +49,9 @@
             transition: all 0.3s ease;
         }
 
-        .hud-text { transform: skewX(10deg); } /* Correct text skew */
+        .hud-text { transform: skewX(10deg); }
         .hud-label { color: #8a9ba8; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 2px;}
         .hud-value { color: white; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 10px var(--primary); }
-        .hud-sub { font-size: 0.8rem; color: var(--primary); }
 
         /* Top Bar */
         .top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -62,7 +62,6 @@
         /* Bottom Bar */
         .bottom-bar { display: flex; flex-direction: column; align-items: center; width: 100%; padding-bottom: 30px; }
         
-        /* Gesture Feedback */
         #gesture-pill {
             background: rgba(0,0,0,0.8); border: 1px solid #333;
             padding: 10px 30px; border-radius: 30px;
@@ -72,7 +71,6 @@
         #gesture-pill.active { border-color: var(--secondary); opacity: 1; box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); }
         #gesture-text { font-size: 1rem; letter-spacing: 3px; font-weight: 700; text-transform: uppercase; }
 
-        /* Charge Bar */
         .charge-container { width: 200px; height: 6px; background: #222; border-radius: 3px; overflow: hidden; position: relative; }
         .charge-fill { 
             width: 0%; height: 100%; background: linear-gradient(90deg, var(--secondary), var(--alert));
@@ -80,7 +78,7 @@
         }
 
         /* Decorative Corners */
-        .reticle { position: absolute; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; transition: all 0.5s; }
+        .reticle { position: absolute; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
         .tl { top: 20px; left: 20px; border-right: 0; border-bottom: 0; }
         .tr { top: 20px; right: 20px; border-left: 0; border-bottom: 0; }
         .bl { bottom: 20px; left: 20px; border-right: 0; border-top: 0; }
@@ -98,10 +96,7 @@
             transition: opacity 0.6s ease-out;
         }
 
-        h1 { 
-            font-size: 3.5rem; margin: 0; letter-spacing: 10px; color: white; 
-            text-transform: uppercase; font-weight: 300; position: relative;
-        }
+        h1 { font-size: 3.5rem; margin: 0; letter-spacing: 10px; color: white; text-transform: uppercase; font-weight: 300; }
         h1 span { color: var(--primary); font-weight: 700; text-shadow: 0 0 30px var(--primary); }
         
         .instruction-grid {
@@ -118,7 +113,7 @@
             color: #000; background: var(--primary); border: none; cursor: pointer;
             text-transform: uppercase; letter-spacing: 2px;
             clip-path: polygon(15% 0, 100% 0, 100% 70%, 85% 100%, 0 100%, 0 30%);
-            transition: all 0.2s; position: relative; overflow: hidden;
+            transition: all 0.2s;
         }
         .btn-main:hover { background: white; box-shadow: 0 0 30px var(--primary); transform: scale(1.05); }
         
@@ -126,22 +121,13 @@
             background: transparent; border: 1px solid #444; color: #888;
             padding: 10px 20px; cursor: pointer; font-family: 'Rajdhani', sans-serif;
             text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;
-            transition: color 0.3s;
         }
         .btn-sec:hover { color: white; border-color: white; }
 
-        /* Loader */
         .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; display: none; margin-top: 20px;}
         
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .instruction-grid { grid-template-columns: 1fr; gap: 10px; }
-            .inst-item { display: flex; justify-content: space-between; padding: 10px; }
-        }
     </style>
 </head>
 <body>
@@ -164,14 +150,12 @@
         </div>
         
         <div class="spinner" id="loader"></div>
-        <div id="error-log" style="color:var(--alert); font-size:12px; margin-top:20px; max-width: 80%; text-align: center;"></div>
+        <div id="error-log" style="color:var(--alert); font-size:12px; margin-top:20px;"></div>
     </div>
 
     <div id="ui-layer">
-        <div class="reticle tl"></div>
-        <div class="reticle tr"></div>
-        <div class="reticle bl"></div>
-        <div class="reticle br"></div>
+        <div class="reticle tl"></div><div class="reticle tr"></div>
+        <div class="reticle bl"></div><div class="reticle br"></div>
 
         <div class="top-bar">
             <div class="hud-panel">
@@ -183,7 +167,7 @@
             
             <div class="hud-panel" style="border-left: none; border-right: 3px solid var(--secondary); transform: skewX(10deg); border-radius: 10px 0 0 10px;">
                 <div class="hud-text" style="transform: skewX(-10deg); text-align: right;">
-                    <span class="hud-label">GEOMETRY</span>
+                    <span class="hud-label">TOPOLOGY</span>
                     <span id="ui-shape" class="hud-value" style="color:var(--secondary);">SPHERE</span>
                 </div>
             </div>
@@ -229,7 +213,7 @@
         // --- 1. SETUP ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.02); // Pure black for AMOLED
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 24;
@@ -239,59 +223,105 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
         container.appendChild(renderer.domElement);
 
-        // Bloom (Glow Effect)
         const renderScene = new RenderPass(scene, camera);
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.4, 0.6, 0.85);
         const composer = new EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
-        // --- 2. PARTICLES SYSTEM ---
-        const PARTICLE_COUNT = 8500;
+        // --- 2. ADVANCED SHAPE LOGIC ---
+        const PARTICLE_COUNT = 9000;
         const geometry = new THREE.BufferGeometry();
         const pos = new Float32Array(PARTICLE_COUNT * 3);
         const target = new Float32Array(PARTICLE_COUNT * 3);
         const colors = new Float32Array(PARTICLE_COUNT * 3);
         const randoms = new Float32Array(PARTICLE_COUNT);
 
-        const color1 = new THREE.Color(0x00f3ff); // Cyan
-        const color2 = new THREE.Color(0xbc13fe); // Purple
+        const colorCyan = new THREE.Color(0x00f3ff); 
+        const colorPurple = new THREE.Color(0xbc13fe); 
+        const colorGold = new THREE.Color(0xffaa00);
+        const colorGreen = new THREE.Color(0x00ff66);
 
-        // Shape Generators
+        // Helper for random between
+        const rand = (min, max) => Math.random() * (max - min) + min;
+
+        // --- SHAPE DEFINITIONS ---
         const shapes = [
-            (i) => { // Sphere
+            // 0. CORE SPHERE
+            (i) => { 
                 const r = 11; 
                 const phi = Math.acos(-1 + (2 * i) / PARTICLE_COUNT);
                 const theta = Math.sqrt(PARTICLE_COUNT * Math.PI) * phi;
                 return { x: r * Math.cos(theta) * Math.sin(phi), y: r * Math.sin(theta) * Math.sin(phi), z: r * Math.cos(phi) };
             },
-            (i) => { // Torus / Galaxy
+            // 1. QUANTUM CUBE (New)
+            (i) => {
+                const s = 14; 
+                // Create a volume cube with concentrated edges
+                const r = Math.random();
+                let x,y,z;
+                if(r < 0.2) { // 20% on edges for structure
+                    x = (Math.random()>0.5?1:-1) * s/2; 
+                    y = rand(-s/2, s/2); 
+                    z = rand(-s/2, s/2);
+                } else {
+                    x = rand(-s/2, s/2); y = rand(-s/2, s/2); z = rand(-s/2, s/2);
+                }
+                return { x, y, z };
+            },
+            // 2. TORUS
+            (i) => { 
                 const u = Math.random() * Math.PI * 2;
                 const v = Math.random() * Math.PI * 2;
                 const r = 8 + 3 * Math.cos(v);
                 return { x: r * Math.cos(u), y: r * Math.sin(u), z: 3 * Math.sin(v) };
             },
-            (i) => { // Double Helix / DNA
+            // 3. NEON PYRAMID (New)
+            (i) => {
+                const h = 18; // Height
+                const y = rand(-h/2, h/2); // Vertical position
+                // Calculate max width at this height (linear interpolation)
+                const pct = 1.0 - ((y + h/2) / h); 
+                const w = pct * 12; // Base width
+                
+                return { 
+                    x: rand(-w, w), 
+                    y: y, 
+                    z: rand(-w, w) 
+                };
+            },
+            // 4. HELIX STRAND
+            (i) => { 
                 const t = (i / PARTICLE_COUNT) * Math.PI * 20;
-                const radius = 6;
-                const x = Math.cos(t) * radius;
-                const z = Math.sin(t) * radius;
+                const r = 6;
+                const x = Math.cos(t) * r;
+                const z = Math.sin(t) * r;
                 const y = (i / PARTICLE_COUNT * 30) - 15;
-                return { x: x + (Math.random()-0.5), y: y, z: z + (Math.random()-0.5) };
+                return { x: x + rand(-1,1), y: y, z: z + rand(-1,1) };
+            },
+            // 5. WARP TUNNEL (New)
+            (i) => {
+                const angle = i * 0.1;
+                const r = 6 + Math.random();
+                const z = (i % 100) * 0.5 - 25; // Length
+                return {
+                    x: Math.cos(angle) * r,
+                    y: Math.sin(angle) * r,
+                    z: z
+                };
             }
         ];
         
+        const shapeNames = ["SPHERE", "QUANTUM CUBE", "TORUS", "NEON PYRAMID", "HELIX", "WARP TUNNEL"];
         let currentShapeIdx = 0;
-        const shapeNames = ["CORE SPHERE", "QUANTUM TORUS", "HELIX STRAND"];
 
+        // Initial Generation
         for(let i=0; i<PARTICLE_COUNT; i++){
             const p = shapes[0](i);
             pos[i*3]=p.x; pos[i*3+1]=p.y; pos[i*3+2]=p.z;
             target[i*3]=p.x; target[i*3+1]=p.y; target[i*3+2]=p.z;
             
-            // Gradient Color Distribution
-            const mixRatio = (p.y + 10) / 20; 
-            const c = color1.clone().lerp(color2, Math.max(0, Math.min(1, mixRatio + Math.random()*0.2)));
+            const c = colorCyan.clone().lerp(colorPurple, Math.random());
             colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
             randoms[i] = Math.random();
         }
@@ -306,7 +336,7 @@
                 uTime: { value: 0 },
                 uMorph: { value: 0 },
                 uZoom: { value: 1.0 },
-                uCharge: { value: 0.0 } // Interaction feedback
+                uCharge: { value: 0.0 }
             },
             vertexShader: `
                 uniform float uTime;
@@ -318,26 +348,15 @@
                 attribute float aRandom;
                 varying vec3 vColor;
                 void main() {
-                    vColor = color + (uCharge * 0.5); // Brighten on charge
-                    
-                    // Morph Logic
+                    vColor = color + (uCharge * 0.6); 
                     vec3 p = mix(position, positionTarget, uMorph);
-                    
-                    // Idling Noise
                     float noise = sin(uTime * 1.5 + p.y + aRandom * 5.0) * 0.15;
-                    
-                    // Charge Vibration (Jitter)
                     float jitter = sin(uTime * 50.0 + aRandom * 10.0) * uCharge * 0.3;
-                    
                     p += normal * (noise + jitter);
                     p *= uZoom;
-                    
                     vec4 mv = modelViewMatrix * vec4(p, 1.0);
                     gl_Position = projectionMatrix * mv;
-                    
-                    // Size calculation
-                    float baseSize = 3.5 + aRandom * 2.0;
-                    gl_PointSize = (baseSize + (uCharge * 3.0)) * (20.0 / -mv.z);
+                    gl_PointSize = (3.5 + aRandom * 2.0 + (uCharge*4.0)) * (20.0 / -mv.z);
                 }
             `,
             fragmentShader: `
@@ -345,7 +364,6 @@
                 void main() {
                     float d = distance(gl_PointCoord, vec2(0.5));
                     if(d > 0.5) discard;
-                    // Soft circle glow
                     float alpha = 1.0 - smoothstep(0.3, 0.5, d);
                     gl_FragColor = vec4(vColor, alpha);
                 }
@@ -356,14 +374,28 @@
         const particles = new THREE.Points(geometry, material);
         scene.add(particles);
 
-        // --- 3. STATE & LOGIC ---
+        // --- 3. LOGIC ---
         const state = {
             morphing: false, morphVal: 0,
             zoom: 1.0, targetZoom: 1.0,
             rot: { x: 0, y: 0 }, targetRot: { x: 0, y: 0 },
-            fistHoldTime: 0, isFist: false, chargeLevel: 0,
-            mode: 'idle'
+            fistHoldTime: 0, isFist: false, chargeLevel: 0
         };
+
+        function updateParticleColors(idx) {
+            // Change colors based on shape
+            let c1, c2;
+            if(idx === 1) { c1 = colorCyan; c2 = colorGreen; } // Cube: Tech
+            else if (idx === 3) { c1 = colorGold; c2 = colorPurple; } // Pyramid: Alien
+            else { c1 = colorCyan; c2 = colorPurple; } // Default
+
+            const colorsAttr = geometry.attributes.color;
+            for(let i=0; i<PARTICLE_COUNT; i++) {
+                const c = c1.clone().lerp(c2, Math.random());
+                colorsAttr.setXYZ(i, c.r, c.g, c.b);
+            }
+            colorsAttr.needsUpdate = true;
+        }
 
         function switchShape() {
             if(state.morphing) return;
@@ -371,11 +403,11 @@
             state.morphVal = 0;
             currentShapeIdx = (currentShapeIdx + 1) % shapes.length;
             
-            // UI Update with Animation
             const shp = document.getElementById('ui-shape');
             shp.style.opacity = 0;
             setTimeout(() => { shp.innerText = shapeNames[currentShapeIdx]; shp.style.opacity = 1; }, 200);
 
+            // Update Target Positions
             const gen = shapes[currentShapeIdx];
             const attr = geometry.attributes.positionTarget;
             for(let i=0; i<PARTICLE_COUNT; i++){
@@ -383,11 +415,12 @@
                 attr.setXYZ(i, p.x, p.y, p.z);
             }
             attr.needsUpdate = true;
+            
+            // Subtle color shift
+            updateParticleColors(currentShapeIdx);
         }
 
-        // --- 4. INPUT HANDLERS ---
-        const video = document.getElementById('video-feed');
-        const startScreen = document.getElementById('start-screen');
+        // --- 4. INPUT ---
         const uiStatus = document.getElementById('ui-status');
         const uiDot = document.getElementById('status-dot');
         const gestureText = document.getElementById('gesture-text');
@@ -399,13 +432,6 @@
             uiDot.className = "status-light " + type;
         }
 
-        function setGesture(text, active) {
-            gestureText.innerText = text;
-            if(active) gesturePill.classList.add('active');
-            else gesturePill.classList.remove('active');
-        }
-
-        // AI Setup
         let hands;
         async function setupAI() {
             hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`});
@@ -416,56 +442,56 @@
                     setStatus("TARGET LOCKED", "active");
                     const lm = results.multiHandLandmarks[0];
                     
-                    // Rotation (Index position)
-                    const x = (lm[9].x - 0.5);
-                    const y = (lm[9].y - 0.5);
-                    state.targetRot.y = x * 4.5;
-                    state.targetRot.x = y * 4.5;
-                    
-                    // Zoom (Pinch)
+                    // Controls
+                    state.targetRot.y = (lm[9].x - 0.5) * 5.0;
+                    state.targetRot.x = (lm[9].y - 0.5) * 5.0;
                     const pinch = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y);
                     state.targetZoom = 0.6 + (pinch * 4.0);
 
-                    // Fist Detection (Compactness)
+                    // Fist Logic
                     const tips = [8, 12, 16, 20];
                     let d = 0;
                     tips.forEach(i => d += Math.hypot(lm[i].x - lm[0].x, lm[i].y - lm[0].y));
-                    const isFist = (d/4) < 0.13;
-
-                    if(isFist) {
-                        setGesture("CHARGING...", true);
+                    
+                    if((d/4) < 0.13) {
+                        gestureText.innerText = "CHARGING...";
+                        gesturePill.classList.add('active');
                         if(!state.isFist) { state.isFist = true; state.fistHoldTime = Date.now(); }
-                        
-                        // Calculate charge percentage
                         const dur = Date.now() - state.fistHoldTime;
-                        state.chargeLevel = Math.min(dur / 1200, 1.0); // 1.2s to charge
+                        state.chargeLevel = Math.min(dur / 1200, 1.0);
                         chargeFill.style.width = (state.chargeLevel * 100) + "%";
 
                         if(state.chargeLevel >= 1 && !state.morphing) {
                             switchShape();
-                            state.fistHoldTime = Date.now() + 1000; // Cooldown
+                            state.fistHoldTime = Date.now() + 1000;
                             state.chargeLevel = 0;
                             chargeFill.style.width = "0%";
-                            // Flash effect
-                            bloomPass.strength = 3.0;
+                            bloomPass.strength = 3.5; // Flash
                             setTimeout(() => bloomPass.strength = 1.4, 300);
                         }
                     } else {
                         state.isFist = false;
-                        state.chargeLevel = Math.max(0, state.chargeLevel - 0.1); // Decay
+                        state.chargeLevel = Math.max(0, state.chargeLevel - 0.1);
                         chargeFill.style.width = (state.chargeLevel * 100) + "%";
-                        setGesture("TRACKING HAND", false);
+                        gestureText.innerText = "TRACKING HAND";
+                        gesturePill.classList.remove('active');
                     }
                 } else {
                     setStatus("SCANNING...", "searching");
-                    setGesture("NO INPUT", false);
-                    state.targetRot.y += 0.001; // Auto spin
+                    gestureText.innerText = "NO INPUT";
+                    gesturePill.classList.remove('active');
+                    state.targetRot.y += 0.0015;
                     state.targetRot.x *= 0.95;
                     state.chargeLevel = 0;
                     chargeFill.style.width = "0%";
                 }
             });
         }
+
+        // Start Handlers
+        const btnStart = document.getElementById('btn-start');
+        const startScreen = document.getElementById('start-screen');
+        const video = document.getElementById('video-feed');
 
         function startGame(mode) {
             document.querySelector('.btn-group').style.display = 'none';
@@ -476,9 +502,8 @@
                 return;
             }
 
-            // Camera Mode
             if (!window.isSecureContext && location.hostname !== 'localhost') {
-                alert("HTTPS Required for Camera. Switching to Touch.");
+                alert("HTTPS Required. Starting Touch Mode.");
                 startTouchMode();
                 return;
             }
@@ -490,7 +515,7 @@
                     });
                     video.srcObject = stream;
                     await video.play();
-
+                    
                     startScreen.style.opacity = 0;
                     setTimeout(() => startScreen.remove(), 600);
                     
@@ -499,10 +524,8 @@
                         requestAnimationFrame(aiLoop);
                     }
                     aiLoop();
-
                 } catch(e) {
-                    logError(e.message);
-                    alert("Camera blocked or unavailable. Switching to Touch Mode.");
+                    alert("Camera Error: " + e.message);
                     startTouchMode();
                 }
             });
@@ -512,24 +535,20 @@
             startScreen.style.opacity = 0;
             setTimeout(() => startScreen.remove(), 600);
             setStatus("TOUCH CONTROL", "active");
-            setGesture("DRAG / DOUBLE TAP", false);
+            gestureText.innerText = "DOUBLE TAP TO MORPH";
             
             window.addEventListener('touchmove', (e) => {
                 const t = e.touches[0];
-                const x = (t.clientX / window.innerWidth) - 0.5;
-                const y = (t.clientY / window.innerHeight) - 0.5;
-                state.targetRot.y = x * 4.0;
-                state.targetRot.x = y * 4.0;
+                state.targetRot.y = ((t.clientX / window.innerWidth) - 0.5) * 4.0;
+                state.targetRot.x = ((t.clientY / window.innerHeight) - 0.5) * 4.0;
             });
-
             window.addEventListener('dblclick', () => {
-                state.chargeLevel = 1; // Instant charge visual
-                setTimeout(() => state.chargeLevel = 0, 300);
+                state.chargeLevel = 1; 
                 switchShape();
+                setTimeout(() => state.chargeLevel = 0, 300);
             });
         }
 
-        // Binds
         document.getElementById('btn-start').addEventListener('click', () => startGame('cam'));
         document.getElementById('btn-touch').addEventListener('click', () => startGame('touch'));
 
@@ -540,21 +559,16 @@
             const dt = clock.getDelta();
             const time = clock.getElapsedTime();
 
-            // Smooth Physics
             state.rot.x += (state.targetRot.x - state.rot.x) * 0.1;
             state.rot.y += (state.targetRot.y - state.rot.y) * 0.1;
             particles.rotation.x = state.rot.x;
             particles.rotation.y = state.rot.y;
             state.zoom += (state.targetZoom - state.zoom) * 0.1;
 
-            // Shader Uniforms
             material.uniforms.uZoom.value = state.zoom;
             material.uniforms.uTime.value = time;
-            
-            // Pass the Charge Level to shader for Shake/Glow effect
-            material.uniforms.uCharge.value = state.chargeLevel; 
+            material.uniforms.uCharge.value = state.chargeLevel;
 
-            // Morph Animation
             if(state.morphing) {
                 state.morphVal += dt * 2.0;
                 if(state.morphVal >= 1) {
