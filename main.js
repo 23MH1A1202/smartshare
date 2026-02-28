@@ -1,97 +1,154 @@
-const peer = new Peer();
-let activeConn = null;
+// --- 1. Service Worker Registration (For PWA Installability) ---
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(err => console.error("SW failed:", err));
+}
 
-// UI Elements
-const dropZone = document.getElementById('drop-zone');
-const initialState = document.getElementById('initial-state');
-const transferState = document.getElementById('transfer-state');
-const progressBar = document.getElementById('progress-bar');
-const percentageText = document.getElementById('percentage');
-const statusText = document.getElementById('status-text');
+// --- 2. State & DOM Elements ---
+const peer = new Peer(); // Initialize WebRTC via PeerJS
+let connection = null;
+let fileToSend = null;
 
-// 1. Handle File Selection
-document.getElementById('file-input').onchange = (e) => startSending(e.target.files[0]);
+const UI = {
+    dropZone: document.getElementById('drop-zone'),
+    initial: document.getElementById('initial-state'),
+    transfer: document.getElementById('transfer-state'),
+    fileInput: document.getElementById('file-input'),
+    selectBtn: document.getElementById('select-btn'),
+    fileName: document.getElementById('file-name'),
+    percentage: document.getElementById('percentage'),
+    progressBar: document.getElementById('progress-bar'),
+    statusText: document.getElementById('status-text'),
+    qrWrapper: document.getElementById('qr-wrapper'),
+    qrContainer: document.getElementById('qr-container')
+};
 
-function startSending(file) {
+// --- 3. Drag & Drop + File Selection ---
+UI.selectBtn.addEventListener('click', () => UI.fileInput.click());
+UI.fileInput.addEventListener('change', (e) => prepareSender(e.target.files[0]));
+
+UI.dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    UI.dropZone.classList.add('drop-active');
+});
+UI.dropZone.addEventListener('dragleave', () => UI.dropZone.classList.remove('drop-active'));
+UI.dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    UI.dropZone.classList.remove('drop-active');
+    if (e.dataTransfer.files.length) prepareSender(e.dataTransfer.files[0]);
+});
+
+// --- 4. Sender Logic ---
+function prepareSender(file) {
     if (!file) return;
+    fileToSend = file;
     
-    initialState.classList.add('hidden');
-    transferState.classList.remove('hidden');
-    document.getElementById('file-name').innerText = file.name;
-    
+    // Update UI
+    UI.initial.classList.add('hidden');
+    UI.transfer.classList.remove('hidden');
+    UI.fileName.innerText = file.name;
+    UI.statusText.innerText = "Generating connection...";
+
     peer.on('open', (id) => {
-        // In a real app, generate a QR with: window.location.href + '#' + id
-        console.log("My ID is: " + id);
-        statusText.innerText = "Scanning for receiver...";
+        const transferUrl = `${window.location.origin}${window.location.pathname}#${id}`;
+        
+        // Generate QR Code
+        UI.qrContainer.innerHTML = "";
+        new QRCode(UI.qrContainer, { text: transferUrl, width: 200, height: 200, colorDark: "#020617" });
+        UI.qrWrapper.classList.remove('hidden');
+        UI.statusText.innerText = "Scan QR Code to receive";
     });
 
     peer.on('connection', (conn) => {
-        activeConn = conn;
-        statusText.innerText = "Connected! Sending...";
-        sendFile(file);
+        connection = conn;
+        UI.qrWrapper.classList.add('hidden');
+        UI.statusText.innerText = "Device connected. Sending...";
+        
+        conn.on('open', () => streamFileToReceiver(conn, fileToSend));
     });
 }
 
-// 2. High-Speed Chunked Transfer
-function sendFile(file) {
-    const chunkSize = 64 * 1024; // 64KB Chunks
+function streamFileToReceiver(conn, file) {
+    const chunkSize = 64 * 1024; // 64KB chunks for stability/speed
     let offset = 0;
+
+    // Send Metadata first
+    conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
 
     const reader = new FileReader();
     reader.onload = (e) => {
-        activeConn.send({
-            data: e.target.result,
-            name: file.name,
-            size: file.size,
-            type: file.type
-        });
-        
+        conn.send({ type: 'chunk', data: e.target.result });
         offset += e.target.result.byteLength;
-        const progress = Math.floor((offset / file.size) * 100);
         
-        // Smooth UI Update
-        progressBar.style.width = progress + "%";
-        percentageText.innerText = progress + "%";
+        updateProgress(offset, file.size);
 
         if (offset < file.size) {
-            readNext();
+            readNext(); // Recursively read next chunk to avoid RAM overload
         } else {
-            statusText.innerText = "Transfer Complete! ✅";
+            UI.statusText.innerText = "Transfer Complete! ✅";
         }
     };
 
-    const readNext = () => {
-        const slice = file.slice(offset, offset + chunkSize);
-        reader.readAsArrayBuffer(slice);
-    };
-
+    const readNext = () => reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
     readNext();
 }
 
-// 3. Handle Receiving (Auto-trigger if URL has hash)
-if (window.location.hash) {
-    const targetPeerId = window.location.hash.replace('#', '');
-    const conn = peer.connect(targetPeerId);
+// --- 5. Receiver Logic ---
+// If a user opens the app with a hash in the URL (e.g., #peer-id)
+window.addEventListener('DOMContentLoaded', () => {
+    const targetPeerId = window.location.hash.substring(1);
     
-    conn.on('open', () => {
-        initialState.classList.add('hidden');
-        transferState.classList.remove('hidden');
-        statusText.innerText = "Receiving data...";
-    });
+    if (targetPeerId) {
+        UI.initial.classList.add('hidden');
+        UI.transfer.classList.remove('hidden');
+        UI.statusText.innerText = "Connecting to sender...";
 
-    let receivedChunks = [];
-    conn.on('data', (data) => {
-        receivedChunks.push(data.data);
-        // Progress logic would go here for receiver too
-        
-        if (receivedChunks.reduce((acc, c) => acc + c.byteLength, 0) >= data.size) {
-            const blob = new Blob(receivedChunks, { type: data.type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = data.name;
-            a.click();
-            statusText.innerText = "Saved to Downloads! 📥";
-        }
-    });
+        peer.on('open', () => {
+            const conn = peer.connect(targetPeerId, { reliable: true });
+            let receivedBuffer = [];
+            let fileMeta = null;
+            let bytesReceived = 0;
+
+            conn.on('open', () => {
+                UI.statusText.innerText = "Connected. Waiting for file...";
+            });
+
+            conn.on('data', (payload) => {
+                if (payload.type === 'metadata') {
+                    fileMeta = payload;
+                    UI.fileName.innerText = fileMeta.name;
+                    UI.statusText.innerText = "Downloading...";
+                } else if (payload.type === 'chunk') {
+                    receivedBuffer.push(payload.data);
+                    bytesReceived += payload.data.byteLength;
+                    
+                    updateProgress(bytesReceived, fileMeta.size);
+
+                    // If file is fully received
+                    if (bytesReceived === fileMeta.size) {
+                        saveFile(receivedBuffer, fileMeta);
+                        UI.statusText.innerText = "File saved to Downloads! 📥";
+                    }
+                }
+            });
+        });
+    }
+});
+
+// --- 6. Helpers ---
+function updateProgress(current, total) {
+    const percent = Math.floor((current / total) * 100);
+    UI.progressBar.style.width = percent + "%";
+    UI.percentage.innerText = percent + "%";
+}
+
+function saveFile(bufferArray, meta) {
+    const blob = new Blob(bufferArray, { type: meta.fileType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = meta.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // Clean up memory
 }
