@@ -3,7 +3,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.error("SW failed:", err));
 }
 
-// --- 2. State & DOM Elements ---
+// --- 2. State & DOM Elements ---  
 const peer = new Peer(); // Initialize WebRTC via PeerJS
 let connection = null;
 let fileToSend = null;
