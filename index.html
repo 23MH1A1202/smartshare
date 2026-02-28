@@ -4,13 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InstantShare</title>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                    console.log("Old Service Worker Destroyed");
+                }
+            });
+        }
+        // Force reload without cache if URL doesn't have the bypass parameter
+        if (!window.location.search.includes('nocache')) {
+            window.location.replace(window.location.href.split('#')[0] + '?nocache=' + new Date().getTime());
+        }
+    </script>
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-950 text-white font-sans overflow-hidden">
@@ -21,7 +36,6 @@
     <main class="flex flex-col items-center justify-center h-screen px-6 fade-up">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">InstantShare</h1>
-            <p class="text-slate-400 mt-2">P2P Local Transfer</p>
         </header>
 
         <div id="drop-zone" class="glass-panel w-full max-w-md p-8 rounded-[2rem] transition-all duration-300 relative">
@@ -30,10 +44,11 @@
                 <div class="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
                     <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 </div>
-                <h2 class="text-xl font-semibold">Drop file to start</h2>
-                <p class="text-slate-500 text-sm mt-2">Zero limits. High speed.</p>
-                <input type="file" id="file-input" class="hidden">
-                <button id="select-btn" class="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-medium transition-all shadow-lg shadow-blue-500/20 active:scale-95">Select File</button>
+                <h2 class="text-xl font-semibold">Ready to Transfer</h2>
+                
+                <input type="file" id="file-input" class="opacity-0 absolute -z-10 w-0 h-0">
+                
+                <button id="select-btn" class="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-medium transition-all shadow-lg active:scale-95">Select File</button>
             </div>
 
             <div id="transfer-state" class="hidden flex-col items-center w-full">
@@ -41,13 +56,10 @@
                     <span id="file-name" class="truncate font-medium text-slate-200 w-3/4">Connecting...</span>
                     <span id="percentage" class="text-blue-400 font-bold">0%</span>
                 </div>
-                
                 <div class="h-3 w-full bg-white/5 rounded-full overflow-hidden border border-white/10 mb-6">
                     <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-100 ease-linear w-0"></div>
                 </div>
-
                 <p id="status-text" class="text-xs text-slate-400 text-center uppercase tracking-widest font-semibold mb-4">Initializing...</p>
-                
                 <div id="qr-wrapper" class="bg-white p-4 rounded-2xl shadow-xl transition-all hidden">
                     <div id="qr-container"></div>
                 </div>
@@ -55,7 +67,9 @@
 
         </div>
     </main>
-
-    <script src="app.js"></script>
+    
+    <script>
+        document.write('<script src="app.js?v=' + new Date().getTime() + '"><\/script>');
+    </script>
 </body>
 </html>
