@@ -31,9 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let fileToSend = null;
 
     // 3. ATTACH THE BUTTON (This will now work instantly)
-    UI.selectBtn.addEventListener('click', () => {
-        UI.fileInput.click();
-    });
+    
 
     UI.fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
