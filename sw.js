@@ -3,7 +3,7 @@ const STATIC_ASSETS = [
     './',
     './index.html',
     './style.css',
-    './app.js',
+    './main.js',
     './manifest.json',
     'https://cdn.tailwindcss.com',
     'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
