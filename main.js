@@ -34,10 +34,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     UI.fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            prepareSender(e.target.files[0]);
+    try {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 1. Force the UI to update immediately
+        UI.initial.classList.add('hidden');
+        UI.transfer.classList.remove('hidden');
+        UI.fileName.innerText = file.name;
+        UI.statusText.innerText = "Connecting to network...";
+
+        // 2. Start the network connection
+        if (!peer) {
+            peer = new Peer(); 
+            setupPeerListenersForSender();
         }
-    });
+
+        // 3. Reset the input so you can select the same file again if needed
+        e.target.value = ''; 
+
+    } catch (error) {
+        // If ANYTHING fails, your phone will pop up an alert telling us exactly why
+        alert("Action Failed: " + error.message);
+    }
+});
+
 
     // --- Sender Logic ---
     function prepareSender(file) {
