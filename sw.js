@@ -1,41 +1,39 @@
-const CACHE_NAME = 'instant-share-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './main.js',
-  './style.css',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js'
+const CACHE_NAME = 'instant-share-v2';
+const STATIC_ASSETS = [
+    './',
+    './index.html',
+    './style.css',
+    './main.js',
+    './manifest.json',
+    'https://cdn.tailwindcss.com',
+    'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];
 
-// Install: Cache everything
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    );
+    self.skipWaiting();
 });
 
-// Activate: Clean up old caches
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
-    })
-  );
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            );
+        })
+    );
+    self.clients.claim();
 });
 
-// Fetch: Offline-First strategy
 self.addEventListener('fetch', (event) => {
-  // Special handling for Web Share Target (POST requests)
-  if (event.request.method === 'POST' && event.request.url.includes('/share')) {
-    event.respondWith(Response.redirect('./?shared=true'));
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+    event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || fetch(event.request);
+        }).catch(() => {
+            return new Response('App is offline.');
+        })
+    );
 });
