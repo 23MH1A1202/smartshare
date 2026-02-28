@@ -1,54 +1,25 @@
-/* Glassmorphism Core */
+/* Glassmorphism Panel */
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
-/* Smooth Progress Bar Glow */
-#progress-bar {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  position: relative;
-  overflow: hidden;
-}
-
-#progress-bar::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* Pulsing Drop Zone */
+/* Drag Active State */
 .drop-active {
-  border-color: #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.1) !important;
-  scale: 1.02;
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  transform: scale(1.02);
 }
 
-/* Custom Scrollbar for 2026 Browsers */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+/* Progress Bar Glow */
+#progress-bar {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
 }
 
-/* App Transition Animations */
+/* Base UI Animations */
 .fade-up {
   animation: fadeUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -56,4 +27,9 @@
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Utility to hide elements smoothly */
+.hidden {
+  display: none !important;
 }
