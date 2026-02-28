@@ -1,23 +1,20 @@
-// 1. MOBILE ERROR CATCHER (Pops up an alert on your phone if JS crashes)
-window.onerror = function(message, source, lineno, colno, error) {
+// Mobile Error Catcher
+window.onerror = function(message, source, lineno) {
     alert("System Error: " + message + " (Line " + lineno + ")");
     return true; 
 };
 
-// 2. Wait for the screen to fully load before attaching buttons
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Check for Service Worker
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(err => console.error("SW failed:", err));
     }
 
     const UI = {
-        dropZone: document.getElementById('drop-zone'),
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
         fileInput: document.getElementById('file-input'),
-        selectBtn: document.getElementById('select-btn'),
         fileName: document.getElementById('file-name'),
         percentage: document.getElementById('percentage'),
         progressBar: document.getElementById('progress-bar'),
@@ -30,59 +27,42 @@ document.addEventListener('DOMContentLoaded', () => {
     let connection = null;
     let fileToSend = null;
 
-    // 3. ATTACH THE BUTTON (This will now work instantly)
-    
-
+    // --- File Selection Logic ---
     UI.fileInput.addEventListener('change', (e) => {
-    try {
-        const file = e.target.files[0];
-        if (!file) return;
+        try {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // 1. Force the UI to update immediately
-        UI.initial.classList.add('hidden');
-        UI.transfer.classList.remove('hidden');
-        UI.fileName.innerText = file.name;
-        UI.statusText.innerText = "Connecting to network...";
+            fileToSend = file;
+            
+            // Switch UI immediately
+            UI.initial.classList.add('hidden');
+            UI.transfer.classList.remove('hidden');
+            UI.transfer.classList.add('flex'); // Ensure it respects tailwind flex
+            UI.fileName.innerText = file.name;
+            UI.statusText.innerText = "Connecting to network...";
 
-        // 2. Start the network connection
-        if (!peer) {
-            peer = new Peer(); 
-            setupPeerListenersForSender();
+            if (!peer) {
+                peer = new Peer(); 
+                setupPeerListenersForSender();
+            }
+
+            e.target.value = ''; // Reset input
+        } catch (error) {
+            alert("Action Failed: " + error.message);
         }
-
-        // 3. Reset the input so you can select the same file again if needed
-        e.target.value = ''; 
-
-    } catch (error) {
-        // If ANYTHING fails, your phone will pop up an alert telling us exactly why
-        alert("Action Failed: " + error.message);
-    }
-});
-
+    });
 
     // --- Sender Logic ---
-    function prepareSender(file) {
-        fileToSend = file;
-        
-        UI.initial.classList.add('hidden');
-        UI.transfer.classList.remove('hidden');
-        UI.fileName.innerText = file.name;
-        UI.statusText.innerText = "Connecting to network...";
-
-        // Initialize network ONLY after file is picked
-        if (!peer) {
-            peer = new Peer(); 
-            setupPeerListenersForSender();
-        }
-    }
-
     function setupPeerListenersForSender() {
         peer.on('open', (id) => {
-            // Build the URL based on your GitHub pages link
-            const transferUrl = `${window.location.origin}${window.location.pathname}#${id}`;
+            // Bulletproof clean URL generation
+            const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+            const transferUrl = `${cleanUrl}#${id}`;
             
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 200, height: 200, colorDark: "#020617" });
+            
             UI.qrWrapper.classList.remove('hidden');
             UI.statusText.innerText = "Scan QR Code to receive";
         });
@@ -102,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function streamFileToReceiver(conn, file) {
-        const chunkSize = 64 * 1024; 
+        const chunkSize = 64 * 1024; // 64KB
         let offset = 0;
 
         conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
@@ -125,12 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Receiver Logic ---
-    // Auto-trigger if someone opens the link with a QR code hash
     if (window.location.hash.length > 1) {
         const targetPeerId = window.location.hash.substring(1);
         
         UI.initial.classList.add('hidden');
         UI.transfer.classList.remove('hidden');
+        UI.transfer.classList.add('flex');
         UI.statusText.innerText = "Connecting to sender...";
 
         peer = new Peer();
@@ -166,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         peer.on('error', (err) => alert("Receiver Error: " + err.type));
     }
 
-    // --- Helpers ---
+    // --- UI Helpers ---
     function updateProgress(current, total) {
         const percent = Math.floor((current / total) * 100);
         UI.progressBar.style.width = percent + "%";
