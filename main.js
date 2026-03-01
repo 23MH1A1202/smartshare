@@ -3,8 +3,33 @@ window.onerror = function(message) {
     return true; 
 };
 
+// --- 🌟 NEW: THEME SWITCHER LOGIC ---
+function initializeTheme() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // Check storage or system preference
+    if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        htmlElement.classList.remove('dark');
+    } else {
+        htmlElement.classList.add('dark');
+    }
+
+    // Toggle on button click
+    themeToggleBtn.addEventListener('click', () => {
+        htmlElement.classList.toggle('dark');
+        if (htmlElement.classList.contains('dark')) {
+            localStorage.theme = 'dark';
+        } else {
+            localStorage.theme = 'light';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     
+    initializeTheme(); // Run Theme setup
+
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(console.error);
     }
@@ -27,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
         toastContainer: document.getElementById('toast-container'),
-        dropZone: document.getElementById('drop-zone') // Added Drop Zone
+        dropZone: document.getElementById('drop-zone')
     };
 
     let peer = null;
@@ -36,18 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
 
-    // --- TOAST NOTIFICATION SYSTEM ---
+    // --- TOAST NOTIFICATION SYSTEM (Updated for Light/Dark) ---
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         const isError = type === "error";
         
         toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
-            isError ? 'bg-red-950/90 border-red-500/30 text-red-200' : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
+            isError ? 'bg-red-50 dark:bg-red-950/90 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-200' 
+                    : 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
         } backdrop-blur-md pointer-events-auto z-50`;
         
         const icon = isError 
-            ? `<svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
-            : `<svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+            ? `<svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+            : `<svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
 
         toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
         UI.toastContainer.appendChild(toast);
@@ -94,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    // --- 🌟 CORE SENDING FUNCTION ---
+    // --- CORE SENDING FUNCTION ---
     function startSendingFile(file) {
         if (!file) return;
 
@@ -173,10 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- 🌟 1. STANDARD CLICK TO SELECT ---
+    // --- EVENT LISTENERS ---
     UI.fileInput.addEventListener('change', (e) => startSendingFile(e.target.files[0]));
 
-    // --- 🌟 2. PC DRAG AND DROP ---
     UI.dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         UI.dropZone.classList.add('drop-active');
@@ -195,13 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 🌟 3. MOBILE NATIVE "SHARE TO" HANDLER ---
     if (window.location.search.includes('shared=true')) {
-        // Clean the URL immediately
         window.history.replaceState(null, null, window.location.pathname);
         showTransferScreen("Processing...", "Loading shared file...");
 
-        // Dig into the cache to retrieve the file the Service Worker caught
         caches.open('shared-file-cache').then(cache => {
             cache.match('/shared-file').then(response => {
                 if (response) {
@@ -211,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     response.blob().then(blob => {
                         const file = new File([blob], fileName, { type: fileType });
                         startSendingFile(file);
-                        cache.delete('/shared-file'); // Delete from cache to save space
+                        cache.delete('/shared-file'); 
                     });
                 } else {
                     resetApp();
@@ -221,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- RECEIVER LOGIC ---
     UI.receiveBtn.addEventListener('click', () => {
         const targetId = UI.receiveCodeInput.value.trim().toUpperCase();
         if (targetId.length !== 6) {
@@ -304,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-    // --- UTILITIES & ERROR HANDLING ---
     function setupPeerErrorHandling(peerInstance) {
         peerInstance.on('error', (err) => {
             clearTimeout(connectionTimeout);
