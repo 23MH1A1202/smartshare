@@ -29,6 +29,36 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    
+    // --- 🌟 NEW: Catch Mobile Native "Share To" Requests ---
+    if (event.request.method === 'POST' && event.request.url.endsWith('/share')) {
+        event.respondWith((async () => {
+            try {
+                const formData = await event.request.formData();
+                const file = formData.get('file');
+
+                if (file) {
+                    const cache = await caches.open('shared-file-cache');
+                    // Temporarily hold the file in cache so the frontend can grab it
+                    await cache.put('/shared-file', new Response(file, {
+                        headers: {
+                            'Content-Type': file.type || 'application/octet-stream',
+                            'Content-Length': file.size,
+                            'X-File-Name': encodeURIComponent(file.name)
+                        }
+                    }));
+                }
+                // Redirect the app to the homepage and tell it a file is waiting
+                return Response.redirect('/?shared=true', 303);
+            } catch (error) {
+                console.error('Share target error:', error);
+                return Response.redirect('/', 303);
+            }
+        })());
+        return;
+    }
+
+    // --- STANDARD OFFLINE CACHING ---
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             return cachedResponse || fetch(event.request);
