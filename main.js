@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         transfer: document.getElementById('transfer-state'),
         shareOptions: document.getElementById('share-options'),
         progressArea: document.getElementById('progress-area'),
-        progressText: document.getElementById('progress-text'),
         fileInput: document.getElementById('file-input'),
         receiveCodeInput: document.getElementById('receive-code-input'),
         receiveBtn: document.getElementById('receive-btn'),
@@ -23,10 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
         percentage: document.getElementById('percentage'),
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
+        progressText: document.getElementById('progress-text'),
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
-        toastContainer: document.getElementById('toast-container')
+        toastContainer: document.getElementById('toast-container'),
+        dropZone: document.getElementById('drop-zone') // Added Drop Zone
     };
 
     let peer = null;
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
             isError ? 'bg-red-950/90 border-red-500/30 text-red-200' : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
-        } backdrop-blur-md pointer-events-auto`;
+        } backdrop-blur-md pointer-events-auto z-50`;
         
         const icon = isError 
             ? `<svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
@@ -57,31 +58,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // --- RESET APP LOGIC ---
     function resetApp() {
         try {
             if (currentConnection) currentConnection.close();
             if (peer) peer.destroy();
-        } catch (e) {
-            console.error("Cleanup error:", e);
-        }
+        } catch (e) { console.error(e); }
         
         clearTimeout(connectionTimeout);
-        
-        peer = null;
-        currentConnection = null;
-        fileToSend = null;
-        isTransferring = false;
+        peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
         
-        // Fix: Clear URL hash so refreshing or clicking "Start Over" doesn't loop
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
         }
         
-        // Reset UI Elements
         UI.transfer.classList.add('hidden');
         UI.transfer.classList.remove('flex');
         UI.initial.classList.remove('hidden');
@@ -102,9 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    // --- SENDER LOGIC ---
-    UI.fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
+    // --- 🌟 CORE SENDING FUNCTION ---
+    function startSendingFile(file) {
         if (!file) return;
 
         fileToSend = file;
@@ -135,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isTransferring = true;
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
-            UI.progressText.innerText = "Sending...";
+            if(UI.progressText) UI.progressText.innerText = "Sending...";
             
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
@@ -151,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setupPeerErrorHandling(peer);
-    });
+    }
 
     function streamFileToReceiver(conn, file) {
         const chunkSize = 64 * 1024; 
@@ -161,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            if (!isTransferring) return; // Stop if cancelled
+            if (!isTransferring) return; 
             
             conn.send({ type: 'chunk', data: e.target.result });
             offset += e.target.result.byteLength;
@@ -179,6 +170,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const readNext = () => reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
         readNext();
+    }
+
+
+    // --- 🌟 1. STANDARD CLICK TO SELECT ---
+    UI.fileInput.addEventListener('change', (e) => startSendingFile(e.target.files[0]));
+
+    // --- 🌟 2. PC DRAG AND DROP ---
+    UI.dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        UI.dropZone.classList.add('drop-active');
+    });
+
+    UI.dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        UI.dropZone.classList.remove('drop-active');
+    });
+
+    UI.dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        UI.dropZone.classList.remove('drop-active');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            startSendingFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    // --- 🌟 3. MOBILE NATIVE "SHARE TO" HANDLER ---
+    if (window.location.search.includes('shared=true')) {
+        // Clean the URL immediately
+        window.history.replaceState(null, null, window.location.pathname);
+        showTransferScreen("Processing...", "Loading shared file...");
+
+        // Dig into the cache to retrieve the file the Service Worker caught
+        caches.open('shared-file-cache').then(cache => {
+            cache.match('/shared-file').then(response => {
+                if (response) {
+                    const fileName = decodeURIComponent(response.headers.get('X-File-Name') || 'shared_file');
+                    const fileType = response.headers.get('Content-Type') || '';
+
+                    response.blob().then(blob => {
+                        const file = new File([blob], fileName, { type: fileType });
+                        startSendingFile(file);
+                        cache.delete('/shared-file'); // Delete from cache to save space
+                    });
+                } else {
+                    resetApp();
+                    showToast("Failed to load shared file.", "error");
+                }
+            });
+        });
     }
 
     // --- RECEIVER LOGIC ---
@@ -217,12 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
             conn.on('open', () => {
                 clearTimeout(connectionTimeout);
                 UI.progressArea.classList.remove('hidden');
-                UI.progressText.innerText = "Downloading...";
+                if(UI.progressText) UI.progressText.innerText = "Downloading...";
                 UI.statusText.innerText = "Connected. Waiting for file...";
             });
 
             conn.on('data', (payload) => {
-                if (!isTransferring) return; // Ignore ghost chunks if cancelled
+                if (!isTransferring) return; 
 
                 if (payload.type === 'metadata') {
                     fileMeta = payload;
@@ -231,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
                     
                 } else if (payload.type === 'chunk') {
-                    // Fix: Safe length calculation for Blobs, ArrayBuffers, and Uint8Arrays
                     const chunkData = payload.data;
                     const chunkLength = chunkData.byteLength || chunkData.size || chunkData.length || 0;
                     
@@ -240,10 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     updateProgress(bytesReceived, fileMeta.size);
 
-                    // Fix: Use >= to prevent hanging if size is slightly off
                     if (bytesReceived >= fileMeta.size) {
                         isTransferring = false;
-                        
                         try {
                             saveFile(receivedBuffer, fileMeta);
                             UI.statusText.innerText = "Saved to Downloads! 📥";
@@ -251,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             showToast("Download Complete!", "success");
                         } catch (err) {
                             showToast("Error saving the file.", "error");
-                            console.error("Save error:", err);
                         }
                     }
                 }
@@ -273,18 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
         peerInstance.on('error', (err) => {
             clearTimeout(connectionTimeout);
             let errMsg = "An unknown network error occurred.";
-            
             switch(err.type) {
-                case 'peer-unavailable':
-                    errMsg = "Invalid code or the sender left.";
-                    break;
+                case 'peer-unavailable': errMsg = "Invalid code or the sender left."; break;
                 case 'network':
-                case 'disconnected':
-                    errMsg = "Lost connection to the signaling server.";
-                    break;
-                case 'webrtc':
-                    errMsg = "WebRTC error. Check your firewall/VPN.";
-                    break;
+                case 'disconnected': errMsg = "Lost connection to the signaling server."; break;
+                case 'webrtc': errMsg = "WebRTC error. Check your firewall/VPN."; break;
             }
             showToast(errMsg, "error");
             resetApp();
@@ -305,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateProgress(current, total) {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
-        if (percent > 100) percent = 100; // Cap at 100%
+        if (percent > 100) percent = 100; 
         
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
