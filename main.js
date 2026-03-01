@@ -1,12 +1,10 @@
-// Mobile Error Catcher
 window.onerror = function(message, source, lineno) {
-    alert("System Error: " + message + " (Line " + lineno + ")");
+    console.error("System Error: " + message + " (Line " + lineno + ")");
     return true; 
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(err => console.error("SW failed:", err));
     }
@@ -14,75 +12,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const UI = {
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
+        shareOptions: document.getElementById('share-options'),
         fileInput: document.getElementById('file-input'),
+        receiveCodeInput: document.getElementById('receive-code-input'),
+        receiveBtn: document.getElementById('receive-btn'),
         fileName: document.getElementById('file-name'),
         percentage: document.getElementById('percentage'),
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
-        qrWrapper: document.getElementById('qr-wrapper'),
-        qrContainer: document.getElementById('qr-container')
+        qrContainer: document.getElementById('qr-container'),
+        pairingCodeDisplay: document.getElementById('pairing-code-display'),
+        copyLinkBtn: document.getElementById('copy-link-btn')
     };
 
     let peer = null;
-    let connection = null;
+    let currentConnection = null;
     let fileToSend = null;
 
-    // --- File Selection Logic ---
+    // Generate a clean 6-character code (e.g., "A7X9PQ")
+    function generateShortCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    // --- SENDER LOGIC ---
     UI.fileInput.addEventListener('change', (e) => {
-        try {
-            const file = e.target.files[0];
-            if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
 
-            fileToSend = file;
-            
-            // Switch UI immediately
-            UI.initial.classList.add('hidden');
-            UI.transfer.classList.remove('hidden');
-            UI.transfer.classList.add('flex'); // Ensure it respects tailwind flex
-            UI.fileName.innerText = file.name;
-            UI.statusText.innerText = "Connecting to network...";
+        fileToSend = file;
+        showTransferScreen(file.name, "Creating secure room...");
 
-            if (!peer) {
-                peer = new Peer(); 
-                setupPeerListenersForSender();
-            }
-
-            e.target.value = ''; // Reset input
-        } catch (error) {
-            alert("Action Failed: " + error.message);
-        }
-    });
-
-    // --- Sender Logic ---
-    function setupPeerListenersForSender() {
+        const roomCode = generateShortCode();
+        peer = new Peer(roomCode); // Using our custom 6-digit code as the Peer ID
+        
         peer.on('open', (id) => {
-            // Bulletproof clean URL generation
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
             
+            // Show QR Code
             UI.qrContainer.innerHTML = "";
-            new QRCode(UI.qrContainer, { text: transferUrl, width: 200, height: 200, colorDark: "#020617" });
+            new QRCode(UI.qrContainer, { text: transferUrl, width: 160, height: 160, colorDark: "#020617" });
             
-            UI.qrWrapper.classList.remove('hidden');
-            UI.statusText.innerText = "Scan QR Code to receive";
+            // Show PIN Code
+            UI.pairingCodeDisplay.innerText = id;
+            UI.shareOptions.classList.remove('hidden');
+            UI.statusText.innerText = "Waiting for receiver...";
+
+            // Setup Copy Link button
+            UI.copyLinkBtn.onclick = () => {
+                navigator.clipboard.writeText(transferUrl);
+                UI.copyLinkBtn.innerText = "Copied!";
+                setTimeout(() => UI.copyLinkBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> Copy Share Link`, 2000);
+            };
         });
 
         peer.on('connection', (conn) => {
-            connection = conn;
-            UI.qrWrapper.classList.add('hidden');
+            currentConnection = conn;
+            UI.shareOptions.classList.add('hidden');
             UI.statusText.innerText = "Device connected. Sending...";
             
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
         });
-        
-        peer.on('error', (err) => {
-            alert("Network Error: " + err.type);
-            UI.statusText.innerText = "Connection failed.";
-        });
-    }
+    });
 
+    // Paced File Streaming to prevent WebRTC buffer overflow
     function streamFileToReceiver(conn, file) {
-        const chunkSize = 64 * 1024; // 64KB
+        const chunkSize = 64 * 1024; // 64KB chunks
         let offset = 0;
 
         conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
@@ -94,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress(offset, file.size);
 
             if (offset < file.size) {
-                readNext(); 
+                // Slight delay allows the WebRTC buffer to breathe for massive files
+                setTimeout(readNext, 5); 
             } else {
                 UI.statusText.innerText = "Transfer Complete! ✅";
             }
@@ -104,19 +100,28 @@ document.addEventListener('DOMContentLoaded', () => {
         readNext();
     }
 
-    // --- Receiver Logic ---
+    // --- RECEIVER LOGIC (Manual Code Entry) ---
+    UI.receiveBtn.addEventListener('click', () => {
+        const targetId = UI.receiveCodeInput.value.trim().toUpperCase();
+        if (targetId.length !== 6) {
+            alert("Please enter a valid 6-character code.");
+            return;
+        }
+        startReceiving(targetId);
+    });
+
+    // --- RECEIVER LOGIC (Link/QR Scan Entry) ---
     if (window.location.hash.length > 1) {
         const targetPeerId = window.location.hash.substring(1);
-        
-        UI.initial.classList.add('hidden');
-        UI.transfer.classList.remove('hidden');
-        UI.transfer.classList.add('flex');
-        UI.statusText.innerText = "Connecting to sender...";
+        startReceiving(targetPeerId);
+    }
 
+    function startReceiving(targetId) {
+        showTransferScreen("Connecting...", "Looking for sender...");
         peer = new Peer();
 
         peer.on('open', () => {
-            const conn = peer.connect(targetPeerId, { reliable: true });
+            const conn = peer.connect(targetId, { reliable: true });
             let receivedBuffer = [];
             let fileMeta = null;
             let bytesReceived = 0;
@@ -141,12 +146,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
+            
+            conn.on('error', () => {
+                UI.statusText.innerText = "Connection lost.";
+                alert("Sender disconnected or code is invalid.");
+            });
         });
-        
-        peer.on('error', (err) => alert("Receiver Error: " + err.type));
     }
 
-    // --- UI Helpers ---
+    // --- UTILITIES ---
+    function showTransferScreen(fileName, statusText) {
+        UI.initial.classList.add('hidden');
+        UI.transfer.classList.remove('hidden');
+        UI.transfer.classList.add('flex');
+        UI.fileName.innerText = fileName;
+        UI.statusText.innerText = statusText;
+    }
+
     function updateProgress(current, total) {
         const percent = Math.floor((current / total) * 100);
         UI.progressBar.style.width = percent + "%";
