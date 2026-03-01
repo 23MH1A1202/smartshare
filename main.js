@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentConnection = null;
     let fileToSend = null;
     let connectionTimeout = null;
+    let isTransferring = false;
 
     // --- TOAST NOTIFICATION SYSTEM ---
     function showToast(message, type = "info") {
@@ -57,16 +58,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- RESET APP LOGIC ---
     function resetApp() {
-        if (currentConnection) currentConnection.close();
-        if (peer) peer.destroy();
+        try {
+            if (currentConnection) currentConnection.close();
+            if (peer) peer.destroy();
+        } catch (e) {
+            console.error("Cleanup error:", e);
+        }
+        
         clearTimeout(connectionTimeout);
         
         peer = null;
         currentConnection = null;
         fileToSend = null;
+        isTransferring = false;
         
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
+        
+        // Fix: Clear URL hash so refreshing or clicking "Start Over" doesn't loop
+        if (window.location.hash) {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
         
         // Reset UI Elements
         UI.transfer.classList.add('hidden');
@@ -77,7 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.progressArea.classList.add('hidden');
         UI.shareOptions.classList.add('hidden');
         updateProgress(0, 100);
+        
         UI.resetBtn.innerText = "Cancel";
+        UI.fileName.innerText = "Waiting...";
+        UI.statusText.innerText = "Initializing connection";
     }
 
     UI.resetBtn.addEventListener('click', resetApp);
@@ -116,14 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         peer.on('connection', (conn) => {
             currentConnection = conn;
+            isTransferring = true;
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
-            UI.statusText.innerText = "Device connected. Sending...";
+            
+            const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
+            UI.statusText.innerText = `Sending (${mbSize} MB)...`;
             
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
             
             conn.on('close', () => {
-                if(UI.percentage.innerText !== "100%") {
+                if(isTransferring) {
                     showToast("Receiver disconnected mid-transfer.", "error");
                     resetApp();
                 }
@@ -141,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
+            if (!isTransferring) return; // Stop if cancelled
+            
             conn.send({ type: 'chunk', data: e.target.result });
             offset += e.target.result.byteLength;
             updateProgress(offset, file.size);
@@ -148,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offset < file.size) {
                 setTimeout(readNext, 5); 
             } else {
+                isTransferring = false;
                 UI.statusText.innerText = "Sent Successfully! ✅";
                 UI.resetBtn.innerText = "Start Over";
                 showToast("File sent successfully!", "success");
@@ -177,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showTransferScreen("Connecting...", `Looking for room ${targetId}...`);
         peer = new Peer();
 
-        // Timeout if connection takes too long
         connectionTimeout = setTimeout(() => {
             showToast("Connection timed out. Check the code and try again.", "error");
             resetApp();
@@ -186,38 +206,56 @@ document.addEventListener('DOMContentLoaded', () => {
         peer.on('open', () => {
             const conn = peer.connect(targetId, { reliable: true });
             currentConnection = conn;
+            isTransferring = true;
             
             let receivedBuffer = [];
             let fileMeta = null;
             let bytesReceived = 0;
 
             conn.on('open', () => {
-                clearTimeout(connectionTimeout); // We connected!
+                clearTimeout(connectionTimeout);
                 UI.progressArea.classList.remove('hidden');
                 UI.statusText.innerText = "Connected. Waiting for file...";
             });
 
             conn.on('data', (payload) => {
+                if (!isTransferring) return; // Ignore ghost chunks if cancelled
+
                 if (payload.type === 'metadata') {
                     fileMeta = payload;
                     UI.fileName.innerText = fileMeta.name;
-                    UI.statusText.innerText = "Downloading...";
+                    const mbSize = (fileMeta.size / (1024 * 1024)).toFixed(2);
+                    UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
+                    
                 } else if (payload.type === 'chunk') {
-                    receivedBuffer.push(payload.data);
-                    bytesReceived += payload.data.byteLength;
+                    // Fix: Safe length calculation for Blobs, ArrayBuffers, and Uint8Arrays
+                    const chunkData = payload.data;
+                    const chunkLength = chunkData.byteLength || chunkData.size || chunkData.length || 0;
+                    
+                    receivedBuffer.push(chunkData);
+                    bytesReceived += chunkLength;
+                    
                     updateProgress(bytesReceived, fileMeta.size);
 
-                    if (bytesReceived === fileMeta.size) {
-                        saveFile(receivedBuffer, fileMeta);
-                        UI.statusText.innerText = "Saved to Downloads! 📥";
-                        UI.resetBtn.innerText = "Start Over";
-                        showToast("Download Complete!", "success");
+                    // Fix: Use >= to prevent hanging if size is slightly off
+                    if (bytesReceived >= fileMeta.size) {
+                        isTransferring = false;
+                        
+                        try {
+                            saveFile(receivedBuffer, fileMeta);
+                            UI.statusText.innerText = "Saved to Downloads! 📥";
+                            UI.resetBtn.innerText = "Start Over";
+                            showToast("Download Complete!", "success");
+                        } catch (err) {
+                            showToast("Error saving the file.", "error");
+                            console.error("Save error:", err);
+                        }
                     }
                 }
             });
             
             conn.on('close', () => {
-                if(bytesReceived < (fileMeta?.size || 1)) {
+                if(isTransferring) {
                     showToast("Sender disconnected.", "error");
                     resetApp();
                 }
@@ -235,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             switch(err.type) {
                 case 'peer-unavailable':
-                    errMsg = "Invalid pairing code or the sender left.";
+                    errMsg = "Invalid code or the sender left.";
                     break;
                 case 'network':
                 case 'disconnected':
@@ -262,8 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress(current, total) {
-        if(total === 0) return;
-        const percent = Math.floor((current / total) * 100);
+        if(!total || total === 0) return;
+        let percent = Math.floor((current / total) * 100);
+        if (percent > 100) percent = 100; // Cap at 100%
+        
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
     }
