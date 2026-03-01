@@ -1,30 +1,17 @@
 /* Glassmorphism Core */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-/* Smooth Progress Bar Glow */
-#progress-bar {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-  position: relative;
-  overflow: hidden;
+  background: rgba(15, 23, 42, 0.6); /* Slightly darker slate for modern look */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #progress-bar::after {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite linear;
 }
 
 @keyframes shimmer {
@@ -32,23 +19,6 @@
   100% { transform: translateX(100%); }
 }
 
-/* Pulsing Drop Zone */
-.drop-active {
-  border-color: #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.1) !important;
-  scale: 1.02;
-}
-
-/* Custom Scrollbar for 2026 Browsers */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-/* App Transition Animations */
 .fade-up {
   animation: fadeUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -56,4 +26,29 @@
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast Animations */
+.toast-enter {
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.toast-exit {
+  animation: fadeOutUp 0.3s ease-in forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
