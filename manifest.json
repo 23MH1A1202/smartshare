@@ -1,6 +1,6 @@
 {
   "name": "SmartShare",
-  "short_name": "Share",
+  "short_name": "Smart Share",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#020617",
