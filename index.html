@@ -118,21 +118,40 @@
 
         </div>
 
-        <footer class="mt-12 text-center text-slate-600 dark:text-slate-400 text-sm max-w-md mx-auto transition-colors z-10">
-            <p class="font-semibold text-slate-800 dark:text-slate-300 mb-1.5 text-base tracking-wide">Ambati Lalitha Sagar</p>
-            <p class="text-xs mb-1 leading-relaxed opacity-90">
-                B.Tech Information Technology (23MH1A1202)<br>
-                Aditya College of Engineering & Technology (ACET)
-            </p>
-            <div class="mt-4 flex justify-center">
-                <a href="mailto:alalithasagar355@gmail.com" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-slate-200/60 hover:bg-slate-300/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/80 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all text-xs font-medium border border-slate-300 dark:border-slate-700 shadow-sm hover:shadow active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    Contact Me
-                </a>
-            </div>
+        <footer class="mt-8 text-center z-10">
+            <button id="about-dev-btn" class="text-sm font-medium text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                About the Developer
+            </button>
         </footer>
 
     </main>
+
+    <div id="dev-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-3xl p-8 max-w-sm w-[90%] relative transform scale-95 transition-transform duration-300" id="dev-modal-card">
+            
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="text-center mt-2">
+                <div class="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full mx-auto flex items-center justify-center shadow-lg mb-5">
+                    <span class="text-white text-3xl font-bold tracking-wider">AS</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white tracking-wide">AMBATI LALITHA SAGAR</h3>
+                <div class="mt-4 space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                    <p class="font-semibold text-blue-600 dark:text-blue-400 tracking-wide">B.Tech - INFORMATION TECHNOLOGY</p>
+                    <p class="font-mono text-xs opacity-80 bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">Roll No: 23MH1A1202</p>
+                    <p class="pt-3 leading-relaxed">Aditya College of Engineering & Technology (ACET)</p>
+                </div>
+                
+                <a href="mailto:alalithasagar355@gmail.com" class="mt-8 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all text-sm font-medium border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow active:scale-95 w-full justify-center">
+                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    alalithasagar355@gmail.com
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script src="main.js"></script>
 </body>
