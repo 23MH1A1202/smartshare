@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transfer: document.getElementById('transfer-state'),
         shareOptions: document.getElementById('share-options'),
         progressArea: document.getElementById('progress-area'),
+        progressText: document.getElementById('progress-text'),
         fileInput: document.getElementById('file-input'),
         receiveCodeInput: document.getElementById('receive-code-input'),
         receiveBtn: document.getElementById('receive-btn'),
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isTransferring = true;
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
+            UI.progressText.innerText = "Sending...";
             
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
@@ -215,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             conn.on('open', () => {
                 clearTimeout(connectionTimeout);
                 UI.progressArea.classList.remove('hidden');
+                UI.progressText.innerText = "Downloading...";
                 UI.statusText.innerText = "Connected. Waiting for file...";
             });
 
