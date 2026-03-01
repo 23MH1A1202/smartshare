@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         progressText: document.getElementById('progress-text'),
+        successArea: document.getElementById('success-area'), // ADD THIS
+        successText: document.getElementById('success-text'), // ADD THIS
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
@@ -107,6 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         UI.progressArea.classList.add('hidden');
         UI.shareOptions.classList.add('hidden');
+
+        // ADD THESE TWO LINES:
+        UI.successArea.classList.add('hidden');
+        UI.successArea.classList.remove('flex');
         updateProgress(0, 100);
         
         UI.resetBtn.innerText = "Cancel";
@@ -187,6 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(readNext, 5); 
             } else {
                 isTransferring = false;
+                UI.progressArea.classList.add('hidden');
+                UI.successArea.classList.remove('hidden');
+                UI.successArea.classList.add('flex');
+                UI.successText.innerText = "Sent";
                 UI.statusText.innerText = "Sent Successfully! ✅";
                 UI.resetBtn.innerText = "Start Over";
                 showToast("File sent successfully!", "success");
@@ -302,6 +312,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         isTransferring = false;
                         try {
                             saveFile(receivedBuffer, fileMeta);
+
+                            UI.progressArea.classList.add('hidden');
+                            UI.successArea.classList.remove('hidden');
+                            UI.successArea.classList.add('flex');
+                            UI.successText.innerText = "Received";
+                            
                             UI.statusText.innerText = "Saved to Downloads! 📥";
                             UI.resetBtn.innerText = "Start Over";
                             showToast("Download Complete!", "success");
