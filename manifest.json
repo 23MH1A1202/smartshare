@@ -1,15 +1,21 @@
 {
-  "name": "InstantShare",
+  "name": "SmartShare",
   "short_name": "Share",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -21,7 +27,7 @@
       "files": [
         {
           "name": "file",
-          "accept": ["*/*"]
+          "accept": ["*/*", "image/*", "video/*", "audio/*", "application/*", "text/*"]
         }
       ]
     }
