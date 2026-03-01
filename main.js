@@ -1,35 +1,87 @@
-window.onerror = function(message, source, lineno) {
-    console.error("System Error: " + message + " (Line " + lineno + ")");
+window.onerror = function(message) {
+    showToast("System Error: " + message, "error");
     return true; 
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.error("SW failed:", err));
+        navigator.serviceWorker.register('sw.js').catch(console.error);
     }
 
     const UI = {
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
         shareOptions: document.getElementById('share-options'),
+        progressArea: document.getElementById('progress-area'),
         fileInput: document.getElementById('file-input'),
         receiveCodeInput: document.getElementById('receive-code-input'),
         receiveBtn: document.getElementById('receive-btn'),
+        resetBtn: document.getElementById('reset-btn'),
         fileName: document.getElementById('file-name'),
         percentage: document.getElementById('percentage'),
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
-        copyLinkBtn: document.getElementById('copy-link-btn')
+        copyLinkBtn: document.getElementById('copy-link-btn'),
+        toastContainer: document.getElementById('toast-container')
     };
 
     let peer = null;
     let currentConnection = null;
     let fileToSend = null;
+    let connectionTimeout = null;
 
-    // Generate a clean 6-character code (e.g., "A7X9PQ")
+    // --- TOAST NOTIFICATION SYSTEM ---
+    function showToast(message, type = "info") {
+        const toast = document.createElement('div');
+        const isError = type === "error";
+        
+        toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
+            isError ? 'bg-red-950/90 border-red-500/30 text-red-200' : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200'
+        } backdrop-blur-md pointer-events-auto`;
+        
+        const icon = isError 
+            ? `<svg class="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+            : `<svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+
+        toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+        UI.toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.replace('toast-enter', 'toast-exit');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // --- RESET APP LOGIC ---
+    function resetApp() {
+        if (currentConnection) currentConnection.close();
+        if (peer) peer.destroy();
+        clearTimeout(connectionTimeout);
+        
+        peer = null;
+        currentConnection = null;
+        fileToSend = null;
+        
+        UI.fileInput.value = '';
+        UI.receiveCodeInput.value = '';
+        
+        // Reset UI Elements
+        UI.transfer.classList.add('hidden');
+        UI.transfer.classList.remove('flex');
+        UI.initial.classList.remove('hidden');
+        UI.initial.classList.add('flex');
+        
+        UI.progressArea.classList.add('hidden');
+        UI.shareOptions.classList.add('hidden');
+        updateProgress(0, 100);
+        UI.resetBtn.innerText = "Cancel";
+    }
+
+    UI.resetBtn.addEventListener('click', resetApp);
+
     function generateShortCode() {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
@@ -43,41 +95,46 @@ document.addEventListener('DOMContentLoaded', () => {
         showTransferScreen(file.name, "Creating secure room...");
 
         const roomCode = generateShortCode();
-        peer = new Peer(roomCode); // Using our custom 6-digit code as the Peer ID
+        peer = new Peer(roomCode); 
         
         peer.on('open', (id) => {
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
             
-            // Show QR Code
             UI.qrContainer.innerHTML = "";
-            new QRCode(UI.qrContainer, { text: transferUrl, width: 160, height: 160, colorDark: "#020617" });
+            new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
             
-            // Show PIN Code
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for receiver...";
 
-            // Setup Copy Link button
             UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
-                UI.copyLinkBtn.innerText = "Copied!";
-                setTimeout(() => UI.copyLinkBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg> Copy Share Link`, 2000);
+                showToast("Link copied to clipboard!", "success");
             };
         });
 
         peer.on('connection', (conn) => {
             currentConnection = conn;
             UI.shareOptions.classList.add('hidden');
+            UI.progressArea.classList.remove('hidden');
             UI.statusText.innerText = "Device connected. Sending...";
             
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
+            
+            conn.on('close', () => {
+                if(UI.percentage.innerText !== "100%") {
+                    showToast("Receiver disconnected mid-transfer.", "error");
+                    resetApp();
+                }
+            });
         });
+
+        setupPeerErrorHandling(peer);
     });
 
-    // Paced File Streaming to prevent WebRTC buffer overflow
     function streamFileToReceiver(conn, file) {
-        const chunkSize = 64 * 1024; // 64KB chunks
+        const chunkSize = 64 * 1024; 
         let offset = 0;
 
         conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
@@ -89,10 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress(offset, file.size);
 
             if (offset < file.size) {
-                // Slight delay allows the WebRTC buffer to breathe for massive files
                 setTimeout(readNext, 5); 
             } else {
-                UI.statusText.innerText = "Transfer Complete! ✅";
+                UI.statusText.innerText = "Sent Successfully! ✅";
+                UI.resetBtn.innerText = "Start Over";
+                showToast("File sent successfully!", "success");
             }
         };
 
@@ -100,33 +158,42 @@ document.addEventListener('DOMContentLoaded', () => {
         readNext();
     }
 
-    // --- RECEIVER LOGIC (Manual Code Entry) ---
+    // --- RECEIVER LOGIC ---
     UI.receiveBtn.addEventListener('click', () => {
         const targetId = UI.receiveCodeInput.value.trim().toUpperCase();
         if (targetId.length !== 6) {
-            alert("Please enter a valid 6-character code.");
+            showToast("Enter a valid 6-character code.", "error");
             return;
         }
         startReceiving(targetId);
     });
 
-    // --- RECEIVER LOGIC (Link/QR Scan Entry) ---
     if (window.location.hash.length > 1) {
-        const targetPeerId = window.location.hash.substring(1);
+        const targetPeerId = window.location.hash.substring(1).toUpperCase();
         startReceiving(targetPeerId);
     }
 
     function startReceiving(targetId) {
-        showTransferScreen("Connecting...", "Looking for sender...");
+        showTransferScreen("Connecting...", `Looking for room ${targetId}...`);
         peer = new Peer();
+
+        // Timeout if connection takes too long
+        connectionTimeout = setTimeout(() => {
+            showToast("Connection timed out. Check the code and try again.", "error");
+            resetApp();
+        }, 15000);
 
         peer.on('open', () => {
             const conn = peer.connect(targetId, { reliable: true });
+            currentConnection = conn;
+            
             let receivedBuffer = [];
             let fileMeta = null;
             let bytesReceived = 0;
 
             conn.on('open', () => {
+                clearTimeout(connectionTimeout); // We connected!
+                UI.progressArea.classList.remove('hidden');
                 UI.statusText.innerText = "Connected. Waiting for file...";
             });
 
@@ -143,27 +210,59 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (bytesReceived === fileMeta.size) {
                         saveFile(receivedBuffer, fileMeta);
                         UI.statusText.innerText = "Saved to Downloads! 📥";
+                        UI.resetBtn.innerText = "Start Over";
+                        showToast("Download Complete!", "success");
                     }
                 }
             });
             
-            conn.on('error', () => {
-                UI.statusText.innerText = "Connection lost.";
-                alert("Sender disconnected or code is invalid.");
+            conn.on('close', () => {
+                if(bytesReceived < (fileMeta?.size || 1)) {
+                    showToast("Sender disconnected.", "error");
+                    resetApp();
+                }
             });
+        });
+
+        setupPeerErrorHandling(peer);
+    }
+
+    // --- UTILITIES & ERROR HANDLING ---
+    function setupPeerErrorHandling(peerInstance) {
+        peerInstance.on('error', (err) => {
+            clearTimeout(connectionTimeout);
+            let errMsg = "An unknown network error occurred.";
+            
+            switch(err.type) {
+                case 'peer-unavailable':
+                    errMsg = "Invalid pairing code or the sender left.";
+                    break;
+                case 'network':
+                case 'disconnected':
+                    errMsg = "Lost connection to the signaling server.";
+                    break;
+                case 'webrtc':
+                    errMsg = "WebRTC error. Check your firewall/VPN.";
+                    break;
+            }
+            showToast(errMsg, "error");
+            resetApp();
         });
     }
 
-    // --- UTILITIES ---
     function showTransferScreen(fileName, statusText) {
         UI.initial.classList.add('hidden');
+        UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
         UI.transfer.classList.add('flex');
+        
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
+        UI.resetBtn.innerText = "Cancel";
     }
 
     function updateProgress(current, total) {
+        if(total === 0) return;
         const percent = Math.floor((current / total) * 100);
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
