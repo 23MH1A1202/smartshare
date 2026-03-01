@@ -3,19 +3,16 @@ window.onerror = function(message) {
     return true; 
 };
 
-// --- 🌟 NEW: THEME SWITCHER LOGIC ---
 function initializeTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
 
-    // Check storage or system preference
     if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlElement.classList.remove('dark');
     } else {
         htmlElement.classList.add('dark');
     }
 
-    // Toggle on button click
     themeToggleBtn.addEventListener('click', () => {
         htmlElement.classList.toggle('dark');
         if (htmlElement.classList.contains('dark')) {
@@ -28,7 +25,7 @@ function initializeTheme() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    initializeTheme(); // Run Theme setup
+    initializeTheme(); 
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(console.error);
@@ -52,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
         toastContainer: document.getElementById('toast-container'),
-        dropZone: document.getElementById('drop-zone')
+        dropZone: document.getElementById('drop-zone'),
+        devModal: document.getElementById('dev-modal'),
+        devModalCard: document.getElementById('dev-modal-card'),
+        openModalBtn: document.getElementById('about-dev-btn'),
+        closeModalBtn: document.getElementById('close-modal-btn')
     };
 
     let peer = null;
@@ -61,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
 
-    // --- TOAST NOTIFICATION SYSTEM (Updated for Light/Dark) ---
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         const isError = type === "error";
@@ -120,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    // --- CORE SENDING FUNCTION ---
     function startSendingFile(file) {
         if (!file) return;
 
@@ -199,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- EVENT LISTENERS ---
     UI.fileInput.addEventListener('change', (e) => startSendingFile(e.target.files[0]));
 
     UI.dropZone.addEventListener('dragover', (e) => {
@@ -371,4 +369,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url); 
     }
+
+    function openModal() {
+        UI.devModal.classList.remove('hidden');
+        UI.devModal.classList.add('flex');
+        setTimeout(() => {
+            UI.devModal.classList.remove('opacity-0');
+            UI.devModalCard.classList.remove('scale-95');
+            UI.devModalCard.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        UI.devModal.classList.add('opacity-0');
+        UI.devModalCard.classList.remove('scale-100');
+        UI.devModalCard.classList.add('scale-95');
+        setTimeout(() => {
+            UI.devModal.classList.add('hidden');
+            UI.devModal.classList.remove('flex');
+        }, 300);
+    }
+
+    UI.openModalBtn.addEventListener('click', openModal);
+    UI.closeModalBtn.addEventListener('click', closeModal);
+    
+    UI.devModal.addEventListener('click', (e) => {
+        if (e.target === UI.devModal) {
+            closeModal();
+        }
+    });
 });
