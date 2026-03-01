@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" class="dark"> <head>
+<html lang="en" class="dark">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartShare</title>
@@ -16,7 +17,7 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-hidden sm:overflow-auto sm:min-h-screen sm:flex sm:items-center sm:justify-center transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto sm:min-h-screen sm:flex sm:items-center sm:justify-center transition-colors duration-300">
     
     <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#f1f5f9,0,#cbd5e1_100%)] dark:bg-[radial-gradient(circle_at_50%_50%,#1e293b,0,#020617_100%)] transition-colors duration-300"></div>
     <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
@@ -29,13 +30,14 @@
 
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
-    <main class="flex flex-col items-center justify-center h-[100dvh] sm:h-auto px-4 w-full fade-up">
-        <header class="text-center mb-8 sm:mb-10 mt-10 sm:mt-0">
+    <main class="flex flex-col items-center justify-center min-h-[100dvh] sm:min-h-0 py-12 px-4 w-full fade-up">
+        
+        <header class="text-center mb-8 sm:mb-10 mt-8 sm:mt-0">
             <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-blue-400 dark:to-emerald-400 bg-clip-text text-transparent pb-1">SmartShare</h1>
             <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base transition-colors">Quick File Transfer</p>
         </header>
 
-        <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative shadow-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10">
+        <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative shadow-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 z-10">
             
             <div id="initial-state" class="flex flex-col items-center text-center w-full">
                 
@@ -115,6 +117,21 @@
             </div>
 
         </div>
+
+        <footer class="mt-12 text-center text-slate-600 dark:text-slate-400 text-sm max-w-md mx-auto transition-colors z-10">
+            <p class="font-semibold text-slate-800 dark:text-slate-300 mb-1.5 text-base tracking-wide">Ambati Lalitha Sagar</p>
+            <p class="text-xs mb-1 leading-relaxed opacity-90">
+                B.Tech Information Technology (23MH1A1202)<br>
+                Aditya College of Engineering & Technology (ACET)
+            </p>
+            <div class="mt-4 flex justify-center">
+                <a href="mailto:alalithasagar355@gmail.com" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-slate-200/60 hover:bg-slate-300/80 dark:bg-slate-800/60 dark:hover:bg-slate-700/80 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all text-xs font-medium border border-slate-300 dark:border-slate-700 shadow-sm hover:shadow active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Contact Me
+                </a>
+            </div>
+        </footer>
+
     </main>
 
     <script src="main.js"></script>
