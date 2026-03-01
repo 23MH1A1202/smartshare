@@ -22,22 +22,35 @@
     <main class="flex flex-col items-center justify-center h-screen px-6 fade-up">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">InstantShare</h1>
-            <p class="text-slate-400 mt-2">Instant file Transfer</p>
+            <p class="text-slate-400 mt-2">P2P Secure Transfer</p>
         </header>
 
         <div id="drop-zone" class="glass-panel w-full max-w-md p-8 rounded-[2rem] transition-all duration-300 relative">
             
             <div id="initial-state" class="flex flex-col items-center text-center">
-                <div class="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
-                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <div class="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
+                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                 </div>
-                <h2 class="text-xl font-semibold">Ready to Transfer</h2>
-                <p class="text-slate-500 text-sm mt-2">Zero limits. High speed.</p>
                 
-                <input type="file" id="file-input" class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
-                <label for="file-input" class="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-medium transition-all shadow-lg shadow-blue-500/20 active:scale-95 cursor-pointer inline-block">
-                    Select File
-                </label>
+                <div class="flex flex-col gap-4 w-full mt-4">
+                    <input type="file" id="file-input" class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
+                    <label for="file-input" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/20 active:scale-95 cursor-pointer inline-block">
+                        Send File
+                    </label>
+                    
+                    <div class="relative flex items-center py-2">
+                        <div class="flex-grow border-t border-slate-700"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-500 text-sm">OR</span>
+                        <div class="flex-grow border-t border-slate-700"></div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="receive-code-input" placeholder="Enter 6-digit code" maxlength="6" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-lg focus:outline-none focus:border-blue-500 transition-colors uppercase">
+                        <button id="receive-btn" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
+                            Connect
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div id="transfer-state" class="hidden flex-col items-center w-full">
@@ -52,8 +65,20 @@
 
                 <p id="status-text" class="text-xs text-slate-400 text-center uppercase tracking-widest font-semibold mb-4">Initializing...</p>
                 
-                <div id="qr-wrapper" class="bg-white p-4 rounded-2xl shadow-xl transition-all hidden flex justify-center items-center w-[232px] mx-auto">
-                    <div id="qr-container"></div>
+                <div id="share-options" class="flex flex-col items-center w-full hidden">
+                    <div id="qr-wrapper" class="bg-white p-3 rounded-2xl shadow-xl transition-all mb-4">
+                        <div id="qr-container"></div>
+                    </div>
+                    
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl w-full p-4 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Pairing Code</p>
+                        <h2 id="pairing-code-display" class="text-3xl font-mono tracking-[0.25em] text-white">------</h2>
+                    </div>
+
+                    <button id="copy-link-btn" class="mt-4 text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        Copy Share Link
+                    </button>
                 </div>
             </div>
 
