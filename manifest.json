@@ -1,3 +1,4 @@
+
 {
   "name": "SmartShare",
   "short_name": "Smart Share",
@@ -20,7 +21,7 @@
     }
   ],
   "share_target": {
-    "action": "/share",
+    "action": "/",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
