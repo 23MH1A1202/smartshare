@@ -1,4 +1,4 @@
-const CACHE_NAME = 'instant-share-v2';
+const CACHE_NAME = 'instant-share-v3';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -29,9 +29,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    
-    // --- 🌟 NEW: Catch Mobile Native "Share To" Requests ---
-    if (event.request.method === 'POST' && event.request.url.endsWith('/share')) {
+
+    // --- 🌟 AGGRESSIVE INTERCEPT: Catch ALL POST requests so GitHub never sees them ---
+    if (event.request.method === 'POST') {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
