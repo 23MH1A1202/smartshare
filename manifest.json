@@ -1,10 +1,9 @@
 
-    
+
 {
   "name": "SmartShare",
   "short_name": "Smart Share",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#3b82f6",
@@ -23,7 +22,7 @@
     }
   ],
   "share_target": {
-    "action": "/_share",
+    "action": "/index.html",
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
@@ -36,4 +35,3 @@
     }
   }
 }
-
