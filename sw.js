@@ -1,20 +1,20 @@
-const CACHE_NAME = 'instant-share-v3';
+const CACHE_NAME = 'instant-share-v4';
 const STATIC_ASSETS = [
-    './',
-    './index.html',
-    './style.css',
-    './main.js',
-    './manifest.json',
+    '/',
+    '/index.html',
+    '/style.css',
+    '/main.js',
+    '/manifest.json',
     'https://cdn.tailwindcss.com',
     'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];
 
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
     );
-    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -30,8 +30,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
 
-    // --- 🌟 AGGRESSIVE INTERCEPT: Catch ALL POST requests so GitHub never sees them ---
-    if (event.request.method === 'POST') {
+    // 🌟 INTERCEPT VIRTUAL ROUTE: Catch the native share payload before GitHub sees it
+    if (event.request.method === 'POST' && event.request.url.includes('/_share')) {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -39,7 +39,6 @@ self.addEventListener('fetch', (event) => {
 
                 if (file) {
                     const cache = await caches.open('shared-file-cache');
-                    // Temporarily hold the file in cache so the frontend can grab it
                     await cache.put('/shared-file', new Response(file, {
                         headers: {
                             'Content-Type': file.type || 'application/octet-stream',
@@ -48,17 +47,19 @@ self.addEventListener('fetch', (event) => {
                         }
                     }));
                 }
-                // Redirect the app to the homepage and tell it a file is waiting
+                
+                // Redirect back to the homepage
                 return Response.redirect('/?shared=true', 303);
+                
             } catch (error) {
-                console.error('Share target error:', error);
-                return Response.redirect('/', 303);
+                console.error('SW Share Error:', error);
+                return Response.redirect('/?error=share_failed', 303);
             }
         })());
         return;
     }
 
-    // --- STANDARD OFFLINE CACHING ---
+    // Standard Offline Caching
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             return cachedResponse || fetch(event.request);
