@@ -1,4 +1,4 @@
-const CACHE_NAME = 'instant-share-v4';
+const CACHE_NAME = 'instant-share-v5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -30,8 +30,8 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
 
-    // 🌟 INTERCEPT VIRTUAL ROUTE: Catch the native share payload before GitHub sees it
-    if (event.request.method === 'POST' && event.request.url.includes('/_share')) {
+    // 🌟 AGGRESSIVE POST INTERCEPT
+    if (event.request.method === 'POST') {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -48,7 +48,6 @@ self.addEventListener('fetch', (event) => {
                     }));
                 }
                 
-                // Redirect back to the homepage
                 return Response.redirect('/?shared=true', 303);
                 
             } catch (error) {
