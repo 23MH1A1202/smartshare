@@ -1,20 +1,22 @@
-/* --- ADVANCED MOLTEN GLASS CORE --- */
+/* --- ORIGINOS 6 FROSTED GLASS CORE --- */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(28px) saturate(200%);
-  -webkit-backdrop-filter: blur(28px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1), 
-              inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-              inset 0 10px 20px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 40px !important; /* Massive OriginOS corner curve */
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.08);
 }
 
 html.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), 
-              inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-              inset 0 10px 20px rgba(255, 255, 255, 0.02);
+  background: rgba(18, 22, 28, 0.75); /* Deep slate for dark mode */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Make inner buttons and inputs extra rounded to match the outer glass */
+input, button, label {
+  border-radius: 20px !important; 
 }
 
 /* --- CUSTOM NATIVE SCROLLBAR --- */
@@ -32,6 +34,7 @@ html.dark #file-list::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.2);
 }
 
+/* --- PROGRESS BAR SHIMMER --- */
 #progress-bar::after {
   content: "";
   position: absolute;
@@ -45,6 +48,7 @@ html.dark #file-list::-webkit-scrollbar-thumb {
   100% { transform: translateX(100%); }
 }
 
+/* --- APP LOAD ANIMATION --- */
 .fade-up {
   animation: fadeUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -54,7 +58,7 @@ html.dark #file-list::-webkit-scrollbar-thumb {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Toast Animations */
+/* --- TOAST NOTIFICATION ANIMATIONS --- */
 .toast-enter {
   animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -79,8 +83,7 @@ html.dark #file-list::-webkit-scrollbar-thumb {
   to { opacity: 1; }
 }
 
-
-/* Success Checkmark Animation */
+/* --- SUCCESS CHECKMARK ANIMATION --- */
 .animate-bounce-in {
   animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
