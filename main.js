@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         progressText: document.getElementById('progress-text'),
-        successArea: document.getElementById('success-area'), 
-        successText: document.getElementById('success-text'), 
+        successArea: document.getElementById('success-area'),
+        successText: document.getElementById('success-text'),
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
@@ -125,6 +125,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
+    async function handleFiles(fileList) {
+        if (!fileList || fileList.length === 0) return;
+
+        if (fileList.length === 1) {
+            startSendingFile(fileList[0]);
+            return;
+        }
+
+        showTransferScreen("Multiple Files", "Compressing files... Please wait");
+        UI.progressArea.classList.remove('hidden');
+        UI.progressText.innerText = "Zipping...";
+        
+        try {
+            const zip = new JSZip();
+            for (let i = 0; i < fileList.length; i++) {
+                zip.file(fileList[i].name, fileList[i]);
+            }
+            
+            const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
+                let percent = Math.floor(metadata.percent);
+                UI.progressBar.style.width = percent + "%";
+                UI.percentage.innerText = percent + "%";
+            });
+            
+            const zipFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
+            
+            UI.progressArea.classList.add('hidden');
+            startSendingFile(zipFile);
+        } catch (error) {
+            showToast("Failed to compress files.", "error");
+            resetApp();
+        }
+    }
+
     function startSendingFile(file) {
         if (!file) return;
 
@@ -161,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
 
-            // 🌟 NEW: Listen for the receiver's Acknowledgement (ACK)
             conn.on('data', (payload) => {
                 if (payload.type === 'transfer-complete') {
                     isTransferring = false;
@@ -205,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offset < file.size) {
                 setTimeout(readNext, 5); 
             } else {
-                // 🌟 CHANGED: Do not show success yet! Wait for receiver.
                 if(UI.progressText) UI.progressText.innerText = "Finalizing...";
                 UI.statusText.innerText = "Waiting for receiver to finish... Please don't close.";
             }
@@ -216,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    UI.fileInput.addEventListener('change', (e) => startSendingFile(e.target.files[0]));
+    UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
     UI.dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -231,9 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         UI.dropZone.classList.remove('drop-active');
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            startSendingFile(e.dataTransfer.files[0]);
-        }
+        handleFiles(e.dataTransfer.files);
     });
 
     if (window.location.search.includes('shared=true')) {
@@ -248,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     response.blob().then(blob => {
                         const file = new File([blob], fileName, { type: fileType });
-                        startSendingFile(file);
+                        handleFiles([file]);
                         cache.delete('/shared-file'); 
                     });
                 } else {
@@ -320,8 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         isTransferring = false;
                         try {
                             saveFile(receivedBuffer, fileMeta);
-                            
-                            // 🌟 NEW: Send ACK to Sender
+
                             conn.send({ type: 'transfer-complete' });
 
                             UI.progressArea.classList.add('hidden');
