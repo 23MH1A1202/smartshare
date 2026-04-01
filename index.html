@@ -56,7 +56,20 @@
                     </label>
                 </div>
 
-                <div class="flex flex-col gap-5 w-full mt-2">
+                <div id="staged-files-section" class="w-full mt-4 hidden flex-col gap-3">
+                    <ul id="file-list" class="max-h-48 overflow-y-auto pr-2 space-y-2"></ul>
+                    <div class="flex gap-2 w-full mt-2">
+                        <label for="file-input" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all text-center cursor-pointer border border-slate-200 dark:border-slate-700 text-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add More
+                        </label>
+                        <button id="send-files-btn" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-[0.98] text-sm flex items-center justify-center gap-2">
+                            Send
+                        </button>
+                    </div>
+                </div>
+
+                <div id="receive-section" class="flex flex-col gap-5 w-full mt-2">
                     <div class="relative flex items-center py-1">
                         <div class="flex-grow border-t border-slate-300 dark:border-slate-700/60"></div>
                         <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-xs font-semibold tracking-widest uppercase">Or Receive</span>
