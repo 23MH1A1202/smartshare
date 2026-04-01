@@ -110,17 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
-            li.className = "flex justify-between items-center bg-slate-100 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm";
+            
+            // 🌟 Sub-glass effect for each list item
+            li.className = "flex justify-between items-center bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
             
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
             
             li.innerHTML = `
-                <div class="flex flex-col truncate pr-4 w-[85%]">
-                    <span class="text-slate-800 dark:text-slate-200 font-medium truncate">${file.name}</span>
-                    <span class="text-xs text-slate-500">${sizeText}</span>
+                <div class="flex flex-col truncate pr-4 text-left w-full">
+                    <span class="text-slate-800 dark:text-slate-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
+                    <span class="text-[13px] text-slate-500 font-medium">${sizeText}</span>
                 </div>
-                <button class="delete-file-btn text-slate-400 hover:text-red-500 transition-colors p-1 shrink-0" data-index="${index}">
+                <button class="delete-file-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2 rounded-xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             `;
