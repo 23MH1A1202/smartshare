@@ -111,17 +111,39 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
             
-            // 🌟 Sub-glass effect for each list item
-           li.className = "flex justify-between items-center bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3.5 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
+            li.className = "flex items-center justify-between bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
+            
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
             
+            // 🌟 NEW: Determine Media Preview or Fallback Icon
+            let mediaPreview = '';
+            const objectUrl = URL.createObjectURL(file);
+
+            if (file.type.startsWith('image/')) {
+                // Instant Image Preview
+                mediaPreview = `<img src="${objectUrl}" class="w-full h-full object-cover" onload="URL.revokeObjectURL(this.src)">`;
+            } else if (file.type.startsWith('video/')) {
+                // Instant Video Frame Preview (#t=0.001 forces mobile browsers to grab the first frame)
+                mediaPreview = `<video src="${objectUrl}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline onloadeddata="URL.revokeObjectURL(this.src)"></video>`;
+            } else {
+                // Generic Document Icon
+                mediaPreview = `<svg class="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
+            }
+
             li.innerHTML = `
-                <div class="flex flex-col truncate pr-4 text-left w-full">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
-                    <span class="text-[13px] text-slate-500 font-medium">${sizeText}</span>
+                <div class="flex items-center w-[85%]">
+                    <div class="w-11 h-11 shrink-0 rounded-[14px] overflow-hidden bg-white/60 dark:bg-slate-800/60 flex items-center justify-center mr-3 border border-white/40 dark:border-slate-700/40 shadow-inner">
+                        ${mediaPreview}
+                    </div>
+                    
+                    <div class="flex flex-col truncate pr-2 text-left w-full">
+                        <span class="text-slate-800 dark:text-slate-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
+                        <span class="text-[13px] text-slate-500 font-medium">${sizeText}</span>
+                    </div>
                 </div>
-                <button class="delete-file-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2 rounded-xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
+                
+                <button class="delete-file-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2.5 rounded-2xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             `;
