@@ -55,7 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
         devModal: document.getElementById('dev-modal'),
         devModalCard: document.getElementById('dev-modal-card'),
         openModalBtn: document.getElementById('about-dev-btn'),
-        closeModalBtn: document.getElementById('close-modal-btn')
+        closeModalBtn: document.getElementById('close-modal-btn'),
+        receiveSection: document.getElementById('receive-section'),
+        stagedFilesSection: document.getElementById('staged-files-section'),
+        fileList: document.getElementById('file-list'),
+        sendFilesBtn: document.getElementById('send-files-btn')
     };
 
     let peer = null;
@@ -63,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let fileToSend = null;
     let connectionTimeout = null;
     let isTransferring = false;
+    let selectedFiles = [];
 
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
@@ -86,6 +91,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    function renderFileList() {
+        UI.fileList.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            UI.stagedFilesSection.classList.add('hidden');
+            UI.stagedFilesSection.classList.remove('flex');
+            UI.receiveSection.classList.remove('hidden');
+            UI.receiveSection.classList.add('flex');
+            UI.fileInput.value = '';
+            return;
+        }
+
+        UI.stagedFilesSection.classList.remove('hidden');
+        UI.stagedFilesSection.classList.add('flex');
+        UI.receiveSection.classList.add('hidden');
+        UI.receiveSection.classList.remove('flex');
+
+        selectedFiles.forEach((file, index) => {
+            const li = document.createElement('li');
+            li.className = "flex justify-between items-center bg-slate-100 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm";
+            
+            let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+            if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
+            
+            li.innerHTML = `
+                <div class="flex flex-col truncate pr-4 w-[85%]">
+                    <span class="text-slate-800 dark:text-slate-200 font-medium truncate">${file.name}</span>
+                    <span class="text-xs text-slate-500">${sizeText}</span>
+                </div>
+                <button class="delete-file-btn text-slate-400 hover:text-red-500 transition-colors p-1 shrink-0" data-index="${index}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+            UI.fileList.appendChild(li);
+        });
+
+        document.querySelectorAll('.delete-file-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                selectedFiles.splice(index, 1);
+                renderFileList();
+            });
+        });
+
+        UI.sendFilesBtn.innerHTML = `Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
+    }
+
     function resetApp() {
         try {
             if (currentConnection) currentConnection.close();
@@ -94,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clearTimeout(connectionTimeout);
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
+        selectedFiles = [];
 
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
@@ -114,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.successArea.classList.remove('flex');
         updateProgress(0, 100);
 
+        renderFileList();
+
         UI.resetBtn.innerText = "Cancel";
         UI.fileName.innerText = "Waiting...";
         UI.statusText.innerText = "Initializing connection";
@@ -125,22 +180,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
     }
 
-    async function handleFiles(fileList) {
+    function handleFiles(fileList) {
         if (!fileList || fileList.length === 0) return;
+        for (let i = 0; i < fileList.length; i++) {
+            selectedFiles.push(fileList[i]);
+        }
+        renderFileList();
+    }
 
-        if (fileList.length === 1) {
-            startSendingFile(fileList[0]);
+    UI.sendFilesBtn.addEventListener('click', async () => {
+        if (selectedFiles.length === 0) return;
+        
+        if (selectedFiles.length === 1) {
+            startSendingFile(selectedFiles[0]);
             return;
         }
 
         showTransferScreen("Multiple Files", "Compressing files... Please wait");
         UI.progressArea.classList.remove('hidden');
-        UI.progressText.innerText = "Zipping...";
+        if(UI.progressText) UI.progressText.innerText = "Zipping...";
         
         try {
             const zip = new JSZip();
-            for (let i = 0; i < fileList.length; i++) {
-                zip.file(fileList[i].name, fileList[i]);
+            for (let i = 0; i < selectedFiles.length; i++) {
+                zip.file(selectedFiles[i].name, selectedFiles[i]);
             }
             
             const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
@@ -157,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Failed to compress files.", "error");
             resetApp();
         }
-    }
+    });
 
     function startSendingFile(file) {
         if (!file) return;
@@ -247,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         readNext();
     }
 
-
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
     UI.dropZone.addEventListener('dragover', (e) => {
@@ -263,7 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         UI.dropZone.classList.remove('drop-active');
-        handleFiles(e.dataTransfer.files);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleFiles(e.dataTransfer.files);
+        }
     });
 
     if (window.location.search.includes('shared=true')) {
@@ -280,6 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const file = new File([blob], fileName, { type: fileType });
                         handleFiles([file]);
                         cache.delete('/shared-file'); 
+                        resetApp(); 
                     });
                 } else {
                     resetApp();
