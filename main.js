@@ -112,8 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             
             // 🌟 Sub-glass effect for each list item
-            li.className = "flex justify-between items-center bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
-            
+           li.className = "flex justify-between items-center bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3.5 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
             
