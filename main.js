@@ -24,7 +24,7 @@ function initializeTheme() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     initializeTheme(); 
 
     if ('serviceWorker' in navigator) {
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         progressText: document.getElementById('progress-text'),
-        successArea: document.getElementById('success-area'), // ADD THIS
-        successText: document.getElementById('success-text'), // ADD THIS
+        successArea: document.getElementById('success-area'), 
+        successText: document.getElementById('success-text'), 
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
@@ -67,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         const isError = type === "error";
-        
+
         toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
             isError ? 'bg-red-50 dark:bg-red-950/90 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-200' 
                     : 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
         } backdrop-blur-md pointer-events-auto z-50`;
-        
+
         const icon = isError 
             ? `<svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
             : `<svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
@@ -91,30 +91,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentConnection) currentConnection.close();
             if (peer) peer.destroy();
         } catch (e) { console.error(e); }
-        
+
         clearTimeout(connectionTimeout);
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
-        
+
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
-        
+
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
         }
-        
+
         UI.transfer.classList.add('hidden');
         UI.transfer.classList.remove('flex');
         UI.initial.classList.remove('hidden');
         UI.initial.classList.add('flex');
-        
+
         UI.progressArea.classList.add('hidden');
         UI.shareOptions.classList.add('hidden');
 
-        // ADD THESE TWO LINES:
         UI.successArea.classList.add('hidden');
         UI.successArea.classList.remove('flex');
         updateProgress(0, 100);
-        
+
         UI.resetBtn.innerText = "Cancel";
         UI.fileName.innerText = "Waiting...";
         UI.statusText.innerText = "Initializing connection";
@@ -134,14 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const roomCode = generateShortCode();
         peer = new Peer(roomCode); 
-        
+
         peer.on('open', (id) => {
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
-            
+
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
-            
+
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for receiver...";
@@ -158,12 +157,26 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
-            
+
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
-            
+
+            // 🌟 NEW: Listen for the receiver's Acknowledgement (ACK)
+            conn.on('data', (payload) => {
+                if (payload.type === 'transfer-complete') {
+                    isTransferring = false;
+                    UI.progressArea.classList.add('hidden');
+                    UI.successArea.classList.remove('hidden');
+                    UI.successArea.classList.add('flex');
+                    UI.successText.innerText = "Sent";
+                    UI.statusText.innerText = "Sent Successfully! ✅";
+                    UI.resetBtn.innerText = "Start Over";
+                    showToast("File sent successfully!", "success");
+                }
+            });
+
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
-            
+
             conn.on('close', () => {
                 if(isTransferring) {
                     showToast("Receiver disconnected mid-transfer.", "error");
@@ -184,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             if (!isTransferring) return; 
-            
+
             conn.send({ type: 'chunk', data: e.target.result });
             offset += e.target.result.byteLength;
             updateProgress(offset, file.size);
@@ -192,14 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offset < file.size) {
                 setTimeout(readNext, 5); 
             } else {
-                isTransferring = false;
-                UI.progressArea.classList.add('hidden');
-                UI.successArea.classList.remove('hidden');
-                UI.successArea.classList.add('flex');
-                UI.successText.innerText = "Sent";
-                UI.statusText.innerText = "Sent Successfully! ✅";
-                UI.resetBtn.innerText = "Start Over";
-                showToast("File sent successfully!", "success");
+                // 🌟 CHANGED: Do not show success yet! Wait for receiver.
+                if(UI.progressText) UI.progressText.innerText = "Finalizing...";
+                UI.statusText.innerText = "Waiting for receiver to finish... Please don't close.";
             }
         };
 
@@ -278,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const conn = peer.connect(targetId, { reliable: true });
             currentConnection = conn;
             isTransferring = true;
-            
+
             let receivedBuffer = [];
             let fileMeta = null;
             let bytesReceived = 0;
@@ -298,26 +306,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.fileName.innerText = fileMeta.name;
                     const mbSize = (fileMeta.size / (1024 * 1024)).toFixed(2);
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
-                    
+
                 } else if (payload.type === 'chunk') {
                     const chunkData = payload.data;
                     const chunkLength = chunkData.byteLength || chunkData.size || chunkData.length || 0;
-                    
+
                     receivedBuffer.push(chunkData);
                     bytesReceived += chunkLength;
-                    
+
                     updateProgress(bytesReceived, fileMeta.size);
 
                     if (bytesReceived >= fileMeta.size) {
                         isTransferring = false;
                         try {
                             saveFile(receivedBuffer, fileMeta);
+                            
+                            // 🌟 NEW: Send ACK to Sender
+                            conn.send({ type: 'transfer-complete' });
 
                             UI.progressArea.classList.add('hidden');
                             UI.successArea.classList.remove('hidden');
                             UI.successArea.classList.add('flex');
                             UI.successText.innerText = "Received";
-                            
+
                             UI.statusText.innerText = "Saved to Downloads! 📥";
                             UI.resetBtn.innerText = "Start Over";
                             showToast("Download Complete!", "success");
@@ -327,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
-            
+
             conn.on('close', () => {
                 if(isTransferring) {
                     showToast("Sender disconnected.", "error");
@@ -359,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
         UI.transfer.classList.add('flex');
-        
+
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
         UI.resetBtn.innerText = "Cancel";
@@ -369,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
         if (percent > 100) percent = 100; 
-        
+
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
     }
@@ -408,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.openModalBtn.addEventListener('click', openModal);
     UI.closeModalBtn.addEventListener('click', closeModal);
-    
+
     UI.devModal.addEventListener('click', (e) => {
         if (e.target === UI.devModal) {
             closeModal();
