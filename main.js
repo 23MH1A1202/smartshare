@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-const db = getFirestore(app);
+const db = getFirestore(app, "smartshare");
 
 window.onerror = function(message) {
     showToast("System Error: " + message, "error");
