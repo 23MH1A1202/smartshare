@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
                     return;
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Code check error:", e); }
         }
 
         const storagePath = `shared/${fileId}_${file.name}`;
@@ -320,41 +320,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(UI.progressText) UI.progressText.innerText = "Uploading...";
             },
             (error) => {
-                showToast("Cloud upload failed.", "error");
+                console.error("Storage Error:", error);
+                showToast("Cloud upload failed: " + error.message, "error");
                 resetApp();
             },
             async () => {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                const expireHours = parseInt(UI.cloudExpire.value);
-                const isOneTime = UI.cloudLimit.value === 'one-time';
+                // 🌟 NEW: Added Try/Catch block to catch silent database errors
+                try {
+                    UI.statusText.innerText = `Finalizing secure link...`;
+                    
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    const expireHours = parseInt(UI.cloudExpire.value);
+                    const isOneTime = UI.cloudLimit.value === 'one-time';
 
-                await setDoc(doc(db, "links", fileId), {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    url: downloadURL,
-                    storagePath: storagePath,
-                    expiresAt: Date.now() + (expireHours * 60 * 60 * 1000),
-                    isOneTime: isOneTime,
-                    createdAt: Date.now()
-                });
+                    await setDoc(doc(db, "links", fileId), {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: downloadURL,
+                        storagePath: storagePath,
+                        expiresAt: Date.now() + (expireHours * 60 * 60 * 1000),
+                        isOneTime: isOneTime,
+                        createdAt: Date.now()
+                    });
 
-                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
-                const transferUrl = `${cleanUrl}?c=${fileId}`;
+                    const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                    const transferUrl = `${cleanUrl}?c=${fileId}`;
 
-                UI.progressArea.classList.add('hidden');
-                UI.qrContainer.innerHTML = "";
-                new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+                    UI.progressArea.classList.add('hidden');
+                    UI.qrContainer.innerHTML = "";
+                    new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
 
-                UI.pairingCodeDisplay.innerText = fileId;
-                UI.shareOptions.classList.remove('hidden');
-                UI.statusText.innerText = "Upload Complete! You can close this tab now.";
-                UI.resetBtn.innerText = "Start Over";
+                    UI.pairingCodeDisplay.innerText = fileId;
+                    UI.shareOptions.classList.remove('hidden');
+                    UI.statusText.innerText = "Upload Complete! You can close this tab now.";
+                    UI.resetBtn.innerText = "Start Over";
 
-                UI.copyLinkBtn.onclick = () => {
-                    navigator.clipboard.writeText(transferUrl);
-                    showToast("Link copied to clipboard!", "success");
-                };
+                    UI.copyLinkBtn.onclick = () => {
+                        navigator.clipboard.writeText(transferUrl);
+                        showToast("Link copied to clipboard!", "success");
+                    };
+                } catch (err) {
+                    console.error("Database Finalization Error:", err);
+                    showToast("Database Error: " + err.message, "error");
+                    resetApp();
+                }
             }
         );
     }
