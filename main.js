@@ -1,7 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBXBbEt_OEwOuHtiM3ERDcLwUZpXyNVtzM",
+    authDomain: "login-59720.firebaseapp.com",
+    projectId: "login-59720",
+    storageBucket: "login-59720.firebasestorage.app",
+    messagingSenderId: "598332882697",
+    appId: "1:598332882697:web:6f675adebeb816e64dddd8",
+    measurementId: "G-36F4WTT681"
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+const db = getFirestore(app);
+
 window.onerror = function(message) {
     showToast("System Error: " + message, "error");
     return true; 
 };
+
+let transferMode = 'p2p'; 
 
 function initializeTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -59,7 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
         receiveSection: document.getElementById('receive-section'),
         stagedFilesSection: document.getElementById('staged-files-section'),
         fileList: document.getElementById('file-list'),
-        sendFilesBtn: document.getElementById('send-files-btn')
+        sendFilesBtn: document.getElementById('send-files-btn'),
+        
+        modeP2P: document.getElementById('mode-p2p'),
+        modeCloud: document.getElementById('mode-cloud'),
+        cloudSettings: document.getElementById('cloud-settings'),
+        cloudExpire: document.getElementById('cloud-expire'),
+        cloudLimit: document.getElementById('cloud-limit'),
+        cloudCustomCode: document.getElementById('cloud-custom-code')
     };
 
     let peer = null;
@@ -68,6 +95,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
     let selectedFiles = [];
+
+    UI.modeP2P.addEventListener('click', () => {
+        transferMode = 'p2p';
+        UI.modeP2P.classList.replace('text-slate-500', 'text-blue-600');
+        UI.modeP2P.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeCloud.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeCloud.classList.add('text-slate-500', 'dark:text-slate-400');
+        UI.cloudSettings.classList.add('hidden');
+        UI.cloudSettings.classList.remove('flex');
+    });
+
+    UI.modeCloud.addEventListener('click', () => {
+        transferMode = 'cloud';
+        UI.modeCloud.classList.replace('text-slate-500', 'text-blue-600');
+        UI.modeCloud.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeP2P.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeP2P.classList.add('text-slate-500', 'dark:text-slate-400');
+        UI.cloudSettings.classList.remove('hidden');
+        UI.cloudSettings.classList.add('flex');
+    });
 
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
@@ -116,18 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
             
-            // 🌟 NEW: Determine Media Preview or Fallback Icon
             let mediaPreview = '';
             const objectUrl = URL.createObjectURL(file);
 
             if (file.type.startsWith('image/')) {
-                // Instant Image Preview
                 mediaPreview = `<img src="${objectUrl}" class="w-full h-full object-cover" onload="URL.revokeObjectURL(this.src)">`;
             } else if (file.type.startsWith('video/')) {
-                // Instant Video Frame Preview (#t=0.001 forces mobile browsers to grab the first frame)
                 mediaPreview = `<video src="${objectUrl}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline onloadeddata="URL.revokeObjectURL(this.src)"></video>`;
             } else {
-                // Generic Document Icon
                 mediaPreview = `<svg class="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
             }
 
@@ -173,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
+        UI.cloudCustomCode.value = '';
 
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
@@ -214,38 +258,108 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.sendFilesBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
         
-        if (selectedFiles.length === 1) {
-            startSendingFile(selectedFiles[0]);
-            return;
+        let finalFile = selectedFiles[0];
+
+        if (selectedFiles.length > 1) {
+            showTransferScreen("Multiple Files", "Compressing files... Please wait");
+            UI.progressArea.classList.remove('hidden');
+            if(UI.progressText) UI.progressText.innerText = "Zipping...";
+            
+            try {
+                const zip = new JSZip();
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    zip.file(selectedFiles[i].name, selectedFiles[i]);
+                }
+                
+                const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
+                    let percent = Math.floor(metadata.percent);
+                    updateProgress(metadata.percent, 100);
+                });
+                
+                finalFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
+            } catch (error) {
+                showToast("Failed to compress files.", "error");
+                resetApp();
+                return;
+            }
         }
 
-        showTransferScreen("Multiple Files", "Compressing files... Please wait");
-        UI.progressArea.classList.remove('hidden');
-        if(UI.progressText) UI.progressText.innerText = "Zipping...";
-        
-        try {
-            const zip = new JSZip();
-            for (let i = 0; i < selectedFiles.length; i++) {
-                zip.file(selectedFiles[i].name, selectedFiles[i]);
-            }
-            
-            const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
-                let percent = Math.floor(metadata.percent);
-                UI.progressBar.style.width = percent + "%";
-                UI.percentage.innerText = percent + "%";
-            });
-            
-            const zipFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
-            
-            UI.progressArea.classList.add('hidden');
-            startSendingFile(zipFile);
-        } catch (error) {
-            showToast("Failed to compress files.", "error");
-            resetApp();
+        if (transferMode === 'cloud') {
+            startCloudTransfer(finalFile);
+        } else {
+            startP2PTransfer(finalFile);
         }
     });
 
-        function startSendingFile(file) {
+    async function startCloudTransfer(file) {
+        showTransferScreen(file.name, "Initializing Cloud Upload...");
+        UI.progressArea.classList.remove('hidden');
+
+        let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        const fileId = rawCode || generateShortCode();
+
+        if (rawCode) {
+            try {
+                const docSnap = await getDoc(doc(db, "links", fileId));
+                if (docSnap.exists()) {
+                    showToast("Custom code is already taken!", "error");
+                    resetApp();
+                    return;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        const storagePath = `shared/${fileId}_${file.name}`;
+        const storageRef = ref(storage, storagePath);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                updateProgress(snapshot.bytesTransferred, snapshot.totalBytes);
+                UI.statusText.innerText = `Uploading to Cloud...`;
+                if(UI.progressText) UI.progressText.innerText = "Uploading...";
+            },
+            (error) => {
+                showToast("Cloud upload failed.", "error");
+                resetApp();
+            },
+            async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                const expireHours = parseInt(UI.cloudExpire.value);
+                const isOneTime = UI.cloudLimit.value === 'one-time';
+
+                await setDoc(doc(db, "links", fileId), {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    url: downloadURL,
+                    storagePath: storagePath,
+                    expiresAt: Date.now() + (expireHours * 60 * 60 * 1000),
+                    isOneTime: isOneTime,
+                    createdAt: Date.now()
+                });
+
+                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                const transferUrl = `${cleanUrl}?c=${fileId}`;
+
+                UI.progressArea.classList.add('hidden');
+                UI.qrContainer.innerHTML = "";
+                new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+
+                UI.pairingCodeDisplay.innerText = fileId;
+                UI.shareOptions.classList.remove('hidden');
+                UI.statusText.innerText = "Upload Complete! You can close this tab now.";
+                UI.resetBtn.innerText = "Start Over";
+
+                UI.copyLinkBtn.onclick = () => {
+                    navigator.clipboard.writeText(transferUrl);
+                    showToast("Link copied to clipboard!", "success");
+                };
+            }
+        );
+    }
+
+    function startP2PTransfer(file) {
         if (!file) return;
 
         fileToSend = file;
@@ -316,7 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-
     function streamFileToReceiver(conn, file) {
         const chunkSize = 64 * 1024; 
         let offset = 0;
@@ -363,6 +476,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle Cloud Links (e.g. ?c=Sagar2026)
+    if (window.location.search.includes('?c=')) {
+        const cloudId = new URLSearchParams(window.location.search).get('c');
+        if(cloudId) {
+            window.history.replaceState(null, null, window.location.pathname);
+            startSmartReceive(cloudId);
+        }
+    }
+
+    // Handle Native Share Intercepts
     if (window.location.search.includes('shared=true')) {
         window.history.replaceState(null, null, window.location.pathname);
         showTransferScreen("Processing...", "Loading shared file...");
@@ -388,22 +511,109 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     UI.receiveBtn.addEventListener('click', () => {
-        const targetId = UI.receiveCodeInput.value.trim().toUpperCase();
-        if (targetId.length !== 6) {
-            showToast("Enter a valid 6-character code.", "error");
+        const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!targetId) {
+            showToast("Enter a valid code or ID.", "error");
             return;
         }
-        startReceiving(targetId);
+        startSmartReceive(targetId);
     });
 
+    // Handle P2P Hash Links
     if (window.location.hash.length > 1) {
         const targetPeerId = window.location.hash.substring(1).toUpperCase();
-        startReceiving(targetPeerId);
+        startSmartReceive(targetPeerId);
     }
 
-        function startReceiving(targetId) {
-        showTransferScreen("Connecting...", `Looking for room ${targetId}...`);
-        
+    // 🌟 NEW: Smart Receiver (Checks Cloud first, falls back to P2P)
+    async function startSmartReceive(targetId) {
+        showTransferScreen("Connecting...", `Searching for ${targetId}...`);
+
+        try {
+            const docRef = doc(db, "links", targetId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (Date.now() > data.expiresAt) {
+                    showToast("This link has expired.", "error");
+                    resetApp();
+                    return;
+                }
+                await downloadCloudFile(data, targetId);
+                return;
+            }
+        } catch(e) {
+            console.error("Firebase lookup failed", e);
+        }
+
+        // If not in Firebase, fallback to P2P
+        startP2PReceive(targetId);
+    }
+
+    async function downloadCloudFile(data, docId) {
+        UI.progressArea.classList.remove('hidden');
+        if(UI.progressText) UI.progressText.innerText = "Downloading from Cloud...";
+        UI.fileName.innerText = data.name;
+        UI.statusText.innerText = `Fetching...`;
+
+        try {
+            // Attempt to fetch as blob to show progress and allow immediate deletion
+            const response = await fetch(data.url);
+            if (!response.ok) throw new Error("CORS or Network Error");
+
+            const reader = response.body.getReader();
+            const contentLength = +response.headers.get('Content-Length') || data.size;
+            let receivedLength = 0;
+            let chunks = [];
+
+            while(true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                receivedLength += value.length;
+                updateProgress(receivedLength, contentLength);
+            }
+
+            const blob = new Blob(chunks, { type: data.type || 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = data.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            if (data.isOneTime) {
+                await deleteDoc(doc(db, "links", docId));
+                await deleteObject(ref(storage, data.storagePath));
+            }
+
+            UI.progressArea.classList.add('hidden');
+            UI.successArea.classList.remove('hidden');
+            UI.successArea.classList.add('flex');
+            UI.successText.innerText = "Received";
+            UI.statusText.innerText = "Saved to Downloads! 📥";
+            UI.resetBtn.innerText = "Start Over";
+            showToast("Download Complete!", "success");
+
+        } catch (error) {
+            // Smart Fallback: If CORS blocks the progress bar, open directly in a new tab
+            window.open(data.url, '_blank'); 
+
+            if (data.isOneTime) {
+                await deleteDoc(doc(db, "links", docId));
+                await deleteObject(ref(storage, data.storagePath));
+            }
+
+            UI.progressArea.classList.add('hidden');
+            UI.statusText.innerText = "Download opened in new tab.";
+            UI.resetBtn.innerText = "Start Over";
+        }
+    }
+
+    function startP2PReceive(targetId) {
         peer = new Peer({
             config: {
                 'iceServers': [
@@ -415,7 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         connectionTimeout = setTimeout(() => {
-            showToast("Connection timed out. Network is too slow or room is invalid.", "error");
+            showToast("Connection timed out. Network is slow or room is invalid.", "error");
             resetApp();
         }, 45000);
 
