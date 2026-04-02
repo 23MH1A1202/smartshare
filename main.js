@@ -245,14 +245,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function startSendingFile(file) {
+        function startSendingFile(file) {
         if (!file) return;
 
         fileToSend = file;
         showTransferScreen(file.name, "Creating secure room...");
 
         const roomCode = generateShortCode();
-        peer = new Peer(roomCode); 
+        
+        peer = new Peer(roomCode, {
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            }
+        });
 
         peer.on('open', (id) => {
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
@@ -306,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupPeerErrorHandling(peer);
     }
+
 
     function streamFileToReceiver(conn, file) {
         const chunkSize = 64 * 1024; 
@@ -391,14 +401,23 @@ document.addEventListener('DOMContentLoaded', () => {
         startReceiving(targetPeerId);
     }
 
-    function startReceiving(targetId) {
+        function startReceiving(targetId) {
         showTransferScreen("Connecting...", `Looking for room ${targetId}...`);
-        peer = new Peer();
+        
+        peer = new Peer({
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            }
+        });
 
         connectionTimeout = setTimeout(() => {
-            showToast("Connection timed out. Check the code and try again.", "error");
+            showToast("Connection timed out. Network is too slow or room is invalid.", "error");
             resetApp();
-        }, 15000);
+        }, 45000);
 
         peer.on('open', () => {
             const conn = peer.connect(targetId, { reliable: true });
