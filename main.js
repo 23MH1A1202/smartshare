@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBXBbEt_OEwOuHtiM3ERDcLwUZpXyNVtzM",
@@ -14,7 +14,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-const db = getFirestore(app, "smartshare");
+const db = getFirestore(app, "smartshare"); // Connected to your named database
+
+// 🌟 Generate a unique ID for this browser to manage files
+let myOwnerId = localStorage.getItem('smartshare_owner_id');
+if (!myOwnerId) {
+    myOwnerId = 'owner_' + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('smartshare_owner_id', myOwnerId);
+}
 
 window.onerror = function(message) {
     showToast("System Error: " + message, "error");
@@ -22,6 +29,7 @@ window.onerror = function(message) {
 };
 
 let transferMode = 'p2p'; 
+let cloudTimerInterval = null;
 
 function initializeTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -47,10 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializeTheme(); 
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(console.error);
-    }
-
     const UI = {
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
@@ -70,23 +74,30 @@ document.addEventListener('DOMContentLoaded', () => {
         qrContainer: document.getElementById('qr-container'),
         pairingCodeDisplay: document.getElementById('pairing-code-display'),
         copyLinkBtn: document.getElementById('copy-link-btn'),
-        toastContainer: document.getElementById('toast-container'),
         dropZone: document.getElementById('drop-zone'),
-        devModal: document.getElementById('dev-modal'),
-        devModalCard: document.getElementById('dev-modal-card'),
-        openModalBtn: document.getElementById('about-dev-btn'),
-        closeModalBtn: document.getElementById('close-modal-btn'),
-        receiveSection: document.getElementById('receive-section'),
-        stagedFilesSection: document.getElementById('staged-files-section'),
-        fileList: document.getElementById('file-list'),
-        sendFilesBtn: document.getElementById('send-files-btn'),
+        toastContainer: document.getElementById('toast-container'),
         
         modeP2P: document.getElementById('mode-p2p'),
         modeCloud: document.getElementById('mode-cloud'),
         cloudSettings: document.getElementById('cloud-settings'),
         cloudExpire: document.getElementById('cloud-expire'),
         cloudLimit: document.getElementById('cloud-limit'),
-        cloudCustomCode: document.getElementById('cloud-custom-code')
+        cloudCustomCode: document.getElementById('cloud-custom-code'),
+        
+        stagedFilesSection: document.getElementById('staged-files-section'),
+        fileList: document.getElementById('file-list'),
+        sendFilesBtn: document.getElementById('send-files-btn'),
+
+        devModal: document.getElementById('dev-modal'),
+        devModalCard: document.getElementById('dev-modal-card'),
+        openModalBtn: document.getElementById('about-dev-btn'),
+        closeModalBtn: document.getElementById('close-modal-btn'),
+
+        cloudModal: document.getElementById('cloud-modal'),
+        cloudModalCard: document.getElementById('cloud-modal-card'),
+        openCloudModalBtn: document.getElementById('my-cloud-files-btn'),
+        closeCloudModalBtn: document.getElementById('close-cloud-modal-btn'),
+        cloudFilesList: document.getElementById('cloud-files-list')
     };
 
     let peer = null;
@@ -138,6 +149,189 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
+    // --- 🌟 NEW: CLOUD MANAGER LOGIC ---
+    
+    function saveFileToLocalLedger(fileId) {
+        let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
+        if (!myLinks.includes(fileId)) {
+            myLinks.push(fileId);
+            localStorage.setItem('smartshare_my_links', JSON.stringify(myLinks));
+        }
+    }
+
+    function removeFileFromLocalLedger(fileId) {
+        let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
+        myLinks = myLinks.filter(id => id !== fileId);
+        localStorage.setItem('smartshare_my_links', JSON.stringify(myLinks));
+    }
+
+    // Auto-sweeper function to physically delete expired files from server
+    async function purgeCloudFile(fileId, storagePath) {
+        try {
+            await deleteDoc(doc(db, "links", fileId));
+            if (storagePath) {
+                await deleteObject(ref(storage, storagePath));
+            }
+        } catch (e) { console.error("Purge error", e); }
+    }
+
+    async function loadCloudManager() {
+        UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">Fetching your files...</p>`;
+        clearInterval(cloudTimerInterval);
+        
+        let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
+        if (myLinks.length === 0) {
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active cloud files.</p>`;
+            return;
+        }
+
+        let activeFiles = [];
+
+        for (let i = 0; i < myLinks.length; i++) {
+            const linkId = myLinks[i];
+            try {
+                const docSnap = await getDoc(doc(db, "links", linkId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Sweeper check!
+                    if (Date.now() > data.expiresAt) {
+                        await purgeCloudFile(linkId, data.storagePath);
+                        removeFileFromLocalLedger(linkId);
+                    } else {
+                        data.id = linkId;
+                        activeFiles.push(data);
+                    }
+                } else {
+                    removeFileFromLocalLedger(linkId); // Clean up ledger if file was deleted
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        if (activeFiles.length === 0) {
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active cloud files.</p>`;
+            return;
+        }
+
+        renderCloudManagerUI(activeFiles);
+
+        // Start live countdown timer
+        cloudTimerInterval = setInterval(() => {
+            activeFiles.forEach(file => {
+                const timeEl = document.getElementById(`timer-${file.id}`);
+                if (timeEl) {
+                    const timeLeft = file.expiresAt - Date.now();
+                    if (timeLeft <= 0) {
+                        timeEl.innerText = "Expired";
+                        timeEl.classList.add("text-red-500");
+                        loadCloudManager(); // Reload to purge
+                    } else {
+                        timeEl.innerText = formatTimeLeft(timeLeft);
+                    }
+                }
+            });
+        }, 1000);
+    }
+
+    function formatTimeLeft(ms) {
+        let totalSeconds = Math.floor(ms / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+        return `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function renderCloudManagerUI(files) {
+        UI.cloudFilesList.innerHTML = '';
+        files.forEach(file => {
+            const card = document.createElement('div');
+            card.className = "bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col gap-2";
+            
+            let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col truncate pr-2">
+                        <span class="font-semibold text-slate-800 dark:text-white text-sm truncate">${file.name}</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-slate-500 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-md font-mono">${file.id}</span>
+                            <span class="text-xs text-slate-500">${sizeText}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-1 bg-white dark:bg-slate-900/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}">+24h</button>
+                        <button class="delete-cloud-btn text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
+                    </div>
+                </div>
+            `;
+            UI.cloudFilesList.appendChild(card);
+        });
+
+        // Attach Listeners
+        document.querySelectorAll('.extend-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.target.getAttribute('data-id');
+                e.target.innerText = "...";
+                try {
+                    const docRef = doc(db, "links", id);
+                    const snap = await getDoc(docRef);
+                    if (snap.exists()) {
+                        const newTime = snap.data().expiresAt + (24 * 60 * 60 * 1000);
+                        await updateDoc(docRef, { expiresAt: newTime });
+                        showToast("Timer extended by 24 hours!", "success");
+                        loadCloudManager();
+                    }
+                } catch(err) {
+                    showToast("Could not extend. " + err.message, "error");
+                    e.target.innerText = "+24h";
+                }
+            });
+        });
+
+        document.querySelectorAll('.delete-cloud-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.target.getAttribute('data-id');
+                const path = e.target.getAttribute('data-path');
+                e.target.innerText = "...";
+                await purgeCloudFile(id, path);
+                removeFileFromLocalLedger(id);
+                showToast("File deleted from cloud.", "info");
+                loadCloudManager();
+            });
+        });
+    }
+
+    // Modal Triggers
+    UI.openCloudModalBtn.addEventListener('click', () => {
+        UI.cloudModal.classList.remove('hidden');
+        UI.cloudModal.classList.add('flex');
+        setTimeout(() => {
+            UI.cloudModal.classList.remove('opacity-0');
+            UI.cloudModalCard.classList.remove('scale-95');
+            UI.cloudModalCard.classList.add('scale-100');
+        }, 10);
+        loadCloudManager();
+    });
+
+    UI.closeCloudModalBtn.addEventListener('click', () => {
+        clearInterval(cloudTimerInterval);
+        UI.cloudModal.classList.add('opacity-0');
+        UI.cloudModalCard.classList.remove('scale-100');
+        UI.cloudModalCard.classList.add('scale-95');
+        setTimeout(() => {
+            UI.cloudModal.classList.add('hidden');
+            UI.cloudModal.classList.remove('flex');
+        }, 300);
+    });
+
+    // --- END CLOUD MANAGER LOGIC ---
+
+
     function renderFileList() {
         UI.fileList.innerHTML = '';
         
@@ -157,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
-            
             li.className = "flex items-center justify-between bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
             
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
@@ -179,13 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="w-11 h-11 shrink-0 rounded-[14px] overflow-hidden bg-white/60 dark:bg-slate-800/60 flex items-center justify-center mr-3 border border-white/40 dark:border-slate-700/40 shadow-inner">
                         ${mediaPreview}
                     </div>
-                    
                     <div class="flex flex-col truncate pr-2 text-left w-full">
                         <span class="text-slate-800 dark:text-slate-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
                         <span class="text-[13px] text-slate-500 font-medium">${sizeText}</span>
                     </div>
                 </div>
-                
                 <button class="delete-file-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2.5 rounded-2xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
@@ -229,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         UI.progressArea.classList.add('hidden');
         UI.shareOptions.classList.add('hidden');
-
         UI.successArea.classList.add('hidden');
         UI.successArea.classList.remove('flex');
         updateProgress(0, 100);
@@ -257,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.sendFilesBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
-        
         let finalFile = selectedFiles[0];
 
         if (selectedFiles.length > 1) {
@@ -270,12 +459,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = 0; i < selectedFiles.length; i++) {
                     zip.file(selectedFiles[i].name, selectedFiles[i]);
                 }
-                
                 const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
-                    let percent = Math.floor(metadata.percent);
                     updateProgress(metadata.percent, 100);
                 });
-                
                 finalFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
             } catch (error) {
                 showToast("Failed to compress files.", "error");
@@ -325,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetApp();
             },
             async () => {
-                // 🌟 NEW: Added Try/Catch block to catch silent database errors
                 try {
                     UI.statusText.innerText = `Finalizing secure link...`;
                     
@@ -341,8 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         storagePath: storagePath,
                         expiresAt: Date.now() + (expireHours * 60 * 60 * 1000),
                         isOneTime: isOneTime,
-                        createdAt: Date.now()
+                        createdAt: Date.now(),
+                        ownerId: myOwnerId // 🌟 Bind to this browser
                     });
+
+                    saveFileToLocalLedger(fileId); // 🌟 Add to dashboard
 
                     const cleanUrl = window.location.href.split('?')[0].split('#')[0];
                     const transferUrl = `${cleanUrl}?c=${fileId}`;
@@ -374,15 +562,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fileToSend = file;
         showTransferScreen(file.name, "Creating secure room...");
-
         const roomCode = generateShortCode();
         
         peer = new Peer(roomCode, {
             config: {
                 'iceServers': [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' }
                 ]
             }
         });
@@ -390,14 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
         peer.on('open', (id) => {
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
-
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
 
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for receiver...";
-
             UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
@@ -410,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
-
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
 
@@ -428,7 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
-
             conn.on('close', () => {
                 if(isTransferring) {
                     showToast("Receiver disconnected mid-transfer.", "error");
@@ -443,13 +625,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function streamFileToReceiver(conn, file) {
         const chunkSize = 64 * 1024; 
         let offset = 0;
-
         conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
 
         const reader = new FileReader();
         reader.onload = (e) => {
             if (!isTransferring) return; 
-
             conn.send({ type: 'chunk', data: e.target.result });
             offset += e.target.result.byteLength;
             updateProgress(offset, file.size);
@@ -461,23 +641,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 UI.statusText.innerText = "Waiting for receiver to finish... Please don't close.";
             }
         };
-
         const readNext = () => reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
         readNext();
     }
 
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-    UI.dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        UI.dropZone.classList.add('drop-active');
-    });
-
-    UI.dropZone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        UI.dropZone.classList.remove('drop-active');
-    });
-
+    UI.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); UI.dropZone.classList.add('drop-active'); });
+    UI.dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); UI.dropZone.classList.remove('drop-active'); });
     UI.dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         UI.dropZone.classList.remove('drop-active');
@@ -486,58 +656,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle Cloud Links (e.g. ?c=Sagar2026)
     if (window.location.search.includes('?c=')) {
         const cloudId = new URLSearchParams(window.location.search).get('c');
         if(cloudId) {
             window.history.replaceState(null, null, window.location.pathname);
-            startSmartReceive(cloudId);
+            receiveCloudLink(cloudId);
         }
     }
 
-    // Handle Native Share Intercepts
-    if (window.location.search.includes('shared=true')) {
-        window.history.replaceState(null, null, window.location.pathname);
-        showTransferScreen("Processing...", "Loading shared file...");
-
-        caches.open('shared-file-cache').then(cache => {
-            cache.match('/shared-file').then(response => {
-                if (response) {
-                    const fileName = decodeURIComponent(response.headers.get('X-File-Name') || 'shared_file');
-                    const fileType = response.headers.get('Content-Type') || '';
-
-                    response.blob().then(blob => {
-                        const file = new File([blob], fileName, { type: fileType });
-                        handleFiles([file]);
-                        cache.delete('/shared-file'); 
-                        resetApp(); 
-                    });
-                } else {
-                    resetApp();
-                    showToast("Failed to load shared file.", "error");
-                }
-            });
-        });
-    }
-
+    // 🌟 SMART ERROR LOGIC
     UI.receiveBtn.addEventListener('click', () => {
         const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
         if (!targetId) {
             showToast("Enter a valid code or ID.", "error");
             return;
         }
-        startSmartReceive(targetId);
+
+        if (transferMode === 'cloud') {
+            receiveCloudLink(targetId);
+        } else {
+            startP2PReceive(targetId);
+        }
     });
 
-    // Handle P2P Hash Links
     if (window.location.hash.length > 1) {
         const targetPeerId = window.location.hash.substring(1).toUpperCase();
-        startSmartReceive(targetPeerId);
+        startP2PReceive(targetPeerId);
     }
 
-    // 🌟 NEW: Smart Receiver (Checks Cloud first, falls back to P2P)
-    async function startSmartReceive(targetId) {
-        showTransferScreen("Connecting...", `Searching for ${targetId}...`);
+    async function receiveCloudLink(targetId) {
+        showTransferScreen("Connecting...", `Searching Cloud for ${targetId}...`);
 
         try {
             const docRef = doc(db, "links", targetId);
@@ -545,20 +693,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
+                // 🌟 SWEEPER LOGIC: Delete if expired!
                 if (Date.now() > data.expiresAt) {
-                    showToast("This link has expired.", "error");
+                    showToast("This link has expired. Cleaning up server...", "error");
+                    await purgeCloudFile(targetId, data.storagePath);
                     resetApp();
                     return;
                 }
                 await downloadCloudFile(data, targetId);
-                return;
+            } else {
+                showToast("File not found in the Cloud.", "error");
+                resetApp();
             }
         } catch(e) {
             console.error("Firebase lookup failed", e);
+            showToast("Database connection error.", "error");
+            resetApp();
         }
-
-        // If not in Firebase, fallback to P2P
-        startP2PReceive(targetId);
     }
 
     async function downloadCloudFile(data, docId) {
@@ -568,7 +720,6 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.statusText.innerText = `Fetching...`;
 
         try {
-            // Attempt to fetch as blob to show progress and allow immediate deletion
             const response = await fetch(data.url);
             if (!response.ok) throw new Error("CORS or Network Error");
 
@@ -596,8 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(url);
 
             if (data.isOneTime) {
-                await deleteDoc(doc(db, "links", docId));
-                await deleteObject(ref(storage, data.storagePath));
+                await purgeCloudFile(docId, data.storagePath);
             }
 
             UI.progressArea.classList.add('hidden');
@@ -609,14 +759,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Download Complete!", "success");
 
         } catch (error) {
-            // Smart Fallback: If CORS blocks the progress bar, open directly in a new tab
             window.open(data.url, '_blank'); 
-
             if (data.isOneTime) {
-                await deleteDoc(doc(db, "links", docId));
-                await deleteObject(ref(storage, data.storagePath));
+                await purgeCloudFile(docId, data.storagePath);
             }
-
             UI.progressArea.classList.add('hidden');
             UI.statusText.innerText = "Download opened in new tab.";
             UI.resetBtn.innerText = "Start Over";
@@ -624,18 +770,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startP2PReceive(targetId) {
+        showTransferScreen("Connecting...", `Looking for P2P room ${targetId}...`);
         peer = new Peer({
             config: {
                 'iceServers': [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' }
                 ]
             }
         });
 
         connectionTimeout = setTimeout(() => {
-            showToast("Connection timed out. Network is slow or room is invalid.", "error");
+            showToast("P2P Connection timed out. Network is slow or room is invalid.", "error");
             resetApp();
         }, 45000);
 
@@ -663,28 +809,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.fileName.innerText = fileMeta.name;
                     const mbSize = (fileMeta.size / (1024 * 1024)).toFixed(2);
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
-
                 } else if (payload.type === 'chunk') {
                     const chunkData = payload.data;
-                    const chunkLength = chunkData.byteLength || chunkData.size || chunkData.length || 0;
-
                     receivedBuffer.push(chunkData);
-                    bytesReceived += chunkLength;
-
+                    bytesReceived += chunkData.byteLength || chunkData.size || chunkData.length || 0;
                     updateProgress(bytesReceived, fileMeta.size);
 
                     if (bytesReceived >= fileMeta.size) {
                         isTransferring = false;
                         try {
                             saveFile(receivedBuffer, fileMeta);
-
                             conn.send({ type: 'transfer-complete' });
 
                             UI.progressArea.classList.add('hidden');
                             UI.successArea.classList.remove('hidden');
                             UI.successArea.classList.add('flex');
                             UI.successText.innerText = "Received";
-
                             UI.statusText.innerText = "Saved to Downloads! 📥";
                             UI.resetBtn.innerText = "Start Over";
                             showToast("Download Complete!", "success");
@@ -711,9 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(connectionTimeout);
             let errMsg = "An unknown network error occurred.";
             switch(err.type) {
-                case 'peer-unavailable': errMsg = "Invalid code or the sender left."; break;
+                case 'peer-unavailable': errMsg = "Invalid P2P code or sender left."; break;
                 case 'network':
-                case 'disconnected': errMsg = "Lost connection to the signaling server."; break;
+                case 'disconnected': errMsg = "Lost connection to server."; break;
                 case 'webrtc': errMsg = "WebRTC error. Check your firewall/VPN."; break;
             }
             showToast(errMsg, "error");
@@ -726,7 +866,6 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
         UI.transfer.classList.add('flex');
-
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
         UI.resetBtn.innerText = "Cancel";
@@ -736,7 +875,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
         if (percent > 100) percent = 100; 
-
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
     }
@@ -753,7 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url); 
     }
 
-    function openModal() {
+    // Modal Handlers (Dev)
+    UI.openModalBtn.addEventListener('click', () => {
         UI.devModal.classList.remove('hidden');
         UI.devModal.classList.add('flex');
         setTimeout(() => {
@@ -761,9 +900,9 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.devModalCard.classList.remove('scale-95');
             UI.devModalCard.classList.add('scale-100');
         }, 10);
-    }
+    });
 
-    function closeModal() {
+    UI.closeModalBtn.addEventListener('click', () => {
         UI.devModal.classList.add('opacity-0');
         UI.devModalCard.classList.remove('scale-100');
         UI.devModalCard.classList.add('scale-95');
@@ -771,14 +910,5 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.devModal.classList.add('hidden');
             UI.devModal.classList.remove('flex');
         }, 300);
-    }
-
-    UI.openModalBtn.addEventListener('click', openModal);
-    UI.closeModalBtn.addEventListener('click', closeModal);
-
-    UI.devModal.addEventListener('click', (e) => {
-        if (e.target === UI.devModal) {
-            closeModal();
-        }
     });
 });
