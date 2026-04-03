@@ -83,10 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stagedFilesSection: document.getElementById('staged-files-section'),
         fileList: document.getElementById('file-list'),
         sendFilesBtn: document.getElementById('send-files-btn'),
-        
-        // 🌟 ADDED MISSING VARIABLE BACK HERE:
         receiveSection: document.getElementById('receive-section'),
-        
         devModal: document.getElementById('dev-modal'),
         devModalCard: document.getElementById('dev-modal-card'),
         openModalBtn: document.getElementById('about-dev-btn'),
@@ -245,28 +242,29 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
             const card = document.createElement('div');
-            card.className = "bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col gap-2";
+            // 🌟 FIXED: Removed horizontal scroll layout, replaced with Grid and Flex columns
+            card.className = "bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+            
             card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="flex flex-col truncate pr-2">
-                        <span class="font-semibold text-slate-800 dark:text-white text-sm truncate">${file.name}</span>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs text-slate-500 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-md font-mono">${file.id}</span>
-                            <span class="text-xs text-slate-500">${sizeText}</span>
+                <div class="flex flex-col w-full mb-3">
+                    <div class="flex items-center justify-between gap-2 w-full mb-1.5">
+                        <span class="text-xs font-mono bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 px-2 py-0.5 rounded-md">${file.id}</span>
+                        <span class="font-semibold text-slate-800 dark:text-white text-sm truncate flex-1 text-right">${file.name}</span>
+                    </div>
+                    <div class="flex items-center justify-between w-full">
+                        <span class="text-xs font-medium text-slate-500 bg-slate-200 dark:bg-slate-700/50 px-2 py-0.5 rounded-md">${sizeText}</span>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-between mt-1 bg-white dark:bg-slate-900/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
-                    </div>
-                    <div class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1">
-                        <button class="copy-link-manager-btn text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}">Copy Link</button>
-                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}">Extend Time</button>
-                        <button class="delete-cloud-btn text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
-                    </div>
+                
+                <div class="grid grid-cols-3 gap-2 border-t border-slate-200 dark:border-slate-700/50 pt-3">
+                    <button class="copy-link-manager-btn flex items-center justify-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Copy Link</button>
+                    <button class="extend-btn flex items-center justify-center text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Extend Time</button>
+                    <button class="delete-cloud-btn flex items-center justify-center text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 py-2 rounded-xl transition-all" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
                 </div>
             `;
             UI.cloudFilesList.appendChild(card);
@@ -498,7 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showTransferScreen(file.name, "Preparing link share...");
         UI.progressArea.classList.remove('hidden');
 
-        let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        // 🌟 FIXED: Force custom Cloud code to uppercase immediately when saving
+        let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
         const fileId = rawCode || generateShortCode();
 
         if (rawCode) {
@@ -675,11 +674,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 🌟 FIXED: Ensure ?c url codes are forced to uppercase
     if (window.location.search.includes('?c=')) {
         const cloudId = new URLSearchParams(window.location.search).get('c');
         if(cloudId) {
             window.history.replaceState(null, null, window.location.pathname);
-            startSmartReceive(cloudId);
+            startSmartReceive(cloudId.toUpperCase());
         }
     }
 
