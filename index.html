@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartShare</title>
-
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
@@ -15,11 +13,9 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto sm:min-h-screen sm:flex sm:items-center sm:justify-center transition-colors duration-300">
-
     <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#f1f5f9,0,#cbd5e1_100%)] dark:bg-[radial-gradient(circle_at_50%_50%,#1e293b,0,#020617_100%)] transition-colors duration-300"></div>
     <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
     <div class="fixed bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/20 blur-[120px] rounded-full pointer-events-none"></div>
@@ -32,16 +28,13 @@
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
     <main class="flex flex-col items-center justify-center min-h-[100dvh] sm:min-h-0 py-12 px-4 w-full fade-up">
-
         <header class="text-center mb-8 sm:mb-10 mt-8 sm:mt-0">
             <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-blue-400 dark:to-emerald-400 bg-clip-text text-transparent pb-1">SmartShare</h1>
             <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base transition-colors">Simple & Fast File Sharing</p>
         </header>
 
         <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative z-10">
-
             <div id="initial-state" class="flex flex-col items-center text-center w-full">
-
                 <div class="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl mb-5 w-full max-w-[300px] mx-auto shadow-inner border border-slate-200/50 dark:border-slate-700/50 relative z-20">
                     <button id="mode-p2p" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 transition-all">Direct (Device to Device)</button>
                     <button id="mode-cloud" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-all">Link Share (Cloud)</button>
@@ -51,10 +44,8 @@
                     <div class="w-20 h-20 bg-blue-100 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-blue-500/20">
                         <svg class="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                     </div>
-
                     <h3 class="text-lg font-medium text-slate-700 dark:text-slate-300">Drag & Drop files here</h3>
                     <p class="text-sm text-slate-500 mt-1 mb-5">or use the button below to browse</p>
-
                     <input type="file" id="file-input" multiple class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
                     <label for="file-input" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-[0.98] cursor-pointer inline-block text-lg">
                         Select Files
@@ -105,7 +96,6 @@
                         <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-xs font-semibold tracking-widest uppercase">Or Receive</span>
                         <div class="flex-grow border-t border-slate-300 dark:border-slate-700/60"></div>
                     </div>
-
                     <div class="flex gap-2 h-14">
                         <input type="text" id="receive-code-input" placeholder="ENTER CODE" class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.2em] font-mono text-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all uppercase placeholder:tracking-normal placeholder:text-sm placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-inner">
                         <button id="receive-btn" class="px-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)] active:scale-[0.98] flex items-center justify-center">
@@ -116,7 +106,6 @@
             </div>
 
             <div id="transfer-state" class="hidden flex-col items-center w-full relative">
-
                 <div class="w-full flex justify-between items-center mb-8">
                     <div class="flex items-center gap-3 w-[70%]">
                         <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
@@ -166,7 +155,6 @@
                     </button>
                 </div>
             </div>
-
         </div>
 
         <footer class="mt-8 text-center z-10 flex flex-col gap-3 items-center">
@@ -180,7 +168,6 @@
                 About the Developer
             </button>
         </footer>
-
     </main>
 
     <div id="cloud-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
@@ -223,7 +210,6 @@
             </div>
         </div>
     </div>
-
     <script type="module" src="main.js"></script>
 </body>
 </html>
