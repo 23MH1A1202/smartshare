@@ -14,9 +14,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-const db = getFirestore(app, "smartshare"); // Connected to your named database
+const db = getFirestore(app, "smartshare"); 
 
-// 🌟 Generate a unique ID for this browser to manage files
 let myOwnerId = localStorage.getItem('smartshare_owner_id');
 if (!myOwnerId) {
     myOwnerId = 'owner_' + Math.random().toString(36).substring(2, 15);
@@ -24,7 +23,7 @@ if (!myOwnerId) {
 }
 
 window.onerror = function(message) {
-    showToast("System Error: " + message, "error");
+    showToast("Something went wrong: " + message, "error");
     return true; 
 };
 
@@ -149,8 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // --- 🌟 NEW: CLOUD MANAGER LOGIC ---
-    
+    // --- Link Manager ---
     function saveFileToLocalLedger(fileId) {
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         if (!myLinks.includes(fileId)) {
@@ -165,14 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('smartshare_my_links', JSON.stringify(myLinks));
     }
 
-    // Auto-sweeper function to physically delete expired files from server
     async function purgeCloudFile(fileId, storagePath) {
         try {
             await deleteDoc(doc(db, "links", fileId));
             if (storagePath) {
                 await deleteObject(ref(storage, storagePath));
             }
-        } catch (e) { console.error("Purge error", e); }
+        } catch (e) { console.error("Could not delete from server", e); }
     }
 
     async function loadCloudManager() {
@@ -181,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         if (myLinks.length === 0) {
-            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active cloud files.</p>`;
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active shared links.</p>`;
             return;
         }
 
@@ -193,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const docSnap = await getDoc(doc(db, "links", linkId));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    // Sweeper check!
                     if (Date.now() > data.expiresAt) {
                         await purgeCloudFile(linkId, data.storagePath);
                         removeFileFromLocalLedger(linkId);
@@ -202,19 +198,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeFiles.push(data);
                     }
                 } else {
-                    removeFileFromLocalLedger(linkId); // Clean up ledger if file was deleted
+                    removeFileFromLocalLedger(linkId); 
                 }
             } catch (e) { console.error(e); }
         }
 
         if (activeFiles.length === 0) {
-            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active cloud files.</p>`;
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active shared links.</p>`;
             return;
         }
 
         renderCloudManagerUI(activeFiles);
 
-        // Start live countdown timer
         cloudTimerInterval = setInterval(() => {
             activeFiles.forEach(file => {
                 const timeEl = document.getElementById(`timer-${file.id}`);
@@ -223,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (timeLeft <= 0) {
                         timeEl.innerText = "Expired";
                         timeEl.classList.add("text-red-500");
-                        loadCloudManager(); // Reload to purge
+                        loadCloudManager(); 
                     } else {
                         timeEl.innerText = formatTimeLeft(timeLeft);
                     }
@@ -264,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
                     </div>
                     <div class="flex gap-2">
-                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}">+24h</button>
+                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}">Extend Time</button>
                         <button class="delete-cloud-btn text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
                     </div>
                 </div>
@@ -272,23 +267,33 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.cloudFilesList.appendChild(card);
         });
 
-        // Attach Listeners
+        // 🌟 NEW: Prompt-based Extending logic
         document.querySelectorAll('.extend-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.target.getAttribute('data-id');
+                
+                let mins = prompt("How many minutes do you want to extend this link for? (Max: 60)", "15");
+                if (mins === null) return; 
+                
+                mins = parseInt(mins, 10);
+                if (isNaN(mins) || mins <= 0 || mins > 60) {
+                    showToast("Please enter a valid number of minutes up to 60.", "error");
+                    return;
+                }
+
                 e.target.innerText = "...";
                 try {
                     const docRef = doc(db, "links", id);
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
-                        const newTime = snap.data().expiresAt + (24 * 60 * 60 * 1000);
+                        const newTime = snap.data().expiresAt + (mins * 60 * 1000);
                         await updateDoc(docRef, { expiresAt: newTime });
-                        showToast("Timer extended by 24 hours!", "success");
+                        showToast(`Time successfully extended by ${mins} minutes!`, "success");
                         loadCloudManager();
                     }
                 } catch(err) {
-                    showToast("Could not extend. " + err.message, "error");
-                    e.target.innerText = "+24h";
+                    showToast("Could not extend time.", "error");
+                    e.target.innerText = "Extend Time";
                 }
             });
         });
@@ -300,13 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.target.innerText = "...";
                 await purgeCloudFile(id, path);
                 removeFileFromLocalLedger(id);
-                showToast("File deleted from cloud.", "info");
+                showToast("File securely removed.", "info");
                 loadCloudManager();
             });
         });
     }
 
-    // Modal Triggers
     UI.openCloudModalBtn.addEventListener('click', () => {
         UI.cloudModal.classList.remove('hidden');
         UI.cloudModal.classList.add('flex');
@@ -328,9 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.cloudModal.classList.remove('flex');
         }, 300);
     });
-
-    // --- END CLOUD MANAGER LOGIC ---
-
 
     function renderFileList() {
         UI.fileList.innerHTML = '';
@@ -428,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         UI.resetBtn.innerText = "Cancel";
         UI.fileName.innerText = "Waiting...";
-        UI.statusText.innerText = "Initializing connection";
+        UI.statusText.innerText = "Getting ready...";
     }
 
     UI.resetBtn.addEventListener('click', resetApp);
@@ -450,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let finalFile = selectedFiles[0];
 
         if (selectedFiles.length > 1) {
-            showTransferScreen("Multiple Files", "Compressing files... Please wait");
+            showTransferScreen("Multiple Files", "Packing files together... Please wait.");
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Zipping...";
             
@@ -464,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 finalFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
             } catch (error) {
-                showToast("Failed to compress files.", "error");
+                showToast("Failed to pack files.", "error");
                 resetApp();
                 return;
             }
@@ -478,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function startCloudTransfer(file) {
-        showTransferScreen(file.name, "Initializing Cloud Upload...");
+        showTransferScreen(file.name, "Preparing link share...");
         UI.progressArea.classList.remove('hidden');
 
         let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
@@ -488,11 +489,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const docSnap = await getDoc(doc(db, "links", fileId));
                 if (docSnap.exists()) {
-                    showToast("Custom code is already taken!", "error");
+                    showToast("That custom word is already taken!", "error");
                     resetApp();
                     return;
                 }
-            } catch(e) { console.error("Code check error:", e); }
+            } catch(e) { console.error(e); }
         }
 
         const storagePath = `shared/${fileId}_${file.name}`;
@@ -502,20 +503,25 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadTask.on('state_changed',
             (snapshot) => {
                 updateProgress(snapshot.bytesTransferred, snapshot.totalBytes);
-                UI.statusText.innerText = `Uploading to Cloud...`;
+                UI.statusText.innerText = `Uploading file securely...`;
                 if(UI.progressText) UI.progressText.innerText = "Uploading...";
             },
             (error) => {
-                console.error("Storage Error:", error);
-                showToast("Cloud upload failed: " + error.message, "error");
+                showToast("Upload failed: Please check your internet.", "error");
                 resetApp();
             },
             async () => {
                 try {
-                    UI.statusText.innerText = `Finalizing secure link...`;
+                    UI.statusText.innerText = `Generating your secure link...`;
                     
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    const expireHours = parseInt(UI.cloudExpire.value);
+                    
+                    // 🌟 NEW: Cleaned up Time selection logic
+                    let expireMs = 60 * 60 * 1000; // default 1 hr
+                    if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
+                    else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
+                    else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
+
                     const isOneTime = UI.cloudLimit.value === 'one-time';
 
                     await setDoc(doc(db, "links", fileId), {
@@ -524,13 +530,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         type: file.type,
                         url: downloadURL,
                         storagePath: storagePath,
-                        expiresAt: Date.now() + (expireHours * 60 * 60 * 1000),
+                        expiresAt: Date.now() + expireMs,
                         isOneTime: isOneTime,
                         createdAt: Date.now(),
-                        ownerId: myOwnerId // 🌟 Bind to this browser
+                        ownerId: myOwnerId
                     });
 
-                    saveFileToLocalLedger(fileId); // 🌟 Add to dashboard
+                    saveFileToLocalLedger(fileId);
 
                     const cleanUrl = window.location.href.split('?')[0].split('#')[0];
                     const transferUrl = `${cleanUrl}?c=${fileId}`;
@@ -541,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     UI.pairingCodeDisplay.innerText = fileId;
                     UI.shareOptions.classList.remove('hidden');
-                    UI.statusText.innerText = "Upload Complete! You can close this tab now.";
+                    UI.statusText.innerText = "Ready! You can safely close this page now.";
                     UI.resetBtn.innerText = "Start Over";
 
                     UI.copyLinkBtn.onclick = () => {
@@ -549,8 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         showToast("Link copied to clipboard!", "success");
                     };
                 } catch (err) {
-                    console.error("Database Finalization Error:", err);
-                    showToast("Database Error: " + err.message, "error");
+                    showToast("Could not generate link.", "error");
                     resetApp();
                 }
             }
@@ -561,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         fileToSend = file;
-        showTransferScreen(file.name, "Creating secure room...");
+        showTransferScreen(file.name, "Setting up secure connection...");
         const roomCode = generateShortCode();
         
         peer = new Peer(roomCode, {
@@ -581,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
-            UI.statusText.innerText = "Waiting for receiver...";
+            UI.statusText.innerText = "Waiting for the other person to join...";
             UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
@@ -604,16 +609,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.successArea.classList.remove('hidden');
                     UI.successArea.classList.add('flex');
                     UI.successText.innerText = "Sent";
-                    UI.statusText.innerText = "Sent Successfully! ✅";
+                    UI.statusText.innerText = "File sent successfully! ✅";
                     UI.resetBtn.innerText = "Start Over";
-                    showToast("File sent successfully!", "success");
+                    showToast("Transfer Complete!", "success");
                 }
             });
 
             conn.on('open', () => streamFileToReceiver(conn, fileToSend));
             conn.on('close', () => {
                 if(isTransferring) {
-                    showToast("Receiver disconnected mid-transfer.", "error");
+                    showToast("The other person disconnected.", "error");
                     resetApp();
                 }
             });
@@ -637,8 +642,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offset < file.size) {
                 setTimeout(readNext, 5); 
             } else {
-                if(UI.progressText) UI.progressText.innerText = "Finalizing...";
-                UI.statusText.innerText = "Waiting for receiver to finish... Please don't close.";
+                if(UI.progressText) UI.progressText.innerText = "Finishing...";
+                UI.statusText.innerText = "Waiting for them to finish downloading... Please don't close.";
             }
         };
         const readNext = () => reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
@@ -664,11 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 🌟 SMART ERROR LOGIC
     UI.receiveBtn.addEventListener('click', () => {
         const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
         if (!targetId) {
-            showToast("Enter a valid code or ID.", "error");
+            showToast("Please enter a valid code or link ID.", "error");
             return;
         }
 
@@ -685,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function receiveCloudLink(targetId) {
-        showTransferScreen("Connecting...", `Searching Cloud for ${targetId}...`);
+        showTransferScreen("Connecting...", `Looking for shared link: ${targetId}...`);
 
         try {
             const docRef = doc(db, "links", targetId);
@@ -693,35 +697,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
-                // 🌟 SWEEPER LOGIC: Delete if expired!
                 if (Date.now() > data.expiresAt) {
-                    showToast("This link has expired. Cleaning up server...", "error");
+                    showToast("This link has expired and is being removed.", "error");
                     await purgeCloudFile(targetId, data.storagePath);
                     resetApp();
                     return;
                 }
                 await downloadCloudFile(data, targetId);
             } else {
-                showToast("File not found in the Cloud.", "error");
+                showToast("File not found or link has expired.", "error");
                 resetApp();
             }
         } catch(e) {
-            console.error("Firebase lookup failed", e);
-            showToast("Database connection error.", "error");
+            showToast("Could not connect to the server.", "error");
             resetApp();
         }
     }
 
     async function downloadCloudFile(data, docId) {
         UI.progressArea.classList.remove('hidden');
-        if(UI.progressText) UI.progressText.innerText = "Downloading from Cloud...";
+        if(UI.progressText) UI.progressText.innerText = "Downloading...";
         UI.fileName.innerText = data.name;
-        UI.statusText.innerText = `Fetching...`;
+        UI.statusText.innerText = `Fetching file...`;
 
         try {
             const response = await fetch(data.url);
-            if (!response.ok) throw new Error("CORS or Network Error");
+            if (!response.ok) throw new Error("Network Error");
 
             const reader = response.body.getReader();
             const contentLength = +response.headers.get('Content-Length') || data.size;
@@ -754,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.successArea.classList.remove('hidden');
             UI.successArea.classList.add('flex');
             UI.successText.innerText = "Received";
-            UI.statusText.innerText = "Saved to Downloads! 📥";
+            UI.statusText.innerText = "File saved to your device! 📥";
             UI.resetBtn.innerText = "Start Over";
             showToast("Download Complete!", "success");
 
@@ -764,13 +765,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 await purgeCloudFile(docId, data.storagePath);
             }
             UI.progressArea.classList.add('hidden');
-            UI.statusText.innerText = "Download opened in new tab.";
+            UI.statusText.innerText = "Download opened in a new tab.";
             UI.resetBtn.innerText = "Start Over";
         }
     }
 
     function startP2PReceive(targetId) {
-        showTransferScreen("Connecting...", `Looking for P2P room ${targetId}...`);
+        showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
         peer = new Peer({
             config: {
                 'iceServers': [
@@ -781,7 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         connectionTimeout = setTimeout(() => {
-            showToast("P2P Connection timed out. Network is slow or room is invalid.", "error");
+            showToast("Connection timed out. Please check the code and try again.", "error");
             resetApp();
         }, 45000);
 
@@ -825,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             UI.successArea.classList.remove('hidden');
                             UI.successArea.classList.add('flex');
                             UI.successText.innerText = "Received";
-                            UI.statusText.innerText = "Saved to Downloads! 📥";
+                            UI.statusText.innerText = "File saved to your device! 📥";
                             UI.resetBtn.innerText = "Start Over";
                             showToast("Download Complete!", "success");
                         } catch (err) {
@@ -837,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             conn.on('close', () => {
                 if(isTransferring) {
-                    showToast("Sender disconnected.", "error");
+                    showToast("The sender disconnected.", "error");
                     resetApp();
                 }
             });
@@ -851,10 +852,10 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(connectionTimeout);
             let errMsg = "An unknown network error occurred.";
             switch(err.type) {
-                case 'peer-unavailable': errMsg = "Invalid P2P code or sender left."; break;
+                case 'peer-unavailable': errMsg = "Code not found, or the sender left."; break;
                 case 'network':
-                case 'disconnected': errMsg = "Lost connection to server."; break;
-                case 'webrtc': errMsg = "WebRTC error. Check your firewall/VPN."; break;
+                case 'disconnected': errMsg = "Lost connection to the network."; break;
+                case 'webrtc': errMsg = "Connection blocked. Check your firewall or VPN."; break;
             }
             showToast(errMsg, "error");
             resetApp();
@@ -891,7 +892,6 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url); 
     }
 
-    // Modal Handlers (Dev)
     UI.openModalBtn.addEventListener('click', () => {
         UI.devModal.classList.remove('hidden');
         UI.devModal.classList.add('flex');
