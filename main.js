@@ -83,6 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
         stagedFilesSection: document.getElementById('staged-files-section'),
         fileList: document.getElementById('file-list'),
         sendFilesBtn: document.getElementById('send-files-btn'),
+        
+        // 🌟 ADDED MISSING VARIABLE BACK HERE:
+        receiveSection: document.getElementById('receive-section'),
+        
         devModal: document.getElementById('dev-modal'),
         devModalCard: document.getElementById('dev-modal-card'),
         openModalBtn: document.getElementById('about-dev-btn'),
