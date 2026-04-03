@@ -51,7 +51,6 @@ function initializeTheme() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
     initializeTheme(); 
 
     const UI = {
@@ -75,23 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         copyLinkBtn: document.getElementById('copy-link-btn'),
         dropZone: document.getElementById('drop-zone'),
         toastContainer: document.getElementById('toast-container'),
-        
         modeP2P: document.getElementById('mode-p2p'),
         modeCloud: document.getElementById('mode-cloud'),
         cloudSettings: document.getElementById('cloud-settings'),
         cloudExpire: document.getElementById('cloud-expire'),
         cloudLimit: document.getElementById('cloud-limit'),
         cloudCustomCode: document.getElementById('cloud-custom-code'),
-        
         stagedFilesSection: document.getElementById('staged-files-section'),
         fileList: document.getElementById('file-list'),
         sendFilesBtn: document.getElementById('send-files-btn'),
-
         devModal: document.getElementById('dev-modal'),
         devModalCard: document.getElementById('dev-modal-card'),
         openModalBtn: document.getElementById('about-dev-btn'),
         closeModalBtn: document.getElementById('close-modal-btn'),
-
         cloudModal: document.getElementById('cloud-modal'),
         cloudModalCard: document.getElementById('cloud-modal-card'),
         openCloudModalBtn: document.getElementById('my-cloud-files-btn'),
@@ -106,6 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let isTransferring = false;
     let selectedFiles = [];
 
+    function updateSendBtnText() {
+        if (selectedFiles.length === 0) {
+            UI.sendFilesBtn.innerText = transferMode === 'cloud' ? 'Upload Files' : 'Send Files';
+            return;
+        }
+        const count = selectedFiles.length;
+        UI.sendFilesBtn.innerText = transferMode === 'cloud' ? `Upload ${count} File${count > 1 ? 's' : ''}` : `Send ${count} File${count > 1 ? 's' : ''}`;
+    }
+
     UI.modeP2P.addEventListener('click', () => {
         transferMode = 'p2p';
         UI.modeP2P.classList.replace('text-slate-500', 'text-blue-600');
@@ -114,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.modeCloud.classList.add('text-slate-500', 'dark:text-slate-400');
         UI.cloudSettings.classList.add('hidden');
         UI.cloudSettings.classList.remove('flex');
+        updateSendBtnText();
     });
 
     UI.modeCloud.addEventListener('click', () => {
@@ -124,12 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.modeP2P.classList.add('text-slate-500', 'dark:text-slate-400');
         UI.cloudSettings.classList.remove('hidden');
         UI.cloudSettings.classList.add('flex');
+        updateSendBtnText();
     });
 
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         const isError = type === "error";
-
         toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
             isError ? 'bg-red-50 dark:bg-red-950/90 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-200' 
                     : 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
@@ -141,14 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
         UI.toastContainer.appendChild(toast);
-
         setTimeout(() => {
             toast.classList.replace('toast-enter', 'toast-exit');
             setTimeout(() => toast.remove(), 300);
         }, 4000);
     }
 
-    // --- Link Manager ---
     function saveFileToLocalLedger(fileId) {
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         if (!myLinks.includes(fileId)) {
@@ -169,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storagePath) {
                 await deleteObject(ref(storage, storagePath));
             }
-        } catch (e) { console.error("Could not delete from server", e); }
+        } catch (e) { }
     }
 
     async function loadCloudManager() {
@@ -183,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let activeFiles = [];
-
         for (let i = 0; i < myLinks.length; i++) {
             const linkId = myLinks[i];
             try {
@@ -200,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     removeFileFromLocalLedger(linkId); 
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { }
         }
 
         if (activeFiles.length === 0) {
@@ -240,9 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         files.forEach(file => {
             const card = document.createElement('div');
             card.className = "bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col gap-2";
-            
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-            
             card.innerHTML = `
                 <div class="flex justify-between items-start">
                     <div class="flex flex-col truncate pr-2">
@@ -258,29 +258,35 @@ document.addEventListener('DOMContentLoaded', () => {
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
                     </div>
-                    <div class="flex gap-2">
-                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}">Extend Time</button>
-                        <button class="delete-cloud-btn text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2.5 py-1.5 rounded-lg transition-colors" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
+                    <div class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1">
+                        <button class="copy-link-manager-btn text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}">Copy Link</button>
+                        <button class="extend-btn text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}">Extend Time</button>
+                        <button class="delete-cloud-btn text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
                     </div>
                 </div>
             `;
             UI.cloudFilesList.appendChild(card);
         });
 
-        // 🌟 NEW: Prompt-based Extending logic
+        document.querySelectorAll('.copy-link-manager-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                navigator.clipboard.writeText(`${cleanUrl}?c=${id}`);
+                showToast("Link copied to clipboard!", "success");
+            });
+        });
+
         document.querySelectorAll('.extend-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.target.getAttribute('data-id');
-                
-                let mins = prompt("How many minutes do you want to extend this link for? (Max: 60)", "15");
+                let mins = prompt("How many extra minutes? (Max: 60)", "15");
                 if (mins === null) return; 
-                
                 mins = parseInt(mins, 10);
                 if (isNaN(mins) || mins <= 0 || mins > 60) {
-                    showToast("Please enter a valid number of minutes up to 60.", "error");
+                    showToast("Please enter a valid number from 1 to 60.", "error");
                     return;
                 }
-
                 e.target.innerText = "...";
                 try {
                     const docRef = doc(db, "links", id);
@@ -342,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.receiveSection.classList.remove('hidden');
             UI.receiveSection.classList.add('flex');
             UI.fileInput.value = '';
+            updateSendBtnText();
             return;
         }
 
@@ -361,9 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const objectUrl = URL.createObjectURL(file);
 
             if (file.type.startsWith('image/')) {
-                mediaPreview = `<img src="${objectUrl}" class="w-full h-full object-cover" onload="URL.revokeObjectURL(this.src)">`;
+                mediaPreview = `<img src="${objectUrl}" class="w-full h-full object-cover">`;
             } else if (file.type.startsWith('video/')) {
-                mediaPreview = `<video src="${objectUrl}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline onloadeddata="URL.revokeObjectURL(this.src)"></video>`;
+                mediaPreview = `<video src="${objectUrl}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline></video>`;
             } else {
                 mediaPreview = `<svg class="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
             }
@@ -393,14 +400,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        UI.sendFilesBtn.innerHTML = `Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
+        updateSendBtnText();
     }
 
     function resetApp() {
         try {
             if (currentConnection) currentConnection.close();
             if (peer) peer.destroy();
-        } catch (e) { console.error(e); }
+        } catch (e) { }
 
         clearTimeout(connectionTimeout);
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
@@ -463,6 +470,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
                     updateProgress(metadata.percent, 100);
                 });
+                
+                UI.progressArea.classList.add('hidden');
+                UI.progressBar.style.width = "0%";
+                UI.percentage.innerText = "0%";
+                
                 finalFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
             } catch (error) {
                 showToast("Failed to pack files.", "error");
@@ -493,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
                     return;
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { }
         }
 
         const storagePath = `shared/${fileId}_${file.name}`;
@@ -513,11 +525,9 @@ document.addEventListener('DOMContentLoaded', () => {
             async () => {
                 try {
                     UI.statusText.innerText = `Generating your secure link...`;
-                    
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     
-                    // 🌟 NEW: Cleaned up Time selection logic
-                    let expireMs = 60 * 60 * 1000; // default 1 hr
+                    let expireMs = 60 * 60 * 1000; 
                     if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
                     else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
                     else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
@@ -665,22 +675,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const cloudId = new URLSearchParams(window.location.search).get('c');
         if(cloudId) {
             window.history.replaceState(null, null, window.location.pathname);
-            receiveCloudLink(cloudId);
+            startSmartReceive(cloudId);
         }
     }
 
     UI.receiveBtn.addEventListener('click', () => {
-        const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
         if (!targetId) {
             showToast("Please enter a valid code or link ID.", "error");
             return;
         }
-
-        if (transferMode === 'cloud') {
-            receiveCloudLink(targetId);
-        } else {
-            startP2PReceive(targetId);
-        }
+        startSmartReceive(targetId);
     });
 
     if (window.location.hash.length > 1) {
@@ -688,8 +693,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startP2PReceive(targetPeerId);
     }
 
-    async function receiveCloudLink(targetId) {
-        showTransferScreen("Connecting...", `Looking for shared link: ${targetId}...`);
+    async function startSmartReceive(targetId) {
+        showTransferScreen("Connecting...", `Searching for ${targetId}...`);
 
         try {
             const docRef = doc(db, "links", targetId);
@@ -704,14 +709,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 await downloadCloudFile(data, targetId);
-            } else {
-                showToast("File not found or link has expired.", "error");
-                resetApp();
+                return;
             }
-        } catch(e) {
-            showToast("Could not connect to the server.", "error");
-            resetApp();
-        }
+        } catch(e) { }
+        
+        startP2PReceive(targetId);
     }
 
     async function downloadCloudFile(data, docId) {
