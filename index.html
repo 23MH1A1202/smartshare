@@ -84,7 +84,7 @@
                         </div>
                         <div class="flex flex-col gap-1 mt-1">
                              <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Custom Code (Optional)</label>
-                             <input type="text" id="cloud-custom-code" placeholder="e.g. sagar2026" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 font-mono">
+                             <input type="text" id="cloud-custom-code" placeholder="e.g. sagar1234" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 font-mono">
                         </div>
                     </div>
 
@@ -169,14 +169,37 @@
 
         </div>
 
-        <footer class="mt-8 text-center z-10">
-            <button id="about-dev-btn" class="text-sm font-medium text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
+        <footer class="mt-8 text-center z-10 flex flex-col gap-3 items-center">
+            <button id="my-cloud-files-btn" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                Manage My Cloud Files
+            </button>
+
+            <button id="about-dev-btn" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 About the Developer
             </button>
         </footer>
 
     </main>
+
+    <div id="cloud-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-3xl p-6 max-w-md w-[95%] relative transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]" id="cloud-modal-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    My Cloud Files
+                </h3>
+                <button id="close-cloud-modal-btn" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                <p class="text-center text-sm text-slate-500 py-10">Loading your files...</p>
+            </div>
+        </div>
+    </div>
 
     <div id="dev-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-3xl p-8 max-w-sm w-[90%] relative transform scale-95 transition-transform duration-300" id="dev-modal-card">
