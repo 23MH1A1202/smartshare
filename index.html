@@ -17,8 +17,9 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto sm:min-h-screen sm:flex sm:items-center sm:justify-center transition-colors duration-300">
     <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#f1f5f9,0,#cbd5e1_100%)] dark:bg-[radial-gradient(circle_at_50%_50%,#1e293b,0,#020617_100%)] transition-colors duration-300"></div>
-    <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+    <div class="bg-blob fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/15 blur-[130px] rounded-full pointer-events-none"></div>
+    <div class="bg-blob-2 fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/20 dark:bg-emerald-600/15 blur-[130px] rounded-full pointer-events-none"></div>
+    <div class="bg-blob fixed top-[40%] right-[20%] w-64 h-64 bg-violet-500/10 dark:bg-violet-600/10 blur-[100px] rounded-full pointer-events-none"></div>
 
     <button id="theme-toggle" class="fixed top-6 right-6 p-2.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all z-50 shadow-lg border border-slate-200 dark:border-slate-700 hover:scale-110 active:scale-95">
         <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -29,26 +30,36 @@
 
     <main class="flex flex-col items-center justify-center min-h-[100dvh] sm:min-h-0 py-12 px-4 w-full fade-up">
         <header class="text-center mb-8 sm:mb-10 mt-8 sm:mt-0">
-            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-blue-400 dark:to-emerald-400 bg-clip-text text-transparent pb-1">SmartShare</h1>
-            <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base transition-colors">Simple & Fast File Sharing</p>
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <svg class="logo-icon w-10 h-10 text-blue-500 dark:text-blue-400 opacity-30 absolute" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="1" stroke-dasharray="4 3"/></svg>
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-500 dark:from-blue-400 dark:via-blue-300 dark:to-emerald-400 bg-clip-text text-transparent pb-1">SmartShare</h1>
+            </div>
+            <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base transition-colors">Simple &amp; Fast File Sharing — No Account Needed</p>
         </header>
 
         <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative z-10">
             <div id="initial-state" class="flex flex-col items-center text-center w-full">
-                <div class="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl mb-5 w-full max-w-[300px] mx-auto shadow-inner border border-slate-200/50 dark:border-slate-700/50 relative z-20">
-                    <button id="mode-p2p" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 transition-all">Direct (Device to Device)</button>
-                    <button id="mode-cloud" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-all">Link Share (Cloud)</button>
+                <div class="mode-tabs flex bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl mb-5 w-full max-w-[320px] mx-auto shadow-inner border border-slate-200/60 dark:border-slate-700/60 relative z-20" data-active="p2p">
+                    <div class="tab-slider"></div>
+                    <button id="mode-p2p" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-blue-600 dark:text-blue-400 transition-colors relative z-10">Direct (Device to Device)</button>
+                    <button id="mode-cloud" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-xl text-slate-500 dark:text-slate-400 transition-colors relative z-10">Link Share (Cloud)</button>
                 </div>
 
-                <div class="w-full border-2 border-dashed border-slate-300 dark:border-slate-700/60 hover:border-blue-500/50 bg-slate-50/50 dark:bg-transparent rounded-[32px] p-6 mb-2 transition-colors flex flex-col items-center">
-                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-blue-500/20">
-                        <svg class="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                <div class="drop-zone-inner w-full border-2 border-dashed border-slate-300 dark:border-slate-700/70 hover:border-blue-400/70 dark:hover:border-blue-500/50 bg-slate-50/60 dark:bg-transparent rounded-[32px] p-6 mb-2 transition-all duration-250 flex flex-col items-center">
+                    <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-500/15 dark:to-blue-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-blue-400/30 dark:ring-blue-500/25 shadow-sm">
+                        <svg class="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                     </div>
-                    <h3 class="text-lg font-medium text-slate-700 dark:text-slate-300">Drag & Drop files here</h3>
-                    <p class="text-sm text-slate-500 mt-1 mb-5">or use the button below to browse</p>
+                    <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Drag &amp; Drop files here</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-500 mt-1 mb-5">or use the button below to browse</p>
                     <input type="file" id="file-input" multiple class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
-                    <label for="file-input" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] active:scale-[0.98] cursor-pointer inline-block text-lg">
-                        Select Files
+                    <label for="file-input" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.45)] active:scale-[0.97] active:shadow-[0_2px_12px_rgba(37,99,235,0.3)] cursor-pointer inline-block text-center text-base tracking-wide">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Select Files
+                        </span>
                     </label>
                 </div>
 
@@ -80,26 +91,27 @@
                     </div>
 
                     <div class="flex gap-2 w-full mt-2">
-                        <label for="file-input" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all text-center cursor-pointer border border-slate-200 dark:border-slate-700 text-sm flex items-center justify-center gap-2">
+                        <label for="file-input" class="btn-ripple flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all text-center cursor-pointer border border-slate-200 dark:border-slate-700/80 text-sm flex items-center justify-center gap-2 active:scale-[0.97]">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Add More
                         </label>
-                        <button id="send-files-btn" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-[0.98] text-sm flex items-center justify-center gap-2">
+                        <button id="send-files-btn" class="btn-ripple flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.45)] active:scale-[0.97] text-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                             Send Files
                         </button>
                     </div>
                 </div>
 
-                <div id="receive-section" class="flex flex-col gap-5 w-full mt-2">
+                <div id="receive-section" class="flex flex-col gap-4 w-full mt-2">
                     <div class="relative flex items-center py-1">
-                        <div class="flex-grow border-t border-slate-300 dark:border-slate-700/60"></div>
-                        <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-xs font-semibold tracking-widest uppercase">Or Receive</span>
-                        <div class="flex-grow border-t border-slate-300 dark:border-slate-700/60"></div>
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-[11px] font-bold tracking-[0.18em] uppercase bg-white/70 dark:bg-transparent px-2 rounded">Or Receive</span>
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
                     </div>
                     <div class="flex gap-2 h-14">
-                        <input type="text" id="receive-code-input" placeholder="ENTER CODE" class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.2em] font-mono text-lg text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all uppercase placeholder:tracking-normal placeholder:text-sm placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-inner">
-                        <button id="receive-btn" class="px-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)] active:scale-[0.98] flex items-center justify-center">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <input type="text" id="receive-code-input" placeholder="ENTER CODE OR LINK ID" class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-slate-900 dark:text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-inner backdrop-blur-sm">
+                        <button id="receive-btn" class="btn-ripple px-5 bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-medium transition-all shadow-[0_4px_16px_rgba(5,150,105,0.35)] hover:shadow-[0_6px_20px_rgba(5,150,105,0.45)] active:scale-[0.97] flex items-center justify-center gap-1.5 whitespace-nowrap text-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -107,49 +119,56 @@
 
             <div id="transfer-state" class="hidden flex-col items-center w-full relative">
                 <div class="w-full flex justify-between items-center mb-8">
-                    <div class="flex items-center gap-3 w-[70%]">
-                        <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 w-[75%]">
+                        <div class="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/60 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
                             <svg class="w-5 h-5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
                         <div class="flex flex-col overflow-hidden">
-                            <span id="file-name" class="truncate font-medium text-slate-800 dark:text-slate-200 text-sm">Waiting...</span>
-                            <span id="status-text" class="text-xs text-slate-500 dark:text-slate-400 leading-snug pr-2">Connecting...</span>
+                            <span id="file-name" class="truncate font-semibold text-slate-800 dark:text-slate-100 text-sm">Waiting...</span>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <div id="status-dot" class="status-dot dot-blue"></div>
+                                <span id="status-text" class="text-xs text-slate-500 dark:text-slate-400 leading-snug pr-2">Connecting...</span>
+                            </div>
                         </div>
                     </div>
-                    <button id="reset-btn" class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
+                    <button id="reset-btn" class="btn-ripple text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200/80 dark:border-slate-700/80 active:scale-[0.97]">
                         Cancel
                     </button>
                 </div>
 
                 <div id="progress-area" class="w-full mb-8 hidden">
-                    <div class="flex justify-between text-sm mb-2 font-medium">
-                        <span id="progress-text" class="text-slate-600 dark:text-slate-300">Preparing...</span>
-                        <span id="percentage" class="text-blue-600 dark:text-blue-400">0%</span>
+                    <div class="flex justify-between text-sm mb-2.5 font-medium">
+                        <div class="flex items-center gap-2">
+                            <span class="connecting-dots"><span></span><span></span><span></span></span>
+                            <span id="progress-text" class="text-slate-600 dark:text-slate-300">Preparing...</span>
+                        </div>
+                        <span id="percentage" class="text-blue-600 dark:text-blue-400 font-bold tabular-nums">0%</span>
                     </div>
-                    <div class="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300/50 dark:border-white/5 shadow-inner">
-                        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-200 ease-out w-0 relative"></div>
+                    <div class="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300/40 dark:border-white/5 shadow-inner">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-400 rounded-full w-0 relative"></div>
                     </div>
                 </div>
                 <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
-                    <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-3 animate-bounce-in ring-4 ring-emerald-500/30">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-600/10 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
+                        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 6L9 17l-5-5"></path>
                         </svg>
                     </div>
-                    <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-2xl tracking-wide">Done</span>
+                    <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Transfer completed successfully</p>
                 </div>
                 <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
-                    <div id="qr-wrapper" class="bg-white p-3.5 rounded-2xl shadow-xl mb-6 border border-slate-100 dark:border-none">
+                    <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5 border border-slate-100 dark:border-none ring-1 ring-slate-200/50">
                         <div id="qr-container"></div>
                     </div>
 
-                    <div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl w-full p-4 text-center relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 font-semibold">Share Code / Link ID</p>
-                        <h2 id="pairing-code-display" class="text-4xl font-mono tracking-[0.25em] text-slate-800 dark:text-white font-light">------</h2>
+                    <div class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/70 dark:to-slate-900/70 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl w-full p-4 text-center relative overflow-hidden group shadow-sm">
+                        <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1.5 font-bold">Share Code / Link ID</p>
+                        <h2 id="pairing-code-display" class="text-4xl font-mono tracking-[0.3em] text-slate-800 dark:text-white font-light select-all">------</h2>
                     </div>
 
-                    <button id="copy-link-btn" class="mt-5 px-6 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm text-blue-600 dark:text-blue-400 rounded-full transition-colors flex items-center gap-2 border border-slate-200 dark:border-slate-700 shadow-lg">
+                    <button id="copy-link-btn" class="btn-ripple mt-5 px-7 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm text-blue-600 dark:text-blue-400 rounded-full transition-all flex items-center gap-2 border border-slate-200/80 dark:border-slate-700/80 shadow-lg hover:shadow-xl active:scale-[0.97] font-medium">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                         Copy Share Link
                     </button>
@@ -158,12 +177,12 @@
         </div>
 
         <footer class="mt-8 text-center z-10 flex flex-col gap-3 items-center">
-            <button id="my-cloud-files-btn" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 shadow-sm">
+            <button id="my-cloud-files-btn" class="btn-ripple text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-50/80 dark:bg-blue-900/20 hover:bg-blue-100/80 dark:hover:bg-blue-900/30 border border-blue-200/70 dark:border-blue-800/50 shadow-sm hover:shadow active:scale-[0.97] backdrop-blur-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
                 Manage Active Links
             </button>
 
-            <button id="about-dev-btn" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
+            <button id="about-dev-btn" class="btn-ripple text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/60 dark:hover:bg-slate-800/60 active:scale-[0.97]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 About the Developer
             </button>
@@ -171,40 +190,45 @@
     </main>
 
     <div id="cloud-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-3xl p-6 max-w-md w-[95%] relative transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]" id="cloud-modal-card">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+        <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xl rounded-3xl p-6 max-w-md w-[95%] relative transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]" id="cloud-modal-card">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    </div>
                     My Active Links
                 </h3>
-                <button id="close-cloud-modal-btn" class="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button id="close-cloud-modal-btn" class="btn-ripple text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.95]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             
-            <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
                 <p class="text-center text-sm text-slate-500 py-10">Loading your files...</p>
             </div>
         </div>
     </div>
 
     <div id="dev-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-3xl p-8 max-w-sm w-[90%] relative transform scale-95 transition-transform duration-300" id="dev-modal-card">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+        <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xl rounded-3xl p-8 max-w-sm w-[90%] relative transform scale-95 transition-transform duration-300" id="dev-modal-card">
+            <button id="close-modal-btn" class="btn-ripple absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.95]">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div class="text-center mt-2">
-                <div class="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full mx-auto flex items-center justify-center shadow-lg mb-5">
-                    <span class="text-white text-3xl font-bold tracking-wider">AS</span>
+                <div class="relative w-20 h-20 mx-auto mb-5">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full opacity-20 blur-lg animate-pulse"></div>
+                    <div class="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full flex items-center justify-center shadow-lg relative">
+                        <span class="text-white text-3xl font-bold tracking-wider">AS</span>
+                    </div>
                 </div>
                 <h3 class="text-xl font-bold text-slate-900 dark:text-white tracking-wide">AMBATI LALITHA SAGAR</h3>
-                <div class="mt-4 space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
-                    <p class="font-semibold text-blue-600 dark:text-blue-400 tracking-wide">B.Tech - INFORMATION TECHNOLOGY</p>
-                    <p class="font-mono text-xs opacity-80 bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">Roll No: 23MH1A1202</p>
-                    <p class="pt-3 leading-relaxed">Aditya College of Engineering & Technology (ACET)</p>
+                <div class="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <p class="font-semibold text-blue-600 dark:text-blue-400 tracking-wide">B.Tech — INFORMATION TECHNOLOGY</p>
+                    <p class="font-mono text-xs opacity-80 bg-slate-100 dark:bg-slate-800 inline-block px-2.5 py-1 rounded-lg">Roll No: 23MH1A1202</p>
+                    <p class="pt-2 leading-relaxed text-slate-500 dark:text-slate-500">Aditya College of Engineering &amp; Technology (ACET)</p>
                 </div>
-                <a href="mailto:alalithasagar355@gmail.com" class="mt-8 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all text-sm font-medium border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow active:scale-95 w-full justify-center">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <a href="mailto:alalithasagar355@gmail.com" class="btn-ripple mt-7 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white transition-all text-sm font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] active:scale-[0.97] w-full justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     Email Me
                 </a>
             </div>

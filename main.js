@@ -113,10 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.modeP2P.addEventListener('click', () => {
         transferMode = 'p2p';
-        UI.modeP2P.classList.replace('text-slate-500', 'text-blue-600');
-        UI.modeP2P.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
-        UI.modeCloud.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        document.querySelector('.mode-tabs').dataset.active = 'p2p';
+        UI.modeP2P.classList.add('text-blue-600', 'dark:text-blue-400');
+        UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
         UI.modeCloud.classList.add('text-slate-500', 'dark:text-slate-400');
+        UI.modeCloud.classList.remove('text-blue-600', 'dark:text-blue-400');
         UI.cloudSettings.classList.add('hidden');
         UI.cloudSettings.classList.remove('flex');
         updateSendBtnText();
@@ -124,10 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.modeCloud.addEventListener('click', () => {
         transferMode = 'cloud';
-        UI.modeCloud.classList.replace('text-slate-500', 'text-blue-600');
-        UI.modeCloud.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
-        UI.modeP2P.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        document.querySelector('.mode-tabs').dataset.active = 'cloud';
+        UI.modeCloud.classList.add('text-blue-600', 'dark:text-blue-400');
+        UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
         UI.modeP2P.classList.add('text-slate-500', 'dark:text-slate-400');
+        UI.modeP2P.classList.remove('text-blue-600', 'dark:text-blue-400');
         UI.cloudSettings.classList.remove('hidden');
         UI.cloudSettings.classList.add('flex');
         updateSendBtnText();
@@ -151,6 +153,12 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.classList.replace('toast-enter', 'toast-exit');
             setTimeout(() => toast.remove(), 300);
         }, 4000);
+    }
+
+    function setStatusDot(color) {
+        const dot = document.getElementById('status-dot');
+        if (!dot) return;
+        dot.className = `status-dot dot-${color}`;
     }
 
     function saveFileToLocalLedger(fileId) {
@@ -243,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         files.forEach(file => {
             const card = document.createElement('div');
             // 🌟 FIXED: Removed horizontal scroll layout, replaced with Grid and Flex columns
-            card.className = "bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col";
+            card.className = "cloud-file-card bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 flex flex-col";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             
             card.innerHTML = `
@@ -361,7 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
-            li.className = "flex items-center justify-between bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
+            li.className = "file-item-enter flex items-center justify-between bg-white/60 dark:bg-slate-800/50 backdrop-blur-md p-3 rounded-3xl border border-white/70 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/80 dark:hover:bg-slate-800/70 hover:shadow-md group";
+            li.style.setProperty('--stagger', index);
             
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
@@ -562,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.shareOptions.classList.remove('hidden');
                     UI.statusText.innerText = "Ready! You can safely close this page now.";
                     UI.resetBtn.innerText = "Start Over";
+                    setStatusDot('green');
 
                     UI.copyLinkBtn.onclick = () => {
                         navigator.clipboard.writeText(transferUrl);
@@ -600,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for the other person to join...";
+            setStatusDot('amber');
             UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
@@ -622,8 +633,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.successArea.classList.remove('hidden');
                     UI.successArea.classList.add('flex');
                     UI.successText.innerText = "Sent";
-                    UI.statusText.innerText = "File sent successfully! ✅";
+                    UI.statusText.innerText = "File sent successfully!";
                     UI.resetBtn.innerText = "Start Over";
+                    setStatusDot('green');
                     showToast("Transfer Complete!", "success");
                 }
             });
@@ -761,8 +773,9 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.successArea.classList.remove('hidden');
             UI.successArea.classList.add('flex');
             UI.successText.innerText = "Received";
-            UI.statusText.innerText = "File saved to your device! 📥";
+            UI.statusText.innerText = "File saved to your device!";
             UI.resetBtn.innerText = "Start Over";
+            setStatusDot('green');
             showToast("Download Complete!", "success");
 
         } catch (error) {
@@ -832,8 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             UI.successArea.classList.remove('hidden');
                             UI.successArea.classList.add('flex');
                             UI.successText.innerText = "Received";
-                            UI.statusText.innerText = "File saved to your device! 📥";
+                            UI.statusText.innerText = "File saved to your device!";
                             UI.resetBtn.innerText = "Start Over";
+                            setStatusDot('green');
                             showToast("Download Complete!", "success");
                         } catch (err) {
                             showToast("Error saving the file.", "error");
@@ -872,10 +886,11 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.initial.classList.add('hidden');
         UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
-        UI.transfer.classList.add('flex');
+        UI.transfer.classList.add('flex', 'transfer-enter');
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
         UI.resetBtn.innerText = "Cancel";
+        setStatusDot('blue');
     }
 
     function updateProgress(current, total) {
