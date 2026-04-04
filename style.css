@@ -151,22 +151,11 @@ html.dark #cloud-files-list::-webkit-scrollbar-thumb {
   border-radius: 50%;
   background: currentColor;
   flex-shrink: 0;
-  animation: pulseDot 1.8s ease-in-out infinite;
 }
 
-.status-dot.dot-blue  { color: rgb(59, 130, 246); }
-.status-dot.dot-green { color: rgb(16, 185, 129); }
-.status-dot.dot-amber { color: rgb(245, 158, 11); }
-
-@keyframes pulseDot {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(currentColor, 0.4); opacity: 1; }
-  50%       { box-shadow: 0 0 0 5px rgba(currentColor, 0); opacity: 0.85; }
-}
-
-/* Specific pulse colors */
-.status-dot.dot-blue  { animation: pulseDotBlue  1.8s ease-in-out infinite; }
-.status-dot.dot-green { animation: pulseDotGreen 1.8s ease-in-out infinite; }
-.status-dot.dot-amber { animation: pulseDotAmber 1.8s ease-in-out infinite; }
+.status-dot.dot-blue  { color: rgb(59, 130, 246); animation: pulseDotBlue  1.8s ease-in-out infinite; }
+.status-dot.dot-green { color: rgb(16, 185, 129); animation: pulseDotGreen 1.8s ease-in-out infinite; }
+.status-dot.dot-amber { color: rgb(245, 158, 11); animation: pulseDotAmber 1.8s ease-in-out infinite; }
 
 @keyframes pulseDotBlue {
   0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.45); }
@@ -293,6 +282,14 @@ html.dark #cloud-files-list::-webkit-scrollbar-thumb {
 @keyframes logoSpin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-icon { animation: none; }
+  .bg-blob, .bg-blob-2 { animation: none; }
+  .file-item-enter { animation: none; }
+  .connecting-dots span { animation: none; }
+  .status-dot.dot-blue, .status-dot.dot-green, .status-dot.dot-amber { animation: none; }
 }
 
 /* --- RECEIVE CODE INPUT GLOW --- */

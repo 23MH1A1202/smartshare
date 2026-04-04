@@ -158,7 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setStatusDot(color) {
         const dot = document.getElementById('status-dot');
         if (!dot) return;
-        dot.className = `status-dot dot-${color}`;
+        dot.classList.remove('dot-blue', 'dot-green', 'dot-amber');
+        dot.classList.add('dot-' + color);
     }
 
     function saveFileToLocalLedger(fileId) {
