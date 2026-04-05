@@ -538,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function startCloudTransfer(file) {
+        isCancelled = false;
         showTransferScreen(file.name, "Preparing link share...");
         UI.progressArea.classList.remove('hidden');
 
@@ -808,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function startSmartReceive(targetId) {
+        isCancelled = false;
         showTransferScreen("Connecting...", `Searching for ${targetId}...`);
 
         try {
