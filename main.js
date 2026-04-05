@@ -106,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isTransferring = false;
     let selectedFiles = [];
 
-    // 🌟 FIXED 1: Instant UI Feedback for Network Drops
     window.addEventListener('offline', () => {
         if (isTransferring || p2pTransferState.bytesReceived > 0) {
             UI.statusText.innerText = "Internet disconnected! Transfer paused...";
@@ -673,11 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         peer.on('open', (id) => {
-            // 🌟 FIXED 2: Do NOT redraw the QR code if we are just re-connecting mid-transfer!
-            if (isTransferring || isCancelled || (currentConnection && currentConnection.open)) {
-                return;
-            }
-
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
             UI.qrContainer.innerHTML = "";
@@ -721,16 +715,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
 
                 } else if (payload.type === 'ack') {
+                    // 🌟 FIXED: Make sure sender text goes back to 'Sending...' after an ack finishes reconnecting
+                    if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused")) {
+                        const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
+                        UI.statusText.innerText = `Sending (${mbSize} MB)...`;
+                        if (UI.progressText) UI.progressText.innerText = "Sending...";
+                        setStatusDot('green');
+                    }
+                    
                     updateProgress(payload.bytesReceived, fileToSend.size);
                     if (payload.bytesReceived < fileToSend.size) {
                         sendNextChunk(conn, fileToSend, payload.bytesReceived);
                     }
                 
                 } else if (payload.type === 'resume') {
-                    UI.shareOptions.classList.add('hidden'); 
-                    UI.statusText.innerText = `Connection Restored! Resuming...`;
+                    // 🌟 FIXED: Ensure UI accurately says it's sending when resuming
+                    const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
+                    UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Sending...";
                     setStatusDot('green');
+                    
                     updateProgress(payload.offset, fileToSend.size);
                     sendNextChunk(conn, fileToSend, payload.offset);
                 }
