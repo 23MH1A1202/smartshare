@@ -30,7 +30,7 @@ window.onerror = function(message) {
 let transferMode = 'p2p'; 
 let cloudTimerInterval = null;
 
-// 🌟 NEW: Persistent State for Auto-Resume
+// 🌟 PERSISTENT STATE FOR AUTO-RESUME
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
 
 function initializeTheme() {
@@ -116,11 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.modeP2P.addEventListener('click', () => {
         transferMode = 'p2p';
-        document.querySelector('.mode-tabs').dataset.active = 'p2p';
-        UI.modeP2P.classList.add('text-blue-600', 'dark:text-blue-400');
-        UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
+        UI.modeP2P.classList.replace('text-slate-500', 'text-blue-600');
+        UI.modeP2P.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeCloud.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
         UI.modeCloud.classList.add('text-slate-500', 'dark:text-slate-400');
-        UI.modeCloud.classList.remove('text-blue-600', 'dark:text-blue-400');
         UI.cloudSettings.classList.add('hidden');
         UI.cloudSettings.classList.remove('flex');
         updateSendBtnText();
@@ -128,11 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     UI.modeCloud.addEventListener('click', () => {
         transferMode = 'cloud';
-        document.querySelector('.mode-tabs').dataset.active = 'cloud';
-        UI.modeCloud.classList.add('text-blue-600', 'dark:text-blue-400');
-        UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
+        UI.modeCloud.classList.replace('text-slate-500', 'text-blue-600');
+        UI.modeCloud.classList.add('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
+        UI.modeP2P.classList.remove('bg-white', 'shadow-sm', 'dark:bg-slate-700', 'dark:text-blue-400');
         UI.modeP2P.classList.add('text-slate-500', 'dark:text-slate-400');
-        UI.modeP2P.classList.remove('text-blue-600', 'dark:text-blue-400');
         UI.cloudSettings.classList.remove('hidden');
         UI.cloudSettings.classList.add('flex');
         updateSendBtnText();
@@ -156,13 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.classList.replace('toast-enter', 'toast-exit');
             setTimeout(() => toast.remove(), 300);
         }, 4000);
-    }
-
-    function setStatusDot(color) {
-        const dot = document.getElementById('status-dot');
-        if (!dot) return;
-        dot.classList.remove('dot-blue', 'dot-green', 'dot-amber');
-        dot.classList.add('dot-' + color);
     }
 
     function saveFileToLocalLedger(fileId) {
@@ -254,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
             const card = document.createElement('div');
-            card.className = "cloud-file-card bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 flex flex-col";
+            card.className = "bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/50 flex flex-col";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             
             card.innerHTML = `
@@ -372,8 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
-            li.className = "file-item-enter flex items-center justify-between bg-white/60 dark:bg-slate-800/50 backdrop-blur-md p-3 rounded-3xl border border-white/70 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/80 dark:hover:bg-slate-800/70 hover:shadow-md group";
-            li.style.setProperty('--stagger', index);
+            li.className = "flex items-center justify-between bg-white/50 dark:bg-slate-800/40 backdrop-blur-md p-3 rounded-3xl border border-white/60 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-slate-800/60 group";
             
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
@@ -427,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         selectedFiles = [];
         
-        // 🌟 NEW: Clear Auto-Resume State
+        // 🌟 CLEAR RESUME STATE
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
 
         UI.fileInput.value = '';
@@ -576,7 +566,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.shareOptions.classList.remove('hidden');
                     UI.statusText.innerText = "Ready! You can safely close this page now.";
                     UI.resetBtn.innerText = "Start Over";
-                    setStatusDot('green');
 
                     UI.copyLinkBtn.onclick = () => {
                         navigator.clipboard.writeText(transferUrl);
@@ -590,7 +579,54 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // 🌟 ENHANCED SENDER: PERFECT SYNC AND AUTO-RESUME
+    // 🌟 ENHANCED ERROR HANDLER FOR RESUME
+    function setupPeerErrorHandling(peerInstance) {
+        
+        peerInstance.on('disconnected', () => {
+            // Keep the Peer ID alive if we drop signaling server connection
+            if (isTransferring || fileToSend || p2pTransferState.bytesReceived > 0) {
+                peerInstance.reconnect();
+            }
+        });
+
+        peerInstance.on('error', (err) => {
+            clearTimeout(connectionTimeout);
+            
+            // 🌟 1. Don't panic on network drops
+            if (err.type === 'network' || err.type === 'disconnected') {
+                if (isTransferring || fileToSend || p2pTransferState.bytesReceived > 0) {
+                    showToast("Network unstable. Holding connection...", "info");
+                    setTimeout(() => {
+                        if (peer && !peer.destroyed) peer.reconnect();
+                    }, 3000);
+                    return; // DO NOT resetApp()
+                }
+            }
+
+            // 🌟 2. Don't panic if Receiver reconnects before Sender is online
+            if (err.type === 'peer-unavailable' && p2pTransferState.isReconnecting) {
+                setTimeout(() => {
+                    if (peer && !peer.destroyed) {
+                        const newConn = peer.connect(p2pTransferState.targetId, { reliable: true });
+                        setupReceiverConnection(newConn);
+                    }
+                }, 3000);
+                return; // DO NOT resetApp()
+            }
+
+            let errMsg = "An unknown network error occurred.";
+            switch(err.type) {
+                case 'peer-unavailable': errMsg = "Code not found, or the sender left."; break;
+                case 'network':
+                case 'disconnected': errMsg = "Lost connection to the network."; break;
+                case 'webrtc': errMsg = "Connection blocked. Check your firewall or VPN."; break;
+            }
+            showToast(errMsg, "error");
+            resetApp();
+        });
+    }
+
+    // 🌟 SENDER: SYNC & RESUME
     function startP2PTransfer(file) {
         if (!file) return;
 
@@ -616,7 +652,6 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for the other person to join...";
-            setStatusDot('amber');
             UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
@@ -632,7 +667,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
-            setStatusDot('green');
 
             conn.on('data', (payload) => {
                 if (payload.type === 'transfer-complete') {
@@ -643,35 +677,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.successText.innerText = "Sent";
                     UI.statusText.innerText = "File sent successfully!";
                     UI.resetBtn.innerText = "Start Over";
-                    setStatusDot('green');
                     showToast("Transfer Complete!", "success");
                 
-                // 🌟 SENDER SYNC: Updates progress exactly based on Receiver's response!
                 } else if (payload.type === 'ack') {
                     updateProgress(payload.bytesReceived, fileToSend.size);
                     if (payload.bytesReceived < fileToSend.size) {
                         sendNextChunk(conn, fileToSend, payload.bytesReceived);
                     }
                 
-                // 🌟 SENDER RESUME: Jumps to the exact missing byte to continue!
+                // 🌟 SENDER RESUMES EXACTLY WHERE IT LEFT OFF
                 } else if (payload.type === 'resume') {
                     UI.statusText.innerText = `Connection Restored! Resuming...`;
-                    setStatusDot('green');
                     updateProgress(payload.offset, fileToSend.size);
                     sendNextChunk(conn, fileToSend, payload.offset);
                 }
             });
 
             conn.on('open', () => {
-                // Send metadata, wait for the receiver to send an 'ack' to start chunk 1!
                 conn.send({ type: 'metadata', name: fileToSend.name, size: fileToSend.size, fileType: fileToSend.type });
             });
 
             conn.on('close', () => {
                 if(isTransferring) {
                     UI.statusText.innerText = "Connection lost! Waiting for receiver to auto-reconnect...";
-                    setStatusDot('amber');
-                    // DO NOT RESET APP! Wait for them to reconnect.
+                    // Do NOT call resetApp(). Wait safely.
                 }
             });
         });
@@ -679,9 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-    // 🌟 SENDER CHUNKING: Stop-and-Wait Flow Control
     function sendNextChunk(conn, file, offset) {
-        const chunkSize = 128 * 1024; // 128 KB for optimal WebRTC speeds
+        const chunkSize = 128 * 1024; 
         const reader = new FileReader();
         reader.onload = (e) => {
             if (!isTransferring) return; 
@@ -794,7 +822,6 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.successText.innerText = "Received";
             UI.statusText.innerText = "File saved to your device!";
             UI.resetBtn.innerText = "Start Over";
-            setStatusDot('green');
             showToast("Download Complete!", "success");
 
         } catch (error) {
@@ -808,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 🌟 ENHANCED RECEIVER: SYNC AND AUTO-RECONNECT
+    // 🌟 RECEIVER: AUTO-RECONNECT
     function startP2PReceive(targetId) {
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false };
         showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
@@ -843,15 +870,12 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(connectionTimeout);
             UI.progressArea.classList.remove('hidden');
             
-            // 🌟 RECEIVER RESUME: If we dropped and reconnected, request missing bytes
             if (p2pTransferState.isReconnecting && p2pTransferState.bytesReceived > 0) {
                 UI.statusText.innerText = "Connection restored! Resuming download...";
-                setStatusDot('green');
                 conn.send({ type: 'resume', offset: p2pTransferState.bytesReceived });
             } else {
                 if(UI.progressText) UI.progressText.innerText = "Downloading...";
                 UI.statusText.innerText = "Connected. Waiting for file...";
-                setStatusDot('green');
             }
         });
 
@@ -859,12 +883,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isTransferring) return; 
 
             if (payload.type === 'metadata') {
+                if (p2pTransferState.isReconnecting) return; // Ignore fresh metadata if we are resuming!
+                
                 p2pTransferState.meta = payload;
                 UI.fileName.innerText = payload.name;
                 const mbSize = (payload.size / (1024 * 1024)).toFixed(2);
                 UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
                 
-                // 🌟 FLOW CONTROL: Ask Sender for the first chunk
                 conn.send({ type: 'ack', bytesReceived: 0 });
 
             } else if (payload.type === 'chunk') {
@@ -886,26 +911,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         UI.successText.innerText = "Received";
                         UI.statusText.innerText = "File saved to your device!";
                         UI.resetBtn.innerText = "Start Over";
-                        setStatusDot('green');
                         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
                         showToast("Download Complete!", "success");
                     } catch (err) {
                         showToast("Error saving the file.", "error");
                     }
                 } else {
-                    // 🌟 FLOW CONTROL: Ask Sender for the next chunk
                     conn.send({ type: 'ack', bytesReceived: p2pTransferState.bytesReceived });
                 }
             }
         });
 
         conn.on('close', () => {
-            // 🌟 AUTO-RECONNECT: If we haven't finished downloading, try to connect again!
+            // 🌟 RECEIVER ACTIVATES AUTO-RECONNECT
             if (p2pTransferState.bytesReceived > 0 && p2pTransferState.bytesReceived < p2pTransferState.meta.size) {
                 p2pTransferState.isReconnecting = true;
                 showToast("Connection dropped. Auto-reconnecting...", "info");
                 UI.statusText.innerText = "Connection lost! Attempting to reconnect...";
-                setStatusDot('amber');
                 
                 // Ping sender every 3 seconds
                 setTimeout(() => {
@@ -923,34 +945,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function setupPeerErrorHandling(peerInstance) {
-        peerInstance.on('error', (err) => {
-            clearTimeout(connectionTimeout);
-            let errMsg = "An unknown network error occurred.";
-            switch(err.type) {
-                case 'peer-unavailable': 
-                    // If we are auto-reconnecting, don't fail out. Just keep trying.
-                    if (p2pTransferState.isReconnecting) return;
-                    errMsg = "Code not found, or the sender left."; 
-                    break;
-                case 'network':
-                case 'disconnected': errMsg = "Lost connection to the network."; break;
-                case 'webrtc': errMsg = "Connection blocked. Check your firewall or VPN."; break;
-            }
-            showToast(errMsg, "error");
-            resetApp();
-        });
-    }
-
     function showTransferScreen(fileName, statusText) {
         UI.initial.classList.add('hidden');
         UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
-        UI.transfer.classList.add('flex', 'transfer-enter');
+        UI.transfer.classList.add('flex');
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
         UI.resetBtn.innerText = "Cancel";
-        setStatusDot('blue');
     }
 
     function updateProgress(current, total) {
