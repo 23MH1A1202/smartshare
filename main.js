@@ -672,6 +672,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         peer.on('open', (id) => {
+            if (currentConnection || isTransferring) {
+                return;
+            }
+
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
             const transferUrl = `${cleanUrl}#${id}`;
             UI.qrContainer.innerHTML = "";
@@ -715,7 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
 
                 } else if (payload.type === 'ack') {
-                    // 🌟 FIXED: Make sure sender text goes back to 'Sending...' after an ack finishes reconnecting
                     if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused")) {
                         const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                         UI.statusText.innerText = `Sending (${mbSize} MB)...`;
@@ -729,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 
                 } else if (payload.type === 'resume') {
-                    // 🌟 FIXED: Ensure UI accurately says it's sending when resuming
+                    UI.shareOptions.classList.add('hidden'); 
                     const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                     UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Sending...";
@@ -919,6 +922,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 45000);
 
         peer.on('open', () => {
+            if (currentConnection || p2pTransferState.isReconnecting) {
+                return;
+            }
             const conn = peer.connect(targetId, { reliable: true });
             setupReceiverConnection(conn);
         });
