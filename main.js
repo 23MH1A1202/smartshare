@@ -31,7 +31,7 @@ let transferMode = 'p2p';
 let cloudTimerInterval = null;
 let isCancelled = false; 
 
-let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
+let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
 
 function initializeTheme() {
@@ -105,6 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
     let selectedFiles = [];
+
+    window.addEventListener('beforeunload', () => {
+        isCancelled = true;
+        if (currentConnection && currentConnection.open) {
+            currentConnection.send({ type: 'transfer-cancelled' });
+        }
+    });
 
     window.addEventListener('offline', () => {
         if (isTransferring || p2pTransferState.bytesReceived > 0) {
@@ -458,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         selectedFiles = [];
-        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
+        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
@@ -753,6 +760,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isTransferring) {
                     UI.statusText.innerText = "Connection lost! Waiting for receiver to auto-reconnect...";
                     setStatusDot('amber');
+
+                    setTimeout(() => {
+                        if (isTransferring && (!currentConnection || !currentConnection.open)) {
+                            showToast("The receiver permanently disconnected.", "error");
+                            resetApp();
+                        }
+                    }, 25000);
                 }
             });
         });
@@ -895,6 +909,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isCancelled) return;
         clearTimeout(reconnectTimer);
 
+        if (p2pTransferState.reconnectAttempts > 15) { 
+            showToast("Connection lost permanently.", "error");
+            resetApp();
+            return;
+        }
+
+        p2pTransferState.reconnectAttempts++;
+
         if (navigator.onLine && peer && !peer.destroyed) {
             if (peer.disconnected) peer.reconnect();
             const newConn = peer.connect(p2pTransferState.targetId, { reliable: true });
@@ -906,7 +928,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startP2PReceive(targetId) {
         isCancelled = false;
-        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false };
+        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false, reconnectAttempts: 0 };
         showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
 
         peer = new Peer({
@@ -938,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
         conn.on('open', () => {
             clearTimeout(connectionTimeout);
             UI.progressArea.classList.remove('hidden');
+            p2pTransferState.reconnectAttempts = 0; 
 
             if (p2pTransferState.isReconnecting && p2pTransferState.bytesReceived > 0) {
                 UI.statusText.innerText = "Connection restored! Resuming download...";
@@ -995,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         UI.statusText.innerText = "File saved to your device!";
                         UI.resetBtn.innerText = "Start Over";
                         setStatusDot('green');
-                        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
+                        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
                         showToast("Download Complete!", "success");
                     } catch (err) {
                         showToast("Error saving the file.", "error");
