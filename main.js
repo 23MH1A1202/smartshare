@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
 
                 } else if (payload.type === 'ack') {
-                    if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused")) {
+                    if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("restored") || UI.statusText.innerText.includes("Attempting")) {
                         const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                         UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                         if (UI.progressText) UI.progressText.innerText = "Sending...";
@@ -970,6 +970,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 conn.send({ type: 'ack', bytesReceived: 0 });
 
             } else if (payload.type === 'chunk') {
+                if (UI.statusText.innerText.includes("restored") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("Attempting") || UI.statusText.innerText.includes("Reconnecting")) {
+                    const mbSize = (p2pTransferState.meta.size / (1024 * 1024)).toFixed(2);
+                    UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
+                    if (UI.progressText) UI.progressText.innerText = "Downloading...";
+                    setStatusDot('green');
+                }
+
                 const chunkData = payload.data;
                 p2pTransferState.buffer.push(chunkData);
                 p2pTransferState.bytesReceived += (chunkData.byteLength || chunkData.size || chunkData.length || 0);
