@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
 
                 } else if (payload.type === 'ack') {
-                    if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("restored") || UI.statusText.innerText.includes("Attempting")) {
+                    if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("Restored")) {
                         const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                         UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                         if (UI.progressText) UI.progressText.innerText = "Sending...";
@@ -732,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 
                 } else if (payload.type === 'resume') {
-                    UI.shareOptions.classList.add('hidden'); 
+                    UI.shareOptions.classList.add('hidden');
                     const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                     UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Sending...";
@@ -760,12 +760,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function sendNextChunk(conn, file, offset) {
-        const chunkSize = 128 * 1024; 
+        const chunkSize = 128 * 1024;
         const reader = new FileReader();
         reader.onload = (e) => {
-            if (!isTransferring || isCancelled) return; 
+            if (!isTransferring || isCancelled) return;
             conn.send({ type: 'chunk', data: e.target.result });
-            
+
             if (offset + e.target.result.byteLength >= file.size) {
                 if(UI.progressText) UI.progressText.innerText = "Finishing...";
                 UI.statusText.innerText = "Waiting for them to finish downloading... Please don't close.";
@@ -826,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         } catch(e) { }
-        
+
         startP2PReceive(targetId);
     }
 
@@ -879,7 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             if (isCancelled) return;
-            window.open(data.url, '_blank'); 
+            window.open(data.url, '_blank');
             if (data.isOneTime) {
                 await purgeCloudFile(docId, data.storagePath);
             }
@@ -892,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function attemptReconnect() {
         if (isCancelled) return;
         clearTimeout(reconnectTimer);
-        
+
         if (navigator.onLine && peer && !peer.destroyed) {
             if (peer.disconnected) peer.reconnect();
             const newConn = peer.connect(p2pTransferState.targetId, { reliable: true });
@@ -906,7 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isCancelled = false;
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false };
         showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
-        
+
         peer = new Peer({
             config: {
                 'iceServers': [
@@ -922,9 +922,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 45000);
 
         peer.on('open', () => {
-            if (currentConnection || p2pTransferState.isReconnecting) {
-                return;
-            }
             const conn = peer.connect(targetId, { reliable: true });
             setupReceiverConnection(conn);
         });
@@ -939,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
         conn.on('open', () => {
             clearTimeout(connectionTimeout);
             UI.progressArea.classList.remove('hidden');
-            
+
             if (p2pTransferState.isReconnecting && p2pTransferState.bytesReceived > 0) {
                 UI.statusText.innerText = "Connection restored! Resuming download...";
                 if (UI.progressText) UI.progressText.innerText = "Downloading...";
@@ -953,24 +950,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         conn.on('data', (payload) => {
-            if (!isTransferring || isCancelled) return; 
+            if (!isTransferring || isCancelled) return;
 
             if (payload.type === 'transfer-cancelled') {
                 showToast("The sender cancelled the transfer.", "error");
                 resetApp();
-            
+
             } else if (payload.type === 'metadata') {
-                if (p2pTransferState.isReconnecting) return; 
-                
+                if (p2pTransferState.isReconnecting) return;
+
                 p2pTransferState.meta = payload;
                 UI.fileName.innerText = payload.name;
                 const mbSize = (payload.size / (1024 * 1024)).toFixed(2);
                 UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
-                
+
                 conn.send({ type: 'ack', bytesReceived: 0 });
 
             } else if (payload.type === 'chunk') {
-                if (UI.statusText.innerText.includes("restored") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("Attempting") || UI.statusText.innerText.includes("Reconnecting")) {
+                if (UI.statusText.innerText.includes("Restored") || UI.statusText.innerText.includes("reconnect") || UI.statusText.innerText.includes("paused")) {
                     const mbSize = (p2pTransferState.meta.size / (1024 * 1024)).toFixed(2);
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Downloading...";
@@ -980,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const chunkData = payload.data;
                 p2pTransferState.buffer.push(chunkData);
                 p2pTransferState.bytesReceived += (chunkData.byteLength || chunkData.size || chunkData.length || 0);
-                
+
                 updateProgress(p2pTransferState.bytesReceived, p2pTransferState.meta.size);
 
                 if (p2pTransferState.bytesReceived >= p2pTransferState.meta.size) {
@@ -1009,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         conn.on('close', () => {
             if (isCancelled) return;
-            
+
             if (p2pTransferState.bytesReceived > 0 && p2pTransferState.bytesReceived < p2pTransferState.meta.size) {
                 p2pTransferState.isReconnecting = true;
                 showToast("Connection dropped. Auto-reconnecting...", "info");
@@ -1037,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateProgress(current, total) {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
-        if (percent > 100) percent = 100; 
+        if (percent > 100) percent = 100;
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
     }
@@ -1051,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url); 
+        URL.revokeObjectURL(url);
     }
 
     UI.openModalBtn.addEventListener('click', () => {
