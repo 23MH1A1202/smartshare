@@ -30,6 +30,9 @@ window.onerror = function(message) {
 let transferMode = 'p2p'; 
 let cloudTimerInterval = null;
 
+// 🌟 NEW: Persistent State for Auto-Resume
+let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
+
 function initializeTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
@@ -251,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
             const card = document.createElement('div');
-            // 🌟 FIXED: Removed horizontal scroll layout, replaced with Grid and Flex columns
             card.className = "cloud-file-card bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 flex flex-col";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             
@@ -424,6 +426,9 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(connectionTimeout);
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         selectedFiles = [];
+        
+        // 🌟 NEW: Clear Auto-Resume State
+        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
 
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
@@ -506,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showTransferScreen(file.name, "Preparing link share...");
         UI.progressArea.classList.remove('hidden');
 
-        // 🌟 FIXED: Force custom Cloud code to uppercase immediately when saving
         let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
         const fileId = rawCode || generateShortCode();
 
@@ -586,6 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    // 🌟 ENHANCED SENDER: PERFECT SYNC AND AUTO-RESUME
     function startP2PTransfer(file) {
         if (!file) return;
 
@@ -624,8 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
+            
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
+            setStatusDot('green');
 
             conn.on('data', (payload) => {
                 if (payload.type === 'transfer-complete') {
@@ -638,14 +645,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.resetBtn.innerText = "Start Over";
                     setStatusDot('green');
                     showToast("Transfer Complete!", "success");
+                
+                // 🌟 SENDER SYNC: Updates progress exactly based on Receiver's response!
+                } else if (payload.type === 'ack') {
+                    updateProgress(payload.bytesReceived, fileToSend.size);
+                    if (payload.bytesReceived < fileToSend.size) {
+                        sendNextChunk(conn, fileToSend, payload.bytesReceived);
+                    }
+                
+                // 🌟 SENDER RESUME: Jumps to the exact missing byte to continue!
+                } else if (payload.type === 'resume') {
+                    UI.statusText.innerText = `Connection Restored! Resuming...`;
+                    setStatusDot('green');
+                    updateProgress(payload.offset, fileToSend.size);
+                    sendNextChunk(conn, fileToSend, payload.offset);
                 }
             });
 
-            conn.on('open', () => streamFileToReceiver(conn, fileToSend));
+            conn.on('open', () => {
+                // Send metadata, wait for the receiver to send an 'ack' to start chunk 1!
+                conn.send({ type: 'metadata', name: fileToSend.name, size: fileToSend.size, fileType: fileToSend.type });
+            });
+
             conn.on('close', () => {
                 if(isTransferring) {
-                    showToast("The other person disconnected.", "error");
-                    resetApp();
+                    UI.statusText.innerText = "Connection lost! Waiting for receiver to auto-reconnect...";
+                    setStatusDot('amber');
+                    // DO NOT RESET APP! Wait for them to reconnect.
                 }
             });
         });
@@ -653,27 +679,20 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-    function streamFileToReceiver(conn, file) {
-        const chunkSize = 64 * 1024; 
-        let offset = 0;
-        conn.send({ type: 'metadata', name: file.name, size: file.size, fileType: file.type });
-
+    // 🌟 SENDER CHUNKING: Stop-and-Wait Flow Control
+    function sendNextChunk(conn, file, offset) {
+        const chunkSize = 128 * 1024; // 128 KB for optimal WebRTC speeds
         const reader = new FileReader();
         reader.onload = (e) => {
             if (!isTransferring) return; 
             conn.send({ type: 'chunk', data: e.target.result });
-            offset += e.target.result.byteLength;
-            updateProgress(offset, file.size);
-
-            if (offset < file.size) {
-                setTimeout(readNext, 5); 
-            } else {
+            
+            if (offset + e.target.result.byteLength >= file.size) {
                 if(UI.progressText) UI.progressText.innerText = "Finishing...";
                 UI.statusText.innerText = "Waiting for them to finish downloading... Please don't close.";
             }
         };
-        const readNext = () => reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
-        readNext();
+        reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
     }
 
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
@@ -687,7 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 🌟 FIXED: Ensure ?c url codes are forced to uppercase
     if (window.location.search.includes('?c=')) {
         const cloudId = new URLSearchParams(window.location.search).get('c');
         if(cloudId) {
@@ -790,8 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 🌟 ENHANCED RECEIVER: SYNC AND AUTO-RECONNECT
     function startP2PReceive(targetId) {
+        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false };
         showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
+        
         peer = new Peer({
             config: {
                 'iceServers': [
@@ -808,64 +829,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
         peer.on('open', () => {
             const conn = peer.connect(targetId, { reliable: true });
-            currentConnection = conn;
-            isTransferring = true;
+            setupReceiverConnection(conn);
+        });
 
-            let receivedBuffer = [];
-            let fileMeta = null;
-            let bytesReceived = 0;
+        setupPeerErrorHandling(peer);
+    }
 
-            conn.on('open', () => {
-                clearTimeout(connectionTimeout);
-                UI.progressArea.classList.remove('hidden');
+    function setupReceiverConnection(conn) {
+        currentConnection = conn;
+        isTransferring = true;
+
+        conn.on('open', () => {
+            clearTimeout(connectionTimeout);
+            UI.progressArea.classList.remove('hidden');
+            
+            // 🌟 RECEIVER RESUME: If we dropped and reconnected, request missing bytes
+            if (p2pTransferState.isReconnecting && p2pTransferState.bytesReceived > 0) {
+                UI.statusText.innerText = "Connection restored! Resuming download...";
+                setStatusDot('green');
+                conn.send({ type: 'resume', offset: p2pTransferState.bytesReceived });
+            } else {
                 if(UI.progressText) UI.progressText.innerText = "Downloading...";
                 UI.statusText.innerText = "Connected. Waiting for file...";
-            });
+                setStatusDot('green');
+            }
+        });
 
-            conn.on('data', (payload) => {
-                if (!isTransferring) return; 
+        conn.on('data', (payload) => {
+            if (!isTransferring) return; 
 
-                if (payload.type === 'metadata') {
-                    fileMeta = payload;
-                    UI.fileName.innerText = fileMeta.name;
-                    const mbSize = (fileMeta.size / (1024 * 1024)).toFixed(2);
-                    UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
-                } else if (payload.type === 'chunk') {
-                    const chunkData = payload.data;
-                    receivedBuffer.push(chunkData);
-                    bytesReceived += chunkData.byteLength || chunkData.size || chunkData.length || 0;
-                    updateProgress(bytesReceived, fileMeta.size);
+            if (payload.type === 'metadata') {
+                p2pTransferState.meta = payload;
+                UI.fileName.innerText = payload.name;
+                const mbSize = (payload.size / (1024 * 1024)).toFixed(2);
+                UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
+                
+                // 🌟 FLOW CONTROL: Ask Sender for the first chunk
+                conn.send({ type: 'ack', bytesReceived: 0 });
 
-                    if (bytesReceived >= fileMeta.size) {
-                        isTransferring = false;
-                        try {
-                            saveFile(receivedBuffer, fileMeta);
-                            conn.send({ type: 'transfer-complete' });
+            } else if (payload.type === 'chunk') {
+                const chunkData = payload.data;
+                p2pTransferState.buffer.push(chunkData);
+                p2pTransferState.bytesReceived += (chunkData.byteLength || chunkData.size || chunkData.length || 0);
+                
+                updateProgress(p2pTransferState.bytesReceived, p2pTransferState.meta.size);
 
-                            UI.progressArea.classList.add('hidden');
-                            UI.successArea.classList.remove('hidden');
-                            UI.successArea.classList.add('flex');
-                            UI.successText.innerText = "Received";
-                            UI.statusText.innerText = "File saved to your device!";
-                            UI.resetBtn.innerText = "Start Over";
-                            setStatusDot('green');
-                            showToast("Download Complete!", "success");
-                        } catch (err) {
-                            showToast("Error saving the file.", "error");
-                        }
+                if (p2pTransferState.bytesReceived >= p2pTransferState.meta.size) {
+                    isTransferring = false;
+                    try {
+                        saveFile(p2pTransferState.buffer, p2pTransferState.meta);
+                        conn.send({ type: 'transfer-complete' });
+
+                        UI.progressArea.classList.add('hidden');
+                        UI.successArea.classList.remove('hidden');
+                        UI.successArea.classList.add('flex');
+                        UI.successText.innerText = "Received";
+                        UI.statusText.innerText = "File saved to your device!";
+                        UI.resetBtn.innerText = "Start Over";
+                        setStatusDot('green');
+                        p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false };
+                        showToast("Download Complete!", "success");
+                    } catch (err) {
+                        showToast("Error saving the file.", "error");
                     }
+                } else {
+                    // 🌟 FLOW CONTROL: Ask Sender for the next chunk
+                    conn.send({ type: 'ack', bytesReceived: p2pTransferState.bytesReceived });
                 }
-            });
+            }
+        });
 
-            conn.on('close', () => {
+        conn.on('close', () => {
+            // 🌟 AUTO-RECONNECT: If we haven't finished downloading, try to connect again!
+            if (p2pTransferState.bytesReceived > 0 && p2pTransferState.bytesReceived < p2pTransferState.meta.size) {
+                p2pTransferState.isReconnecting = true;
+                showToast("Connection dropped. Auto-reconnecting...", "info");
+                UI.statusText.innerText = "Connection lost! Attempting to reconnect...";
+                setStatusDot('amber');
+                
+                // Ping sender every 3 seconds
+                setTimeout(() => {
+                    if (peer && !peer.destroyed) {
+                        const newConn = peer.connect(p2pTransferState.targetId, { reliable: true });
+                        setupReceiverConnection(newConn);
+                    }
+                }, 3000);
+            } else {
                 if(isTransferring) {
                     showToast("The sender disconnected.", "error");
                     resetApp();
                 }
-            });
+            }
         });
-
-        setupPeerErrorHandling(peer);
     }
 
     function setupPeerErrorHandling(peerInstance) {
@@ -873,7 +928,11 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(connectionTimeout);
             let errMsg = "An unknown network error occurred.";
             switch(err.type) {
-                case 'peer-unavailable': errMsg = "Code not found, or the sender left."; break;
+                case 'peer-unavailable': 
+                    // If we are auto-reconnecting, don't fail out. Just keep trying.
+                    if (p2pTransferState.isReconnecting) return;
+                    errMsg = "Code not found, or the sender left."; 
+                    break;
                 case 'network':
                 case 'disconnected': errMsg = "Lost connection to the network."; break;
                 case 'webrtc': errMsg = "Connection blocked. Check your firewall or VPN."; break;
