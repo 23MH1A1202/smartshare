@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto sm:min-h-screen sm:flex sm:items-center sm:justify-center transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto transition-colors duration-300">
     <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#f1f5f9,0,#cbd5e1_100%)] dark:bg-[radial-gradient(circle_at_50%_50%,#1e293b,0,#020617_100%)] transition-colors duration-300"></div>
     <div class="bg-blob fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/15 blur-[130px] rounded-full pointer-events-none"></div>
     <div class="bg-blob-2 fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/20 dark:bg-emerald-600/15 blur-[130px] rounded-full pointer-events-none"></div>
@@ -28,8 +28,8 @@
 
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
-    <main class="flex flex-col items-center justify-center min-h-[100dvh] sm:min-h-0 py-12 px-4 w-full fade-up">
-        <header class="text-center mb-8 sm:mb-10 mt-8 sm:mt-0">
+    <main class="flex flex-col items-center min-h-screen pt-12 sm:pt-20 px-4 w-full fade-up pb-20">
+        <header class="text-center mb-8 sm:mb-10">
             <div class="flex items-center justify-center gap-3 mb-2">
                 <div class="relative w-10 h-10 flex items-center justify-center">
                     <svg class="logo-icon w-10 h-10 text-blue-500 dark:text-blue-400 opacity-30 absolute" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="1" stroke-dasharray="4 3"/></svg>
@@ -40,7 +40,7 @@
             <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base transition-colors">Simple &amp; Fast File Sharing — No Account Needed</p>
         </header>
 
-        <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative z-10">
+        <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative z-10 mb-16 shadow-2xl">
             <div id="initial-state" class="flex flex-col items-center text-center w-full">
                 <div class="mode-tabs flex bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl mb-5 w-full max-w-[320px] mx-auto shadow-inner border border-slate-200/60 dark:border-slate-700/60 relative z-20" data-active="p2p">
                     <div class="tab-slider"></div>
@@ -154,13 +154,12 @@
 
                 <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
                     <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-600/10 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
-                        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 6L9 17l-5-5"></path>
-                        </svg>
+                        <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
                     </div>
                     <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
                     <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Transfer completed successfully</p>
                 </div>
+
                 <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
                     <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5 border border-slate-100 dark:border-none ring-1 ring-slate-200/50">
                         <div id="qr-container"></div>
@@ -179,6 +178,66 @@
                 </div>
             </div>
         </div>
+
+        <section id="features-info" class="w-full max-w-2xl mt-12 flex flex-col gap-12 pb-10">
+            <div class="text-center space-y-4">
+                <h2 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">What is SmartShare?</h2>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base max-w-xl mx-auto italic">
+                    We are a free, independent hybrid file-sharing service. Our mission is to make sure people keep their data safely in their own hands, exactly as it should be.
+                </p>
+                <div class="w-12 h-1 bg-blue-500 rounded-full mx-auto mt-6"></div>
+            </div>
+
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Straight from your device</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    When using Direct Mode, we store absolutely nothing online. Your files never touch a server. Simply close your browser tab to stop sending. We use WebRTC technology to find the shortest path, meaning your data might not even leave the building.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">True Auto-Resume & Perfect Sync</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    Unstable internet? No problem. SmartShare uses military-grade Stop-and-Wait flow control. If your Wi-Fi drops halfway through a massive file, the transfer pauses. The moment you reconnect, it resumes exactly on the byte it left off.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">No file size limits</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    Because we don't store your data in Direct Mode, there are zero limits on file sizes. Share gigabytes of 4K video or massive project folders instantly. You are only limited by your own data usage and hard drive space.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Self-Cleaning Cloud Links</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    Need to send a file to someone who is currently offline? Switch to Link Share. We vault your file securely in the cloud. You set the expiration timer or limit it to a single download, and our servers automatically shred the file the second time runs out. 
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Low environmental impact</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    By bypassing bulky, energy-hungry server farms and routing data directly between phones and laptops, you have a much smaller carbon footprint than when using traditional big-tech cloud storage providers.
+                </p>
+            </div>
+        </section>
 
         <footer class="mt-8 text-center z-10 flex flex-col gap-3 items-center">
             <button id="my-cloud-files-btn" class="btn-ripple text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-50/80 dark:bg-blue-900/20 hover:bg-blue-100/80 dark:hover:bg-blue-900/30 border border-blue-200/70 dark:border-blue-800/50 shadow-sm hover:shadow active:scale-[0.97] backdrop-blur-sm">
