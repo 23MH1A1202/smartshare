@@ -34,6 +34,10 @@ let isCancelled = false;
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
 
+// 🌟 SPEEDOMETER VARIABLES
+let lastSpeedBytes = 0;
+let lastSpeedTime = Date.now();
+
 function initializeTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
@@ -71,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         progressText: document.getElementById('progress-text'),
+        transferSpeed: document.getElementById('transfer-speed'), // 🌟 NEW SPEED UI REF
         successArea: document.getElementById('success-area'),
         successText: document.getElementById('success-text'),
         qrContainer: document.getElementById('qr-container'),
@@ -118,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.statusText.innerText = "Internet disconnected! Transfer paused...";
             setStatusDot('red');
             if (UI.progressText) UI.progressText.innerText = "Paused...";
+            if (UI.transferSpeed) UI.transferSpeed.innerText = "0.0 MB/s";
         }
     });
 
@@ -467,6 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedFiles = [];
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 
+        // 🌟 RESET SPEEDOMETER
+        lastSpeedBytes = 0;
+        lastSpeedTime = Date.now();
+        if (UI.transferSpeed) UI.transferSpeed.innerText = '';
+
         UI.fileInput.value = '';
         UI.receiveCodeInput.value = '';
         UI.cloudCustomCode.value = '';
@@ -549,6 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showTransferScreen(file.name, "Preparing link share...");
         UI.progressArea.classList.remove('hidden');
 
+        lastSpeedBytes = 0;
+        lastSpeedTime = Date.now();
+
         let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
         const fileId = rawCode || generateShortCode();
 
@@ -580,6 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async () => {
                 try {
                     UI.statusText.innerText = `Generating your secure link...`;
+                    if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     
                     let expireMs = 60 * 60 * 1000; 
@@ -702,6 +717,10 @@ document.addEventListener('DOMContentLoaded', () => {
         peer.on('connection', (conn) => {
             currentConnection = conn;
             isTransferring = true;
+            
+            lastSpeedBytes = 0;
+            lastSpeedTime = Date.now();
+
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
@@ -719,6 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.successText.innerText = "Sent";
                     UI.statusText.innerText = "File sent successfully!";
                     UI.resetBtn.innerText = "Start Over";
+                    if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                     setStatusDot('green');
                     showToast("Transfer Complete!", "success");
                 
@@ -746,6 +766,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (UI.progressText) UI.progressText.innerText = "Sending...";
                     setStatusDot('green');
                     
+                    lastSpeedBytes = payload.offset;
+                    lastSpeedTime = Date.now();
+
                     updateProgress(payload.offset, fileToSend.size);
                     sendNextChunk(conn, fileToSend, payload.offset);
                 }
@@ -759,14 +782,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isCancelled) return;
                 if (isTransferring) {
                     UI.statusText.innerText = "Connection lost! Waiting for receiver to auto-reconnect...";
+                    if (UI.transferSpeed) UI.transferSpeed.innerText = "0.0 MB/s";
                     setStatusDot('amber');
-
-                    setTimeout(() => {
-                        if (isTransferring && (!currentConnection || !currentConnection.open)) {
-                            showToast("The receiver permanently disconnected.", "error");
-                            resetApp();
-                        }
-                    }, 25000);
                 }
             });
         });
@@ -774,19 +791,26 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-    function sendNextChunk(conn, file, offset) {
-        const chunkSize = 128 * 1024;
-        const reader = new FileReader();
-        reader.onload = (e) => {
+    // 🌟 INCREASED CHUNK SIZE TO 512KB FOR MASSIVE SPEED BOOST
+    async function sendNextChunk(conn, file, offset) {
+        const chunkSize = 512 * 1024; 
+        try {
             if (!isTransferring || isCancelled) return;
-            conn.send({ type: 'chunk', data: e.target.result });
+            
+            const slice = file.slice(offset, offset + chunkSize);
+            const buffer = await slice.arrayBuffer();
+            
+            if (!isTransferring || isCancelled) return;
+            conn.send({ type: 'chunk', data: buffer });
 
-            if (offset + e.target.result.byteLength >= file.size) {
+            if (offset + buffer.byteLength >= file.size) {
                 if(UI.progressText) UI.progressText.innerText = "Finishing...";
                 UI.statusText.innerText = "Waiting for them to finish downloading... Please don't close.";
+                if (UI.transferSpeed) UI.transferSpeed.innerText = '';
             }
-        };
-        reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
+        } catch (e) {
+            console.error("File Read Error", e);
+        }
     }
 
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
@@ -852,6 +876,9 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.fileName.innerText = data.name;
         UI.statusText.innerText = `Fetching file...`;
 
+        lastSpeedBytes = 0;
+        lastSpeedTime = Date.now();
+
         try {
             const response = await fetch(data.url);
             if (!response.ok) throw new Error("Network Error");
@@ -890,6 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.successText.innerText = "Received";
             UI.statusText.innerText = "File saved to your device!";
             UI.resetBtn.innerText = "Start Over";
+            if (UI.transferSpeed) UI.transferSpeed.innerText = '';
             setStatusDot('green');
             showToast("Download Complete!", "success");
 
@@ -989,6 +1017,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mbSize = (payload.size / (1024 * 1024)).toFixed(2);
                 UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
 
+                lastSpeedBytes = 0;
+                lastSpeedTime = Date.now();
+
                 conn.send({ type: 'ack', bytesReceived: 0 });
 
             } else if (payload.type === 'chunk') {
@@ -997,6 +1028,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Downloading...";
                     setStatusDot('green');
+                    
+                    lastSpeedBytes = p2pTransferState.bytesReceived;
+                    lastSpeedTime = Date.now();
                 }
 
                 const chunkData = payload.data;
@@ -1017,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         UI.successText.innerText = "Received";
                         UI.statusText.innerText = "File saved to your device!";
                         UI.resetBtn.innerText = "Start Over";
+                        if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                         setStatusDot('green');
                         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
                         showToast("Download Complete!", "success");
@@ -1037,6 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast("Connection dropped. Auto-reconnecting...", "info");
                 UI.statusText.innerText = "Connection lost! Attempting to reconnect...";
                 setStatusDot('amber');
+                if (UI.transferSpeed) UI.transferSpeed.innerText = "0.0 MB/s";
                 attemptReconnect();
             } else if (isTransferring) {
                 showToast("The sender disconnected.", "error");
@@ -1056,12 +1092,28 @@ document.addEventListener('DOMContentLoaded', () => {
         setStatusDot('blue');
     }
 
+    // 🌟 SMART SPEEDOMETER LOGIC
     function updateProgress(current, total) {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
         if (percent > 100) percent = 100;
         UI.progressBar.style.width = percent + "%";
         UI.percentage.innerText = percent + "%";
+
+        const now = Date.now();
+        const timeDiff = now - lastSpeedTime;
+        
+        if (timeDiff >= 1000) { 
+            if (timeDiff < 5000) { 
+                const bytesDiff = current - lastSpeedBytes;
+                const speedMBps = (bytesDiff / (1024 * 1024) / (timeDiff / 1000)).toFixed(1);
+                if (speedMBps >= 0 && UI.transferSpeed) {
+                    UI.transferSpeed.innerText = `${speedMBps} MB/s`;
+                }
+            }
+            lastSpeedBytes = current;
+            lastSpeedTime = now;
+        }
     }
 
     function saveFile(bufferArray, meta) {
