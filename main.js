@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar: document.getElementById('progress-bar'),
         statusText: document.getElementById('status-text'),
         progressText: document.getElementById('progress-text'),
-        transferSpeed: document.getElementById('transfer-speed'), // 🌟 NEW SPEED UI REF
+        transferSpeed: document.getElementById('transfer-speed'),
         successArea: document.getElementById('success-area'),
         successText: document.getElementById('success-text'),
         qrContainer: document.getElementById('qr-container'),
@@ -473,7 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedFiles = [];
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 
-        // 🌟 RESET SPEEDOMETER
         lastSpeedBytes = 0;
         lastSpeedTime = Date.now();
         if (UI.transferSpeed) UI.transferSpeed.innerText = '';
@@ -718,9 +717,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentConnection = conn;
             isTransferring = true;
             
-            lastSpeedBytes = 0;
-            lastSpeedTime = Date.now();
-
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
@@ -747,6 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
 
                 } else if (payload.type === 'ack') {
+                    if (payload.bytesReceived === 0) {
+                        lastSpeedBytes = 0;
+                        lastSpeedTime = Date.now();
+                    }
+
                     if (UI.statusText.innerText.includes("Reconnecting") || UI.statusText.innerText.includes("paused") || UI.statusText.innerText.includes("Restored")) {
                         const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
                         UI.statusText.innerText = `Sending (${mbSize} MB)...`;
@@ -791,7 +792,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPeerErrorHandling(peer);
     }
 
-    // 🌟 INCREASED CHUNK SIZE TO 512KB FOR MASSIVE SPEED BOOST
     async function sendNextChunk(conn, file, offset) {
         const chunkSize = 512 * 1024; 
         try {
@@ -1103,11 +1103,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = Date.now();
         const timeDiff = now - lastSpeedTime;
         
-        if (timeDiff >= 1000) { 
-            if (timeDiff < 5000) { 
+        // 🌟 FIXED: Update every 250ms for a buttery smooth live speedometer
+        if (timeDiff >= 250) {
+            if (timeDiff < 5000 && current >= lastSpeedBytes) {
                 const bytesDiff = current - lastSpeedBytes;
                 const speedMBps = (bytesDiff / (1024 * 1024) / (timeDiff / 1000)).toFixed(1);
-                if (speedMBps >= 0 && UI.transferSpeed) {
+                
+                if (UI.transferSpeed && speedMBps > 0) {
                     UI.transferSpeed.innerText = `${speedMBps} MB/s`;
                 }
             }
