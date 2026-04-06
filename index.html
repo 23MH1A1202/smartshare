@@ -142,12 +142,16 @@
                             <span class="connecting-dots"><span></span><span></span><span></span></span>
                             <span id="progress-text" class="text-slate-600 dark:text-slate-300">Preparing...</span>
                         </div>
-                        <span id="percentage" class="text-blue-600 dark:text-blue-400 font-bold tabular-nums">0%</span>
+                        <div class="text-right flex flex-col items-end">
+                            <span id="percentage" class="text-blue-600 dark:text-blue-400 font-bold tabular-nums leading-none">0%</span>
+                            <span id="transfer-speed" class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1 h-3"></span>
+                        </div>
                     </div>
                     <div class="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300/40 dark:border-white/5 shadow-inner">
                         <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-400 rounded-full w-0 relative"></div>
                     </div>
                 </div>
+
                 <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
                     <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-600/10 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
                         <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
