@@ -101,7 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cloudModalCard: document.getElementById('cloud-modal-card'),
         openCloudModalBtn: document.getElementById('my-cloud-files-btn'),
         closeCloudModalBtn: document.getElementById('close-cloud-modal-btn'),
-        cloudFilesList: document.getElementById('cloud-files-list')
+        cloudFilesList: document.getElementById('cloud-files-list'),
+        qrScanBtn: document.getElementById('qr-scan-btn'),
+        qrScannerModal: document.getElementById('qr-scanner-modal'),
+        qrVideo: document.getElementById('qr-video'),
+        qrCanvas: document.getElementById('qr-canvas'),
+        qrScanStatus: document.getElementById('qr-scan-status'),
+        closeQrScanner: document.getElementById('close-qr-scanner')
     };
 
     let peer = null;
@@ -110,6 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
     let selectedFiles = [];
+
+    let qrScanActive = false;
+    let qrStream = null;
+    let qrAnimFrame = null;
 
     window.addEventListener('beforeunload', () => {
         isCancelled = true;
@@ -1149,4 +1159,93 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.devModal.classList.remove('flex');
         }, 300);
     });
+
+    // ── QR SCANNER ──────────────────────────────────────────────
+    function startQRScanner() {
+        if (!UI.qrScannerModal || !UI.qrVideo || !UI.qrCanvas) return;
+        UI.qrScannerModal.classList.remove('hidden');
+        UI.qrScannerModal.classList.add('flex');
+        qrScanActive = true;
+        if (UI.qrScanStatus) UI.qrScanStatus.innerText = "Starting camera…";
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                qrStream = stream;
+                UI.qrVideo.srcObject = stream;
+                UI.qrVideo.addEventListener('loadedmetadata', () => {
+                    if (UI.qrScanStatus) UI.qrScanStatus.innerText = "Align QR code within the frame";
+                    requestScanFrame();
+                }, { once: true });
+            })
+            .catch(() => {
+                stopQRScanner();
+                showToast("Camera access denied. Please allow camera permissions.", "error");
+            });
+    }
+
+    function requestScanFrame() {
+        if (!qrScanActive) return;
+        qrAnimFrame = requestAnimationFrame(() => {
+            if (!qrScanActive || !UI.qrVideo || !UI.qrCanvas) return;
+            const video = UI.qrVideo;
+            const canvas = UI.qrCanvas;
+            if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(video, 0, 0);
+                try {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data) {
+                        stopQRScanner();
+                        processQRCodeData(code.data);
+                        return;
+                    }
+                } catch (e) { }
+            }
+            requestScanFrame();
+        });
+    }
+
+    function stopQRScanner() {
+        qrScanActive = false;
+        if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
+        if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
+        if (UI.qrVideo) UI.qrVideo.srcObject = null;
+        if (UI.qrScannerModal) {
+            UI.qrScannerModal.classList.add('hidden');
+            UI.qrScannerModal.classList.remove('flex');
+        }
+    }
+
+    function processQRCodeData(data) {
+        let code = data.trim().toUpperCase();
+        try {
+            const url = new URL(data);
+            const cParam = url.searchParams.get('c');
+            if (cParam) {
+                code = cParam.toUpperCase();
+            } else if (url.hash && url.hash.length > 1) {
+                code = url.hash.substring(1).toUpperCase();
+            }
+        } catch (e) { }
+        UI.receiveCodeInput.value = code;
+        showToast("QR code scanned!", "success");
+        setTimeout(() => UI.receiveBtn.click(), 350);
+    }
+
+    if (UI.qrScanBtn) {
+        UI.qrScanBtn.addEventListener('click', () => {
+            if (typeof jsQR !== 'function') {
+                showToast("QR scanner not available. Please reload the page.", "error");
+                return;
+            }
+            startQRScanner();
+        });
+    }
+
+    if (UI.closeQrScanner) {
+        UI.closeQrScanner.addEventListener('click', stopQRScanner);
+    }
 });
