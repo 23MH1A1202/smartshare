@@ -1202,7 +1202,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         processQRCodeData(code.data);
                         return;
                     }
-                } catch (e) { }
+                } catch (e) {
+                    // Frame decode errors are normal (e.g. partially loaded frame); continue scanning
+                }
             }
             requestScanFrame();
         });
@@ -1229,7 +1231,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (url.hash && url.hash.length > 1) {
                 code = url.hash.substring(1).toUpperCase();
             }
-        } catch (e) { }
+        } catch (e) {
+            // QR data is not a URL — use the raw value as the code
+        }
         UI.receiveCodeInput.value = code;
         showToast("QR code scanned!", "success");
         setTimeout(() => UI.receiveBtn.click(), 350);
