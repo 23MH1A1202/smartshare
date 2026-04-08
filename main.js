@@ -1160,96 +1160,127 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-    // ── QR SCANNER ──────────────────────────────────────────────
-    function startQRScanner() {
-        if (!UI.qrScannerModal || !UI.qrVideo || !UI.qrCanvas) return;
-        UI.qrScannerModal.classList.remove('hidden');
-        UI.qrScannerModal.classList.add('flex');
-        qrScanActive = true;
-        if (UI.qrScanStatus) UI.qrScanStatus.innerText = "Starting camera…";
+    // ── QR SCANNER LOGIC ────────────────────────────────────────────── 
+let qrScanActive = false; 
+let qrStream = null; 
+let qrAnimFrame = null; 
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(stream => {
-                qrStream = stream;
-                UI.qrVideo.srcObject = stream;
-                UI.qrVideo.addEventListener('loadedmetadata', () => {
-                    if (UI.qrScanStatus) UI.qrScanStatus.innerText = "Align QR code within the frame";
-                    requestScanFrame();
-                }, { once: true });
-            })
-            .catch(() => {
-                stopQRScanner();
-                showToast("Camera access denied. Please allow camera permissions.", "error");
-            });
-    }
+// Grab elements directly to prevent UI object mapping errors
+const qrScanBtn = document.getElementById('qr-scan-btn');
+const qrScannerModal = document.getElementById('qr-scanner-modal');
+const qrVideo = document.getElementById('qr-video');
+const qrCanvas = document.getElementById('qr-canvas');
+const qrScanStatus = document.getElementById('qr-scan-status');
+const closeQrScanner = document.getElementById('close-qr-scanner');
+const receiveCodeInput = document.getElementById('receive-code-input');
+const receiveBtn = document.getElementById('receive-btn');
 
-    function requestScanFrame() {
-        if (!qrScanActive) return;
-        qrAnimFrame = requestAnimationFrame(() => {
-            if (!qrScanActive || !UI.qrVideo || !UI.qrCanvas) return;
-            const video = UI.qrVideo;
-            const canvas = UI.qrCanvas;
-            if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d', { willReadFrequently: true });
-                ctx.drawImage(video, 0, 0);
-                try {
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-                    if (code && code.data) {
-                        stopQRScanner();
-                        processQRCodeData(code.data);
-                        return;
-                    }
-                } catch (e) {
-                    // Frame decode errors are normal (e.g. partially loaded frame); continue scanning
-                }
-            }
-            requestScanFrame();
-        });
+function startQRScanner() { 
+    if (!qrScannerModal || !qrVideo || !qrCanvas) {
+        alert("Scanner Error: Could not find HTML elements.");
+        return; 
     }
+    
+    qrScannerModal.classList.remove('hidden'); 
+    qrScannerModal.classList.add('flex'); 
+    qrScanActive = true; 
+    if (qrScanStatus) qrScanStatus.innerText = "Starting camera…"; 
 
-    function stopQRScanner() {
-        qrScanActive = false;
-        if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
-        if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
-        if (UI.qrVideo) UI.qrVideo.srcObject = null;
-        if (UI.qrScannerModal) {
-            UI.qrScannerModal.classList.add('hidden');
-            UI.qrScannerModal.classList.remove('flex');
-        }
-    }
+    // Request camera permission
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) 
+        .then(stream => { 
+            qrStream = stream; 
+            qrVideo.srcObject = stream; 
+            qrVideo.addEventListener('loadedmetadata', () => { 
+                if (qrScanStatus) qrScanStatus.innerText = "Align QR code within the frame"; 
+                requestScanFrame(); 
+            }, { once: true }); 
+        }) 
+        .catch((err) => { 
+            stopQRScanner(); 
+            alert("Camera access denied or unavailable. Please allow camera permissions in your browser settings."); 
+            console.error("Camera Error:", err);
+        }); 
+} 
 
-    function processQRCodeData(data) {
-        let code = data.trim().toUpperCase();
-        try {
-            const url = new URL(data);
-            const cParam = url.searchParams.get('c');
-            if (cParam) {
-                code = cParam.toUpperCase();
-            } else if (url.hash && url.hash.length > 1) {
-                code = url.hash.substring(1).toUpperCase();
-            }
-        } catch (e) {
-            // QR data is not a URL — use the raw value as the code
-        }
-        UI.receiveCodeInput.value = code;
-        showToast("QR code scanned!", "success");
-        setTimeout(() => UI.receiveBtn.click(), 350);
-    }
+function requestScanFrame() { 
+    if (!qrScanActive) return; 
+    qrAnimFrame = requestAnimationFrame(() => { 
+        if (!qrScanActive || !qrVideo || !qrCanvas) return; 
+        
+        if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA && qrVideo.videoWidth > 0) { 
+            qrCanvas.width = qrVideo.videoWidth; 
+            qrCanvas.height = qrVideo.videoHeight; 
+            const ctx = qrCanvas.getContext('2d', { willReadFrequently: true }); 
+            ctx.drawImage(qrVideo, 0, 0); 
+            
+            try { 
+                const imageData = ctx.getImageData(0, 0, qrCanvas.width, qrCanvas.height); 
+                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' }); 
+                
+                if (code && code.data) { 
+                    stopQRScanner(); 
+                    processQRCodeData(code.data); 
+                    return; 
+                } 
+            } catch (e) { 
+                // Normal frame drop, keep scanning
+            } 
+        } 
+        requestScanFrame(); 
+    }); 
+} 
 
-    if (UI.qrScanBtn) {
-        UI.qrScanBtn.addEventListener('click', () => {
-            if (typeof jsQR !== 'function') {
-                showToast("QR scanner not available. Please reload the page.", "error");
-                return;
-            }
-            startQRScanner();
-        });
-    }
+function stopQRScanner() { 
+    qrScanActive = false; 
+    if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; } 
+    if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; } 
+    if (qrVideo) qrVideo.srcObject = null; 
+    if (qrScannerModal) { 
+        qrScannerModal.classList.add('hidden'); 
+        qrScannerModal.classList.remove('flex'); 
+    } 
+} 
 
-    if (UI.closeQrScanner) {
-        UI.closeQrScanner.addEventListener('click', stopQRScanner);
+function processQRCodeData(data) { 
+    let code = data.trim().toUpperCase(); 
+    try { 
+        const url = new URL(data); 
+        const cParam = url.searchParams.get('c'); 
+        if (cParam) { 
+            code = cParam.toUpperCase(); 
+        } else if (url.hash && url.hash.length > 1) { 
+            code = url.hash.substring(1).toUpperCase(); 
+        } 
+    } catch (e) { 
+        // Not a URL, use raw code
+    } 
+    
+    if (receiveCodeInput) receiveCodeInput.value = code; 
+    
+    // Check if you have a showToast function globally available, otherwise use alert
+    if (typeof showToast === 'function') {
+        showToast("QR code scanned!", "success"); 
+    } else {
+        alert("QR code scanned successfully!");
     }
-});
+    
+    setTimeout(() => {
+        if (receiveBtn) receiveBtn.click();
+    }, 350); 
+} 
+
+// Attach Event Listeners
+if (qrScanBtn) { 
+    qrScanBtn.addEventListener('click', () => { 
+        if (typeof jsQR !== 'function') { 
+            alert("QR scanner library is still loading. Please wait a second and try again."); 
+            return; 
+        } 
+        startQRScanner(); 
+    }); 
+} 
+
+if (closeQrScanner) { 
+    closeQrScanner.addEventListener('click', stopQRScanner); 
+}
