@@ -62,33 +62,6 @@ Live here:
 ├── icon-512.png
 └── CNAME              # Custom domain for GitHub Pages
 ```
-
----
-
-## Getting Started (Local)
-
-Because this project uses ES modules (`type="module"`), run it with a local server (not by opening `index.html` directly).
-
-### Option A: VS Code Live Server
-1. Install **Live Server**
-2. Right-click `index.html` → **Open with Live Server**
-
-### Option B: Python
-```bash
-python -m http.server 5500
-```
-Open:
-```text
-http://localhost:5500
-```
-
-### Option C: Node (http-server)
-```bash
-npx http-server -p 5500
-```
-
----
-
 ## How to Use
 
 ### 1) Direct Mode (Device-to-Device)
