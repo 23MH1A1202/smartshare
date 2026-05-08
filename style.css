@@ -49,7 +49,7 @@ html.dark .glass-panel {
   top: 6px;
   bottom: 6px;
   left: 6px;
-  width: calc((100% - 12px) / 2);
+  width: calc((100% - 12px) / 3); /* Changed from 2 to 3 */
   background: white;
   border-radius: 14px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255,255,255,0.9) inset;
@@ -65,6 +65,11 @@ html.dark .tab-slider {
 
 .mode-tabs[data-active="cloud"] .tab-slider {
   transform: translateX(100%);
+}
+
+/* Add this new rule for the 3rd tab */
+.mode-tabs[data-active="clipboard"] .tab-slider {
+  transform: translateX(200%);
 }
 
 /* --- INNER BORDER RADIUS --- */
