@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (transferMode === 'cloud') {
-            startCloudTransfer(finalFile);
+            (finalFile);
         } else {
             startP2PTransfer(finalFile);
         }
@@ -664,8 +664,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     navigator.clipboard.writeText(transferUrl);
                     showToast("Link copied to clipboard!", "success");
                 };
-            } catch (err) {
-                showToast("Could not generate link in database.", "error");
+        } catch (err) {
+                console.error("Firestore Error:", err);
+                showToast("Database Error: " + err.message, "error");
                 resetApp();
             }
         } else {
