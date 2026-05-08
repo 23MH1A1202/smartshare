@@ -219,10 +219,16 @@
             </button>
         </div>
        <div id="shared-textpad" contenteditable="true" data-placeholder="Type, paste text, drop links, or paste images here..." class="w-full bg-white dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-400/20 rounded-2xl p-4 text-slate-800 dark:text-slate-100 shadow-inner transition-all mb-4 text-sm sm:text-base leading-relaxed min-h-[150px] max-h-[350px] overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 break-words"></div>
-        <button id="copy-clipboard-btn" class="btn-ripple w-full py-3.5 bg-slate-800 dark:bg-slate-100 hover:bg-slate-700 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-            Copy to Device
-        </button>
+        <div class="flex gap-3 w-full">
+            <button id="copy-clipboard-btn" class="btn-ripple flex-[2] py-3.5 bg-slate-800 dark:bg-slate-100 hover:bg-slate-700 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                Copy to Device
+            </button>
+            <button id="clear-clipboard-btn" class="btn-ripple flex-[1] py-3.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 rounded-xl font-bold transition-all shadow-sm active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Clear
+            </button>
+        </div>
     </div>
 
 </div>
