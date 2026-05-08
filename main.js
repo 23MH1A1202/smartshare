@@ -1279,7 +1279,11 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.initial.classList.add('hidden');
             UI.clipboardActiveState.classList.remove('hidden');
             UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
-            UI.sharedTextpad.innerHTML = "";
+            
+            // Works for both textarea and contenteditable
+            if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
+            else UI.sharedTextpad.innerHTML = "";
+            
             UI.sharedTextpad.focus();
             showToast("Devices Synced!", "success");
 
@@ -1289,12 +1293,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentConnection && currentConnection.open) {
                     currentConnection.send({ type: 'heartbeat' });
                 }
-            }, 25000); // Pings every 25 seconds
+            }, 25000); 
         });
 
         conn.on('data', (payload) => {
             if (payload.type === 'clipboard-sync') {
-                UI.sharedTextpad.innerHTML = payload.html;
+                // BULLETPROOF: Accepts both old text and new html to prevent "undefined"
+                const incomingData = payload.html !== undefined ? payload.html : payload.text;
+                
+                if (UI.sharedTextpad.tagName === 'TEXTAREA') {
+                    UI.sharedTextpad.value = incomingData;
+                } else {
+                    UI.sharedTextpad.innerHTML = incomingData;
+                }
             } else if (payload.type === 'transfer-cancelled') {
                 clearInterval(clipboardHeartbeat);
                 showToast("The other device disconnected.", "info");
@@ -1305,7 +1316,6 @@ document.addEventListener('DOMContentLoaded', () => {
         conn.on('close', () => {
             clearInterval(clipboardHeartbeat);
             if(!isCancelled) {
-                // Instantly notifies if the other user closes the tab or drops wifi
                 showToast("The other device disconnected.", "error"); 
                 resetApp();
             }
@@ -1314,12 +1324,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- RICH TEXT, LINKS & IMAGE HANDLING ---
     
-    // 1. Sync on typing
-    UI.sharedTextpad.addEventListener('input', (e) => {
+    // Master Sync Function
+    function syncClipboardData() {
         if (currentConnection && currentConnection.open) {
-            currentConnection.send({ type: 'clipboard-sync', html: UI.sharedTextpad.innerHTML });
+            const currentData = UI.sharedTextpad.tagName === 'TEXTAREA' ? UI.sharedTextpad.value : UI.sharedTextpad.innerHTML;
+            // Send both formats to prevent version clashing
+            currentConnection.send({ type: 'clipboard-sync', html: currentData, text: currentData });
         }
-    });
+    }
+
+    // 1. Sync on typing
+    UI.sharedTextpad.addEventListener('input', syncClipboardData);
 
     // 2. Click to open links
     UI.sharedTextpad.addEventListener('click', (e) => {
@@ -1346,6 +1361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onload = (event) => {
                     const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm cursor-pointer" />`;
                     document.execCommand('insertHTML', false, imgHtml);
+                    setTimeout(syncClipboardData, 50); // Force sync update
                 };
                 reader.readAsDataURL(blob);
             }
@@ -1357,10 +1373,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const htmlText = pastedText
-                    .replace(/</g, "&lt;").replace(/>/g, "&gt;") // Sanitize
+                    .replace(/</g, "&lt;").replace(/>/g, "&gt;") 
                     .replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>')
-                    .replace(/\n/g, "<br>"); // Keep newlines
+                    .replace(/\n/g, "<br>"); 
                 document.execCommand('insertHTML', false, htmlText);
+                setTimeout(syncClipboardData, 50); // Force sync update
             }
         }
     });
@@ -1376,6 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onload = (event) => {
                     const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm" />`;
                     document.execCommand('insertHTML', false, imgHtml);
+                    setTimeout(syncClipboardData, 50); // Force sync update
                 };
                 reader.readAsDataURL(file);
             }
@@ -1385,14 +1403,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const htmlText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>').replace(/\n/g, "<br>");
                 document.execCommand('insertHTML', false, htmlText);
+                setTimeout(syncClipboardData, 50); // Force sync update
             }
         }
     });
 
     // 5. Copy out of the app
     UI.copyClipboardBtn.addEventListener('click', () => {
-        // Copies clean text (no html tags) to the user's system clipboard
-        navigator.clipboard.writeText(UI.sharedTextpad.innerText);
+        const textToCopy = UI.sharedTextpad.tagName === 'TEXTAREA' ? UI.sharedTextpad.value : UI.sharedTextpad.innerText;
+        navigator.clipboard.writeText(textToCopy);
         showToast("Copied to your device clipboard!", "success");
     });
 
