@@ -12,7 +12,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore(app); 
 
 let myOwnerId = localStorage.getItem('smartshare_owner_id');
 if (!myOwnerId) {
@@ -32,7 +32,6 @@ let isCancelled = false;
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
 
-// 🌟 SPEEDOMETER VARIABLES
 let lastSpeedBytes = 0;
 let lastSpeedTime = Date.now();
 
@@ -213,11 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function purgeCloudFile(fileId, storagePath) {
-    try {
-        await deleteDoc(doc(db, "links", fileId));
-        // We removed the Firebase storage deletion. Cloudinary will hold the file safely!
-    } catch (e) { }
-}
+        try {
+            await deleteDoc(doc(db, "links", fileId));
+        } catch (e) { }
+    }
 
     async function loadCloudManager() {
         UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">Fetching your files...</p>`;
@@ -544,139 +542,139 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (transferMode === 'cloud') {
-            (finalFile);
+            startCloudTransfer(finalFile);
         } else {
             startP2PTransfer(finalFile);
         }
     });
 
     async function startCloudTransfer(file) {
-    isCancelled = false;
-    
-    // --- 1. CLOUDINARY FREE TIER SIZE CHECK ---
-    const isVideo = file.type.startsWith('video/');
-    const isImage = file.type.startsWith('image/');
-    
-    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
-    const MAX_OTHER_SIZE = 10 * 1024 * 1024;  // 10 MB in bytes
-
-    if (isVideo && file.size > MAX_VIDEO_SIZE) {
-        showToast("Video too large! The maximum size is 100 MB.", "error");
-        resetApp();
-        return;
-    } else if (!isVideo && file.size > MAX_OTHER_SIZE) {
-        const typeName = isImage ? "Image" : "File";
-        showToast(`${typeName} too large! The maximum size is 10 MB.`, "error");
-        resetApp();
-        return;
-    }
-    // ------------------------------------------
-
-    showTransferScreen(file.name, "Preparing link share...");
-    UI.progressArea.classList.remove('hidden');
-
-    lastSpeedBytes = 0;
-    lastSpeedTime = Date.now();
-
-    let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
-    const fileId = rawCode || generateShortCode();
-
-    if (rawCode) {
-        try {
-            const docSnap = await getDoc(doc(db, "links", fileId));
-            if (docSnap.exists()) {
-                showToast("That custom word is already taken!", "error");
-                resetApp();
-                return;
-            }
-        } catch(e) { }
-    }
-
-    // --- CLOUDINARY UPLOAD LOGIC ---
-    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dt4hut2hm/auto/upload"; 
+        isCancelled = false;
         
-    const CLOUDINARY_PRESET = "smartshare_preset"; 
+        // --- 1. CLOUDINARY FREE TIER SIZE CHECK ---
+        const isVideo = file.type.startsWith('video/');
+        const isImage = file.type.startsWith('image/');
+        
+        const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
+        const MAX_OTHER_SIZE = 10 * 1024 * 1024;  // 10 MB in bytes
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_PRESET);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', CLOUDINARY_URL, true);
-
-    xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-            updateProgress(e.loaded, e.total);
-            UI.statusText.innerText = `Uploading securely to Cloudinary...`;
-            if(UI.progressText) UI.progressText.innerText = "Uploading...";
+        if (isVideo && file.size > MAX_VIDEO_SIZE) {
+            showToast("Video too large! The maximum size is 100 MB.", "error");
+            resetApp();
+            return;
+        } else if (!isVideo && file.size > MAX_OTHER_SIZE) {
+            const typeName = isImage ? "Image" : "File";
+            showToast(`${typeName} too large! The maximum size is 10 MB.`, "error");
+            resetApp();
+            return;
         }
-    };
+        // ------------------------------------------
 
-    xhr.onerror = () => {
-        showToast("Upload failed: Please check your internet connection.", "error");
-        resetApp();
-    };
+        showTransferScreen(file.name, "Preparing link share...");
+        UI.progressArea.classList.remove('hidden');
 
-    xhr.onload = async () => {
-        if (xhr.status === 200 || xhr.status === 201) {
-            const response = JSON.parse(xhr.responseText);
-            const downloadURL = response.secure_url;
+        lastSpeedBytes = 0;
+        lastSpeedTime = Date.now();
 
+        let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+        const fileId = rawCode || generateShortCode();
+
+        if (rawCode) {
             try {
-                UI.statusText.innerText = `Generating your secure link...`;
-                if (UI.transferSpeed) UI.transferSpeed.innerText = '';
+                const docSnap = await getDoc(doc(db, "links", fileId));
+                if (docSnap.exists()) {
+                    showToast("That custom word is already taken!", "error");
+                    resetApp();
+                    return;
+                }
+            } catch(e) { }
+        }
 
-                let expireMs = 60 * 60 * 1000; 
-                if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
-                else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
-                else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
+        // --- CLOUDINARY UPLOAD LOGIC ---
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dt4hut2hm/auto/upload"; 
+        const CLOUDINARY_PRESET = "smartshare_preset"; 
 
-                const isOneTime = UI.cloudLimit.value === 'one-time';
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", CLOUDINARY_PRESET);
 
-                await setDoc(doc(db, "links", fileId), {
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    url: downloadURL,
-                    storagePath: response.public_id,
-                    expiresAt: Date.now() + expireMs,
-                    isOneTime: isOneTime,
-                    createdAt: Date.now(),
-                    ownerId: myOwnerId
-                });
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', CLOUDINARY_URL, true);
 
-                saveFileToLocalLedger(fileId);
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                updateProgress(e.loaded, e.total);
+                UI.statusText.innerText = `Uploading securely to Cloudinary...`;
+                if(UI.progressText) UI.progressText.innerText = "Uploading...";
+            }
+        };
 
-                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
-                const transferUrl = `${cleanUrl}?c=${fileId}`;
+        xhr.onerror = () => {
+            showToast("Upload failed: Please check your internet connection.", "error");
+            resetApp();
+        };
 
-                UI.progressArea.classList.add('hidden');
-                UI.qrContainer.innerHTML = "";
-                new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+        xhr.onload = async () => {
+            if (xhr.status === 200 || xhr.status === 201) {
+                const response = JSON.parse(xhr.responseText);
+                const downloadURL = response.secure_url;
 
-                UI.pairingCodeDisplay.innerText = fileId;
-                UI.shareOptions.classList.remove('hidden');
-                UI.statusText.innerText = "Ready! You can safely close this page now.";
-                UI.resetBtn.innerText = "Start Over";
-                setStatusDot('green');
+                try {
+                    UI.statusText.innerText = `Generating your secure link...`;
+                    if (UI.transferSpeed) UI.transferSpeed.innerText = '';
 
-                UI.copyLinkBtn.onclick = () => {
-                    navigator.clipboard.writeText(transferUrl);
-                    showToast("Link copied to clipboard!", "success");
-                };
-        } catch (err) {
-                console.error("Firestore Error:", err);
-                showToast("Database Error: " + err.message, "error");
+                    let expireMs = 60 * 60 * 1000; 
+                    if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
+                    else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
+                    else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
+
+                    const isOneTime = UI.cloudLimit.value === 'one-time';
+
+                    await setDoc(doc(db, "links", fileId), {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: downloadURL,
+                        storagePath: response.public_id,
+                        expiresAt: Date.now() + expireMs,
+                        isOneTime: isOneTime,
+                        createdAt: Date.now(),
+                        ownerId: myOwnerId
+                    });
+
+                    saveFileToLocalLedger(fileId);
+
+                    const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                    const transferUrl = `${cleanUrl}?c=${fileId}`;
+
+                    UI.progressArea.classList.add('hidden');
+                    UI.qrContainer.innerHTML = "";
+                    new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+
+                    UI.pairingCodeDisplay.innerText = fileId;
+                    UI.shareOptions.classList.remove('hidden');
+                    UI.statusText.innerText = "Ready! You can safely close this page now.";
+                    UI.resetBtn.innerText = "Start Over";
+                    setStatusDot('green');
+
+                    UI.copyLinkBtn.onclick = () => {
+                        navigator.clipboard.writeText(transferUrl);
+                        showToast("Link copied to clipboard!", "success");
+                    };
+                } catch (err) {
+                    console.error("Firestore Error:", err);
+                    showToast("Database Error: " + err.message, "error");
+                    resetApp();
+                }
+            } else {
+                showToast("Cloudinary Upload Failed. The file might be corrupted or rejected.", "error");
                 resetApp();
             }
-        } else {
-            showToast("Cloud Upload Failed. The file might be corrupted or rejected.", "error");
-            resetApp();
-        }
-    };
+        };
 
-    xhr.send(formData);
-}
+        xhr.send(formData);
+    }
+
     function setupPeerErrorHandling(peerInstance) {
         peerInstance.on('disconnected', () => {
             if (!isCancelled && (isTransferring || fileToSend || p2pTransferState.bytesReceived > 0)) {
@@ -1127,7 +1125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setStatusDot('blue');
     }
 
-    // 🌟 SMART SPEEDOMETER LOGIC
     function updateProgress(current, total) {
         if(!total || total === 0) return;
         let percent = Math.floor((current / total) * 100);
@@ -1138,7 +1135,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = Date.now();
         const timeDiff = now - lastSpeedTime;
         
-        // 🌟 FIXED: Update every 250ms for a buttery smooth live speedometer
         if (timeDiff >= 250) {
             if (timeDiff < 5000 && current >= lastSpeedBytes) {
                 const bytesDiff = current - lastSpeedBytes;
