@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clipboardActiveState: document.getElementById('clipboard-active-state'),
         sharedTextpad: document.getElementById('shared-textpad'),
         copyClipboardBtn: document.getElementById('copy-clipboard-btn'),
+        clearClipboardBtn: document.getElementById('clear-clipboard-btn'),
         clipboardDisconnectBtn: document.getElementById('clipboard-disconnect-btn')
     };
 
@@ -1336,12 +1337,58 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Sync on typing
     UI.sharedTextpad.addEventListener('input', syncClipboardData);
 
-    // 2. Click to open links
+  // 2. Click to open links, Save Images, and Remove Images
     UI.sharedTextpad.addEventListener('click', (e) => {
+        // Handle Links
         if (e.target.tagName === 'A') {
             window.open(e.target.href, '_blank');
+            return;
+        }
+
+        // Handle Save Image Button
+        const saveBtn = e.target.closest('.save-img-btn');
+        if (saveBtn) {
+            const img = saveBtn.closest('.group').querySelector('img');
+            if (img) {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = `SmartShare_Image_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast("Image saved to device!", "success");
+            }
+            return;
+        }
+
+        // Handle Remove Image Button
+        const removeBtn = e.target.closest('.remove-img-btn');
+        if (removeBtn) {
+            const wrapper = removeBtn.closest('.group');
+            if (wrapper) {
+                wrapper.remove();
+                syncClipboardData();
+                showToast("Image removed", "info");
+            }
+            return;
         }
     });
+
+    // Helper: Generates the HTML for images with overlay buttons
+    function generateImageWrapper(base64Data) {
+        return `
+        <div class="relative group inline-block m-2 align-middle max-w-full" contenteditable="false">
+            <img src="${base64Data}" class="max-w-full rounded-xl border border-slate-200 dark:border-slate-600 shadow-sm block" />
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1.5 transition-opacity duration-200 z-10">
+                <button class="save-img-btn bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-lg backdrop-blur-md shadow-lg transition-transform hover:scale-105" title="Save Image">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+                <button class="remove-img-btn bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-lg backdrop-blur-md shadow-lg transition-transform hover:scale-105" title="Remove">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>&nbsp;`; // Trailing space lets the user keep typing after the image
+    }
 
     // 3. Smart Paste (Auto-Link & Images)
     UI.sharedTextpad.addEventListener('paste', (e) => {
@@ -1359,9 +1406,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm cursor-pointer" />`;
-                    document.execCommand('insertHTML', false, imgHtml);
-                    setTimeout(syncClipboardData, 50); // Force sync update
+                    document.execCommand('insertHTML', false, generateImageWrapper(event.target.result));
+                    setTimeout(syncClipboardData, 50); 
                 };
                 reader.readAsDataURL(blob);
             }
@@ -1377,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>')
                     .replace(/\n/g, "<br>"); 
                 document.execCommand('insertHTML', false, htmlText);
-                setTimeout(syncClipboardData, 50); // Force sync update
+                setTimeout(syncClipboardData, 50); 
             }
         }
     });
@@ -1391,9 +1437,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(file.size > 2 * 1024 * 1024) return showToast("Image too large! Max 2MB.", "error");
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm" />`;
-                    document.execCommand('insertHTML', false, imgHtml);
-                    setTimeout(syncClipboardData, 50); // Force sync update
+                    document.execCommand('insertHTML', false, generateImageWrapper(event.target.result));
+                    setTimeout(syncClipboardData, 50); 
                 };
                 reader.readAsDataURL(file);
             }
@@ -1403,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const htmlText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>').replace(/\n/g, "<br>");
                 document.execCommand('insertHTML', false, htmlText);
-                setTimeout(syncClipboardData, 50); // Force sync update
+                setTimeout(syncClipboardData, 50); 
             }
         }
     });
@@ -1413,6 +1458,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const textToCopy = UI.sharedTextpad.tagName === 'TEXTAREA' ? UI.sharedTextpad.value : UI.sharedTextpad.innerText;
         navigator.clipboard.writeText(textToCopy);
         showToast("Copied to your device clipboard!", "success");
+    });
+
+    // 6. Clear Clipboard Button
+    UI.clearClipboardBtn.addEventListener('click', () => {
+        if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
+        else UI.sharedTextpad.innerHTML = "";
+        
+        syncClipboardData();
+        UI.sharedTextpad.focus();
+        showToast("Clipboard cleared", "info");
     });
 
     UI.clipboardDisconnectBtn.addEventListener('click', () => {
