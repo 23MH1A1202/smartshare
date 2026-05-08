@@ -98,7 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
         cloudModalCard: document.getElementById('cloud-modal-card'),
         openCloudModalBtn: document.getElementById('my-cloud-files-btn'),
         closeCloudModalBtn: document.getElementById('close-cloud-modal-btn'),
-        cloudFilesList: document.getElementById('cloud-files-list')
+        cloudFilesList: document.getElementById('cloud-files-list'),
+        fileUploadInner: document.getElementById('file-upload-inner'),
+        modeClipboard: document.getElementById('mode-clipboard'),
+        clipboardInitInner: document.getElementById('clipboard-init-inner'),
+        startClipboardBtn: document.getElementById('start-clipboard-btn'),
+        clipboardReceiveCode: document.getElementById('clipboard-receive-code'),
+        clipboardReceiveBtn: document.getElementById('clipboard-receive-btn'),
+        clipboardActiveState: document.getElementById('clipboard-active-state'),
+        sharedTextpad: document.getElementById('shared-textpad'),
+        copyClipboardBtn: document.getElementById('copy-clipboard-btn'),
+        clipboardDisconnectBtn: document.getElementById('clipboard-disconnect-btn')
     };
 
     let peer = null;
@@ -146,29 +156,46 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.sendFilesBtn.innerText = transferMode === 'cloud' ? `Upload ${count} File${count > 1 ? 's' : ''}` : `Send ${count} File${count > 1 ? 's' : ''}`;
     }
 
-    UI.modeP2P.addEventListener('click', () => {
-        transferMode = 'p2p';
-        document.querySelector('.mode-tabs').dataset.active = 'p2p';
-        UI.modeP2P.classList.add('text-blue-600', 'dark:text-blue-400');
-        UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
-        UI.modeCloud.classList.add('text-slate-500', 'dark:text-slate-400');
-        UI.modeCloud.classList.remove('text-blue-600', 'dark:text-blue-400');
-        UI.cloudSettings.classList.add('hidden');
-        UI.cloudSettings.classList.remove('flex');
-        updateSendBtnText();
-    });
+   function switchMode(mode) {
+        transferMode = mode;
+        document.querySelector('.mode-tabs').dataset.active = mode;
+        
+        UI.modeP2P.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+        UI.modeCloud.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+        UI.modeClipboard.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
 
-    UI.modeCloud.addEventListener('click', () => {
-        transferMode = 'cloud';
-        document.querySelector('.mode-tabs').dataset.active = 'cloud';
-        UI.modeCloud.classList.add('text-blue-600', 'dark:text-blue-400');
-        UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
-        UI.modeP2P.classList.add('text-slate-500', 'dark:text-slate-400');
-        UI.modeP2P.classList.remove('text-blue-600', 'dark:text-blue-400');
-        UI.cloudSettings.classList.remove('hidden');
-        UI.cloudSettings.classList.add('flex');
+        UI.fileUploadInner.classList.add('hidden');
+        UI.fileUploadInner.classList.remove('flex');
+        if(UI.clipboardInitInner) {
+            UI.clipboardInitInner.classList.add('hidden');
+            UI.clipboardInitInner.classList.remove('flex');
+        }
+        UI.cloudSettings.classList.add('hidden');
+
+        if (mode === 'p2p') {
+            UI.modeP2P.classList.add('text-blue-600', 'dark:text-blue-400');
+            UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.fileUploadInner.classList.remove('hidden');
+            UI.fileUploadInner.classList.add('flex');
+        } else if (mode === 'cloud') {
+            UI.modeCloud.classList.add('text-blue-600', 'dark:text-blue-400');
+            UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.fileUploadInner.classList.remove('hidden');
+            UI.fileUploadInner.classList.add('flex');
+            UI.cloudSettings.classList.remove('hidden');
+            UI.cloudSettings.classList.add('flex');
+        } else if (mode === 'clipboard') {
+            UI.modeClipboard.classList.add('text-purple-600', 'dark:text-purple-400');
+            UI.modeClipboard.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.clipboardInitInner.classList.remove('hidden');
+            UI.clipboardInitInner.classList.add('flex');
+        }
         updateSendBtnText();
-    });
+    }
+    
+    UI.modeP2P.addEventListener('click', () => switchMode('p2p'));
+    UI.modeCloud.addEventListener('click', () => switchMode('cloud'));
+    UI.modeClipboard.addEventListener('click', () => switchMode('clipboard'));
 
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
@@ -475,6 +502,13 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.receiveCodeInput.value = '';
         UI.cloudCustomCode.value = '';
 
+        if(UI.clipboardReceiveCode) UI.clipboardReceiveCode.value = '';
+        if(UI.clipboardActiveState) {
+            UI.clipboardActiveState.classList.add('hidden');
+            UI.clipboardActiveState.classList.remove('flex');
+        }
+        if(UI.sharedTextpad) UI.sharedTextpad.value = '';
+        
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
         }
@@ -875,8 +909,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (window.location.hash.length > 1) {
-        const targetPeerId = window.location.hash.substring(1).toUpperCase();
-        startP2PReceive(targetPeerId);
+        const hashVal = window.location.hash.substring(1);
+        if (hashVal.startsWith('clip-')) {
+            const targetPeerId = hashVal.substring(5).toUpperCase();
+            switchMode('clipboard'); 
+            startP2PClipboardReceive(targetPeerId);
+        } else {
+            const targetPeerId = hashVal.toUpperCase();
+            startP2PReceive(targetPeerId);
+        }
     }
 
     async function startSmartReceive(targetId) {
@@ -1181,3 +1222,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 });
+
+
+// --- NEW CLIPBOARD P2P LOGIC ---
+    UI.startClipboardBtn.addEventListener('click', () => {
+        startP2PClipboard();
+    });
+
+    UI.clipboardReceiveBtn.addEventListener('click', () => {
+        const targetId = UI.clipboardReceiveCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+        if (!targetId) return showToast("Enter sync code", "error");
+        startP2PClipboardReceive(targetId);
+    });
+
+    function startP2PClipboard() {
+        isCancelled = false;
+        showTransferScreen("Clipboard Sync", "Waiting for the other device to connect...");
+        const roomCode = generateShortCode();
+        peer = new Peer(roomCode, {
+            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+        });
+
+        peer.on('open', (id) => {
+            const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+            const transferUrl = `${cleanUrl}#clip-${id}`; 
+            UI.qrContainer.innerHTML = "";
+            new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+            UI.pairingCodeDisplay.innerText = id;
+            UI.shareOptions.classList.remove('hidden');
+            setStatusDot('amber');
+        });
+
+        peer.on('connection', setupClipboardConnection);
+        setupPeerErrorHandling(peer);
+    }
+
+    function startP2PClipboardReceive(targetId) {
+        isCancelled = false;
+        showTransferScreen("Clipboard Sync", `Connecting to ${targetId}...`);
+        peer = new Peer({
+            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+        });
+        peer.on('open', () => {
+            const conn = peer.connect(targetId, { reliable: true });
+            setupClipboardConnection(conn);
+        });
+        setupPeerErrorHandling(peer);
+    }
+
+    function setupClipboardConnection(conn) {
+        currentConnection = conn;
+        conn.on('open', () => {
+            UI.transfer.classList.add('hidden');
+            UI.initial.classList.add('hidden');
+            UI.clipboardActiveState.classList.remove('hidden');
+            UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
+            UI.sharedTextpad.value = "";
+            UI.sharedTextpad.focus();
+            showToast("Devices Synced!", "success");
+        });
+
+        conn.on('data', (payload) => {
+            if (payload.type === 'clipboard-sync') {
+                UI.sharedTextpad.value = payload.text;
+            } else if (payload.type === 'transfer-cancelled') {
+                showToast("Other device disconnected.", "info");
+                resetApp();
+            }
+        });
+
+        conn.on('close', () => {
+            if(!isCancelled) {
+                showToast("Connection lost.", "error");
+                resetApp();
+            }
+        });
+    }
+
+    UI.sharedTextpad.addEventListener('input', (e) => {
+        if (currentConnection && currentConnection.open) {
+            currentConnection.send({ type: 'clipboard-sync', text: e.target.value });
+        }
+    });
+
+    UI.copyClipboardBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(UI.sharedTextpad.value);
+        showToast("Copied to your device clipboard!", "success");
+    });
+
+    UI.clipboardDisconnectBtn.addEventListener('click', () => {
+        resetApp();
+    });
