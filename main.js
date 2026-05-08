@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-const db = getFirestore(app, "smartshare"); 
+const db = getFirestore(app);
 
 let myOwnerId = localStorage.getItem('smartshare_owner_id');
 if (!myOwnerId) {
