@@ -639,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
         xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) {
                 updateProgress(e.loaded, e.total);
-                UI.statusText.innerText = `Uploading securely to Cloudinary...`;
+                UI.statusText.innerText = `Uploading securely to Cloud...`;
                 if(UI.progressText) UI.progressText.innerText = "Uploading...";
             }
         };
@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetApp();
                 }
             } else {
-                showToast("Cloudinary Upload Failed. The file might be corrupted or rejected.", "error");
+                showToast("Cloud Upload Failed. The file might be corrupted or rejected.", "error");
                 resetApp();
             }
         };
