@@ -1225,6 +1225,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // --- NEW CLIPBOARD P2P LOGIC ---
+    let clipboardHeartbeat = null;
+
     UI.startClipboardBtn.addEventListener('click', () => {
         startP2PClipboard();
     });
@@ -1277,40 +1279,126 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.initial.classList.add('hidden');
             UI.clipboardActiveState.classList.remove('hidden');
             UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
-            UI.sharedTextpad.value = "";
+            UI.sharedTextpad.innerHTML = "";
             UI.sharedTextpad.focus();
             showToast("Devices Synced!", "success");
+
+            // HEARTBEAT: Keeps the firewall connection alive indefinitely
+            clearInterval(clipboardHeartbeat);
+            clipboardHeartbeat = setInterval(() => {
+                if (currentConnection && currentConnection.open) {
+                    currentConnection.send({ type: 'heartbeat' });
+                }
+            }, 25000); // Pings every 25 seconds
         });
 
         conn.on('data', (payload) => {
             if (payload.type === 'clipboard-sync') {
-                UI.sharedTextpad.value = payload.text;
+                UI.sharedTextpad.innerHTML = payload.html;
             } else if (payload.type === 'transfer-cancelled') {
-                showToast("Other device disconnected.", "info");
+                clearInterval(clipboardHeartbeat);
+                showToast("The other device disconnected.", "info");
                 resetApp();
             }
         });
 
         conn.on('close', () => {
+            clearInterval(clipboardHeartbeat);
             if(!isCancelled) {
-                showToast("Connection lost.", "error");
+                // Instantly notifies if the other user closes the tab or drops wifi
+                showToast("The other device disconnected.", "error"); 
                 resetApp();
             }
         });
     }
 
+    // --- RICH TEXT, LINKS & IMAGE HANDLING ---
+    
+    // 1. Sync on typing
     UI.sharedTextpad.addEventListener('input', (e) => {
         if (currentConnection && currentConnection.open) {
-            currentConnection.send({ type: 'clipboard-sync', text: e.target.value });
+            currentConnection.send({ type: 'clipboard-sync', html: UI.sharedTextpad.innerHTML });
         }
     });
 
+    // 2. Click to open links
+    UI.sharedTextpad.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            window.open(e.target.href, '_blank');
+        }
+    });
+
+    // 3. Smart Paste (Auto-Link & Images)
+    UI.sharedTextpad.addEventListener('paste', (e) => {
+        let hasImage = false;
+        const items = (e.clipboardData || window.clipboardData).items;
+        
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                hasImage = true;
+                e.preventDefault();
+                const blob = item.getAsFile();
+                
+                if (blob.size > 2 * 1024 * 1024) return showToast("Image too large! Max 2MB for clipboard.", "error");
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm cursor-pointer" />`;
+                    document.execCommand('insertHTML', false, imgHtml);
+                };
+                reader.readAsDataURL(blob);
+            }
+        }
+        
+        if (!hasImage) {
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            if (pastedText) {
+                e.preventDefault();
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const htmlText = pastedText
+                    .replace(/</g, "&lt;").replace(/>/g, "&gt;") // Sanitize
+                    .replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>')
+                    .replace(/\n/g, "<br>"); // Keep newlines
+                document.execCommand('insertHTML', false, htmlText);
+            }
+        }
+    });
+
+    // 4. Drag & Drop Text/Images directly into the pad
+    UI.sharedTextpad.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                if(file.size > 2 * 1024 * 1024) return showToast("Image too large! Max 2MB.", "error");
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imgHtml = `<img src="${event.target.result}" class="max-w-full rounded-lg my-2 border border-slate-200 shadow-sm" />`;
+                    document.execCommand('insertHTML', false, imgHtml);
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            const text = e.dataTransfer.getData('text/plain');
+            if(text) {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const htmlText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>').replace(/\n/g, "<br>");
+                document.execCommand('insertHTML', false, htmlText);
+            }
+        }
+    });
+
+    // 5. Copy out of the app
     UI.copyClipboardBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(UI.sharedTextpad.value);
+        // Copies clean text (no html tags) to the user's system clipboard
+        navigator.clipboard.writeText(UI.sharedTextpad.innerText);
         showToast("Copied to your device clipboard!", "success");
     });
 
     UI.clipboardDisconnectBtn.addEventListener('click', () => {
+        clearInterval(clipboardHeartbeat);
         resetApp();
     });
+
 });
