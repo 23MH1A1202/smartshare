@@ -1221,7 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.devModal.classList.remove('flex');
         }, 300);
     });
-});
+
 
 
 // --- NEW CLIPBOARD P2P LOGIC ---
@@ -1313,3 +1313,4 @@ document.addEventListener('DOMContentLoaded', () => {
     UI.clipboardDisconnectBtn.addEventListener('click', () => {
         resetApp();
     });
+});
