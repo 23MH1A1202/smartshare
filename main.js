@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -13,7 +12,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
 const db = getFirestore(app);
 
 let myOwnerId = localStorage.getItem('smartshare_owner_id');
@@ -215,13 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function purgeCloudFile(fileId, storagePath) {
-        try {
-            await deleteDoc(doc(db, "links", fileId));
-            if (storagePath) {
-                await deleteObject(ref(storage, storagePath));
-            }
-        } catch (e) { }
-    }
+    try {
+        await deleteDoc(doc(db, "links", fileId));
+        // We removed the Firebase storage deletion. Cloudinary will hold the file safely!
+    } catch (e) { }
+}
 
     async function loadCloudManager() {
         UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">Fetching your files...</p>`;
@@ -555,93 +551,131 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function startCloudTransfer(file) {
-        isCancelled = false;
-        showTransferScreen(file.name, "Preparing link share...");
-        UI.progressArea.classList.remove('hidden');
+    isCancelled = false;
+    
+    // --- 1. CLOUDINARY FREE TIER SIZE CHECK ---
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
+    const MAX_OTHER_SIZE = 10 * 1024 * 1024;  // 10 MB in bytes
 
-        lastSpeedBytes = 0;
-        lastSpeedTime = Date.now();
+    if (isVideo && file.size > MAX_VIDEO_SIZE) {
+        showToast("Video too large! The maximum size is 100 MB.", "error");
+        resetApp();
+        return;
+    } else if (!isVideo && file.size > MAX_OTHER_SIZE) {
+        const typeName = isImage ? "Image" : "File";
+        showToast(`${typeName} too large! The maximum size is 10 MB.`, "error");
+        resetApp();
+        return;
+    }
+    // ------------------------------------------
 
-        let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
-        const fileId = rawCode || generateShortCode();
+    showTransferScreen(file.name, "Preparing link share...");
+    UI.progressArea.classList.remove('hidden');
 
-        if (rawCode) {
-            try {
-                const docSnap = await getDoc(doc(db, "links", fileId));
-                if (docSnap.exists()) {
-                    showToast("That custom word is already taken!", "error");
-                    resetApp();
-                    return;
-                }
-            } catch(e) { }
-        }
+    lastSpeedBytes = 0;
+    lastSpeedTime = Date.now();
 
-        const storagePath = `shared/${fileId}_${file.name}`;
-        const storageRef = ref(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+    let rawCode = UI.cloudCustomCode.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+    const fileId = rawCode || generateShortCode();
 
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                updateProgress(snapshot.bytesTransferred, snapshot.totalBytes);
-                UI.statusText.innerText = `Uploading file securely...`;
-                if(UI.progressText) UI.progressText.innerText = "Uploading...";
-            },
-            (error) => {
-                showToast("Upload failed: Please check your internet.", "error");
+    if (rawCode) {
+        try {
+            const docSnap = await getDoc(doc(db, "links", fileId));
+            if (docSnap.exists()) {
+                showToast("That custom word is already taken!", "error");
                 resetApp();
-            },
-            async () => {
-                try {
-                    UI.statusText.innerText = `Generating your secure link...`;
-                    if (UI.transferSpeed) UI.transferSpeed.innerText = '';
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    
-                    let expireMs = 60 * 60 * 1000; 
-                    if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
-                    else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
-                    else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
-
-                    const isOneTime = UI.cloudLimit.value === 'one-time';
-
-                    await setDoc(doc(db, "links", fileId), {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        url: downloadURL,
-                        storagePath: storagePath,
-                        expiresAt: Date.now() + expireMs,
-                        isOneTime: isOneTime,
-                        createdAt: Date.now(),
-                        ownerId: myOwnerId
-                    });
-
-                    saveFileToLocalLedger(fileId);
-
-                    const cleanUrl = window.location.href.split('?')[0].split('#')[0];
-                    const transferUrl = `${cleanUrl}?c=${fileId}`;
-
-                    UI.progressArea.classList.add('hidden');
-                    UI.qrContainer.innerHTML = "";
-                    new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
-
-                    UI.pairingCodeDisplay.innerText = fileId;
-                    UI.shareOptions.classList.remove('hidden');
-                    UI.statusText.innerText = "Ready! You can safely close this page now.";
-                    UI.resetBtn.innerText = "Start Over";
-                    setStatusDot('green');
-
-                    UI.copyLinkBtn.onclick = () => {
-                        navigator.clipboard.writeText(transferUrl);
-                        showToast("Link copied to clipboard!", "success");
-                    };
-                } catch (err) {
-                    showToast("Could not generate link.", "error");
-                    resetApp();
-                }
+                return;
             }
-        );
+        } catch(e) { }
     }
 
+    // --- CLOUDINARY UPLOAD LOGIC ---
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dt4hut2hm/auto/upload"; 
+        
+    const CLOUDINARY_PRESET = "smartshare_preset"; 
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_PRESET);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', CLOUDINARY_URL, true);
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            updateProgress(e.loaded, e.total);
+            UI.statusText.innerText = `Uploading securely to Cloudinary...`;
+            if(UI.progressText) UI.progressText.innerText = "Uploading...";
+        }
+    };
+
+    xhr.onerror = () => {
+        showToast("Upload failed: Please check your internet connection.", "error");
+        resetApp();
+    };
+
+    xhr.onload = async () => {
+        if (xhr.status === 200 || xhr.status === 201) {
+            const response = JSON.parse(xhr.responseText);
+            const downloadURL = response.secure_url;
+
+            try {
+                UI.statusText.innerText = `Generating your secure link...`;
+                if (UI.transferSpeed) UI.transferSpeed.innerText = '';
+
+                let expireMs = 60 * 60 * 1000; 
+                if (UI.cloudExpire.value === '10m') expireMs = 10 * 60 * 1000;
+                else if (UI.cloudExpire.value === '1h') expireMs = 60 * 60 * 1000;
+                else if (UI.cloudExpire.value === '4h') expireMs = 4 * 60 * 60 * 1000;
+
+                const isOneTime = UI.cloudLimit.value === 'one-time';
+
+                await setDoc(doc(db, "links", fileId), {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    url: downloadURL,
+                    storagePath: response.public_id,
+                    expiresAt: Date.now() + expireMs,
+                    isOneTime: isOneTime,
+                    createdAt: Date.now(),
+                    ownerId: myOwnerId
+                });
+
+                saveFileToLocalLedger(fileId);
+
+                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                const transferUrl = `${cleanUrl}?c=${fileId}`;
+
+                UI.progressArea.classList.add('hidden');
+                UI.qrContainer.innerHTML = "";
+                new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+
+                UI.pairingCodeDisplay.innerText = fileId;
+                UI.shareOptions.classList.remove('hidden');
+                UI.statusText.innerText = "Ready! You can safely close this page now.";
+                UI.resetBtn.innerText = "Start Over";
+                setStatusDot('green');
+
+                UI.copyLinkBtn.onclick = () => {
+                    navigator.clipboard.writeText(transferUrl);
+                    showToast("Link copied to clipboard!", "success");
+                };
+            } catch (err) {
+                showToast("Could not generate link in database.", "error");
+                resetApp();
+            }
+        } else {
+            showToast("Cloud Upload Failed. The file might be corrupted or rejected.", "error");
+            resetApp();
+        }
+    };
+
+    xhr.send(formData);
+}
     function setupPeerErrorHandling(peerInstance) {
         peerInstance.on('disconnected', () => {
             if (!isCancelled && (isTransferring || fileToSend || p2pTransferState.bytesReceived > 0)) {
