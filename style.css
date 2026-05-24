@@ -2,16 +2,17 @@
    SMARTSHARE – ENHANCED UI v2  |  Modern Look & Animations
    ============================================================ */
 
-
-/* Add this to style.css */
+/* Update these in your style.css */
 .screen-panel {
-    margin-top: 2px; /* This creates your 2px-3px gap */
+    margin-top: 0px; /* Reset base margin */
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-/* Ensure the Home screen stays centered */
+/* Home screen specifically: reduced from 40px to 16px */
 #screen-home.screen-panel {
-    margin-top: 40px; /* Adjust this to center the home screen perfectly */
+    margin-top: 16px; 
 }
+
 
 /* --- GLASS PANEL (Enhanced) --- */
 .glass-panel {
