@@ -32,7 +32,7 @@
     <div class="bg-blob fixed top-[-12%] left-[-8%] w-[520px] h-[520px] bg-indigo-500/20 dark:bg-indigo-500/15 blur-[140px] rounded-full pointer-events-none"></div>
     <div class="bg-blob-2 fixed bottom-[-12%] right-[-12%] w-[520px] h-[520px] bg-sky-400/20 dark:bg-sky-500/15 blur-[140px] rounded-full pointer-events-none"></div>
 
-    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-24 sm:top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
     <header class="sticky top-0 z-50 w-full border-b border-slate-200/70 dark:border-slate-800/70 bg-white/75 dark:bg-slate-950/70 backdrop-blur-xl">
         <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
@@ -47,12 +47,11 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <nav class="hidden md:flex items-center gap-2 text-sm font-semibold">
-                    <button class="nav-link" data-screen-link="share">Receive</button>
-                    <button class="nav-link" data-screen-link="create">Send</button>
-                    <button class="nav-link" data-screen-link="manage">Manage Active Links</button>
-                    <button class="nav-link" data-screen-link="about">About</button>
-                </nav>
+                <nav class="hidden md:flex items-center gap-3 text-sm font-semibold">
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
+</nav>
                 <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-all shadow-md border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95" aria-label="Toggle theme">
                     <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -64,23 +63,22 @@
         </div>
         <div id="mobile-menu" class="md:hidden hidden border-t border-slate-200/70 dark:border-slate-800/70 bg-white/90 dark:bg-slate-950/90 px-4 pb-4">
             <div class="flex flex-col gap-2 pt-3 text-sm font-semibold">
-                <button class="nav-link w-full text-left" data-screen-link="share">Receive</button>
-                <button class="nav-link w-full text-left" data-screen-link="create">Send</button>
-                <button class="nav-link w-full text-left" data-screen-link="manage">Manage Active Links</button>
-                <button class="nav-link w-full text-left" data-screen-link="about">About</button>
-            </div>
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
+</div>
         </div>
     </header>
 
-    <main class="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-20 pt-10">
-        <section data-screen="share" id="screen-share" class="screen-panel">
-            <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
-                <div class="space-y-6">
+    <main class="mx-auto flex w-full max-w-7xl flex-col gap-20 px-4 sm:px-6 lg:px-8 pb-24 pt-8 sm:pt-12">
+        <section data-screen="share" id="screen-share" class="screen-panel min-h-[calc(100vh-120px)] flex items-center">
+            <div class="grid gap-14 lg:gap-20 lg:grid-cols-[1.15fr_0.85fr] items-center">
+                <div class="space-y-8 lg:space-y-10">
                     <div class="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-50/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-300">
                         Trusted, minimal, secure
                     </div>
                     <div class="space-y-3">
-                        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">Share files with confidence.</h1>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">Share files with confidence.</h1>
                         <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300">Create secure Direct or Link shares in seconds, or sync a Live Clipboard between devices. No accounts, no clutter, just clean sharing.</p>
                     </div>
                     <div class="flex flex-wrap gap-3">
@@ -88,7 +86,7 @@
                         <button class="btn-ripple rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-screen-link="about">Learn More</button>
                     </div>
                     </div>
-                <div class="glass-panel p-6 sm:p-8 rounded-[2rem]">
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
                     <div class="flex items-center gap-2 text-slate-900 dark:text-white">
                         <div class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center">
                             <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -126,6 +124,39 @@
                         </div>
 
                         <div id="file-upload-inner" class="w-full flex flex-col items-center transition-all duration-250">
+                            <div class="w-full mb-6">
+    <div class="flex flex-col sm:flex-row gap-4">
+        
+        <div class="flex-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div>
+                <h4 class="font-semibold text-slate-800 dark:text-white text-sm">Direct Share</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Instantly send files directly between two nearby devices without storing anything online.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-500/10 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/>
+                </svg>
+            </div>
+            <div>
+                <h4 class="font-semibold text-slate-800 dark:text-white text-sm">Link Share</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Generate a temporary secure download link that can be shared anywhere instantly.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
                             <div class="drop-zone-inner w-full border border-dashed border-slate-300/80 dark:border-slate-700/70 hover:border-indigo-400/70 dark:hover:border-indigo-500/50 bg-white/60 dark:bg-transparent rounded-[32px] p-6 mb-3 transition-all duration-250 flex flex-col items-center">
                                 <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-indigo-100 to-white dark:from-indigo-500/15 dark:to-indigo-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-indigo-400/30 dark:ring-indigo-500/25 shadow-sm">
                                     <svg class="w-10 h-10 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
@@ -184,7 +215,7 @@
                                 <svg class="w-8 h-8 text-violet-500 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                             </div>
                             <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Clipboard Sync</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-5 text-center">Sync text, links, and images between two devices in real time.</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-5 text-center">Connect two devices instantly and sync copied text, links, and images live between them in real time.</p>
 
                             <button id="start-clipboard-btn" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
@@ -297,9 +328,9 @@
                         <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Manage Active Links</h2>
                         <p class="text-slate-600 dark:text-slate-300 mt-2">Track your active Link shares, extend time, or remove them anytime.</p>
                     </div>
-                    <button id="refresh-cloud-links" class="btn-ripple rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">Refresh</button>
+                    <button id="refresh-cloud-links" class="btn-ripple w-fit self-start sm:self-auto rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">     Refresh </button>
                 </div>
-                <div class="glass-panel p-6 sm:p-8 rounded-[2rem]">
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
                     <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[420px]">
                         <p class="text-center text-sm text-slate-500 py-10">Loading your files...</p>
                     </div>
@@ -490,11 +521,10 @@
             <div class="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                 <p class="uppercase tracking-wider text-xs text-slate-500 dark:text-slate-400">Navigate</p>
                 <div class="flex flex-col gap-2">
-                    <button class="footer-link" data-screen-link="share">Receive</button>
-                    <button class="footer-link" data-screen-link="create">Send</button>
-                    <button class="footer-link" data-screen-link="manage">Manage Active Links</button>
-                    <button class="footer-link" data-screen-link="about">About</button>
-                </div>
+    <button class="footer-link" data-screen-link="share">Home</button>
+    <button class="footer-link" data-screen-link="manage">Manage Active Links</button>
+    <button class="footer-link" data-screen-link="about">About</button>
+</div>
             </div>
             <div class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <p class="uppercase tracking-wider text-xs text-slate-500 dark:text-slate-400">Contact</p>
