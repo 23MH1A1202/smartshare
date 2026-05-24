@@ -162,10 +162,88 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (UI.mobileMenuBtn && UI.mobileMenu) {
-        UI.mobileMenuBtn.addEventListener('click', () => {
-            UI.mobileMenu.classList.toggle('hidden');
+
+    function openMobileMenu() {
+        UI.mobileMenu.classList.remove(
+            'hidden',
+            'opacity-0',
+            '-translate-y-2',
+            'pointer-events-none'
+        );
+
+        requestAnimationFrame(() => {
+            UI.mobileMenu.classList.remove('scale-95');
+            UI.mobileMenu.classList.add(
+                'opacity-100',
+                'translate-y-0',
+                'scale-100',
+                'pointer-events-auto'
+            );
         });
     }
+
+    function closeMobileMenu() {
+        UI.mobileMenu.classList.remove(
+            'opacity-100',
+            'translate-y-0',
+            'scale-100',
+            'pointer-events-auto'
+        );
+
+        UI.mobileMenu.classList.add(
+            'opacity-0',
+            '-translate-y-2',
+            'scale-95',
+            'pointer-events-none'
+        );
+
+        setTimeout(() => {
+            if (
+                UI.mobileMenu.classList.contains('opacity-0')
+            ) {
+                UI.mobileMenu.classList.add('hidden');
+            }
+        }, 250);
+    }
+
+    function toggleMobileMenu(e) {
+        e.stopPropagation();
+
+        if (
+            UI.mobileMenu.classList.contains('hidden') ||
+            UI.mobileMenu.classList.contains('opacity-0')
+        ) {
+            openMobileMenu();
+        } else {
+            closeMobileMenu();
+        }
+    }
+
+    UI.mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+    document.addEventListener('click', (e) => {
+        if (
+            !UI.mobileMenu.contains(e.target) &&
+            !UI.mobileMenuBtn.contains(e.target)
+        ) {
+            closeMobileMenu();
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        closeMobileMenu();
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            closeMobileMenu();
+        }
+    });
+
+    document.querySelectorAll('#mobile-menu .nav-link').forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+}
 
     if (UI.refreshCloudLinks) {
         UI.refreshCloudLinks.addEventListener('click', loadCloudManager);
