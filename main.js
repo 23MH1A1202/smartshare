@@ -90,14 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileList: document.getElementById('file-list'),
         sendFilesBtn: document.getElementById('send-files-btn'),
         receiveSection: document.getElementById('receive-section'),
-        devModal: document.getElementById('dev-modal'),
-        devModalCard: document.getElementById('dev-modal-card'),
-        openModalBtn: document.getElementById('about-dev-btn'),
-        closeModalBtn: document.getElementById('close-modal-btn'),
-        cloudModal: document.getElementById('cloud-modal'),
-        cloudModalCard: document.getElementById('cloud-modal-card'),
-        openCloudModalBtn: document.getElementById('my-cloud-files-btn'),
-        closeCloudModalBtn: document.getElementById('close-cloud-modal-btn'),
         cloudFilesList: document.getElementById('cloud-files-list'),
         fileUploadInner: document.getElementById('file-upload-inner'),
         modeClipboard: document.getElementById('mode-clipboard'),
@@ -109,7 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sharedTextpad: document.getElementById('shared-textpad'),
         copyClipboardBtn: document.getElementById('copy-clipboard-btn'),
         clearClipboardBtn: document.getElementById('clear-clipboard-btn'),
-        clipboardDisconnectBtn: document.getElementById('clipboard-disconnect-btn')
+        clipboardDisconnectBtn: document.getElementById('clipboard-disconnect-btn'),
+        navLinks: document.querySelectorAll('[data-screen-link]'),
+        screenPanels: document.querySelectorAll('[data-screen]'),
+        mobileMenuBtn: document.getElementById('mobile-menu-btn'),
+        mobileMenu: document.getElementById('mobile-menu'),
+        refreshCloudLinks: document.getElementById('refresh-cloud-links')
     };
 
     let peer = null;
@@ -118,6 +115,64 @@ document.addEventListener('DOMContentLoaded', () => {
     let connectionTimeout = null;
     let isTransferring = false;
     let selectedFiles = [];
+    const resetLabel = UI.resetBtn ? UI.resetBtn.querySelector('.reset-label') : null;
+    const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+    const homeScreens = new Set(['share', 'create']);
+
+    function setResetButton(label, compact = false) {
+        if (!UI.resetBtn) return;
+        if (resetLabel) resetLabel.innerText = label;
+        UI.resetBtn.setAttribute('aria-label', label);
+        UI.resetBtn.classList.toggle('compact', compact);
+    }
+
+    function setActiveScreen(screenId, { scroll = true } = {}) {
+        if (!UI.screenPanels) return;
+        const isHome = homeScreens.has(screenId);
+        UI.screenPanels.forEach(panel => {
+            const panelId = panel.dataset.screen;
+            const shouldShow = isHome ? homeScreens.has(panelId) : panelId === screenId;
+            panel.classList.toggle('hidden', !shouldShow);
+        });
+        UI.navLinks.forEach(link => {
+            const target = link.dataset.screenLink;
+            if (link.classList.contains('nav-link')) {
+                link.classList.toggle('is-active', target === screenId);
+            }
+        });
+        if (UI.mobileMenu) UI.mobileMenu.classList.add('hidden');
+        if (screenId === 'manage') {
+            loadCloudManager();
+        } else {
+            clearInterval(cloudTimerInterval);
+        }
+        if (scroll) {
+            const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
+            if (targetPanel) {
+                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+
+    UI.navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const target = link.dataset.screenLink;
+            if (target) setActiveScreen(target);
+        });
+    });
+
+    if (UI.mobileMenuBtn && UI.mobileMenu) {
+        UI.mobileMenuBtn.addEventListener('click', () => {
+            UI.mobileMenu.classList.toggle('hidden');
+        });
+    }
+
+    if (UI.refreshCloudLinks) {
+        UI.refreshCloudLinks.addEventListener('click', loadCloudManager);
+    }
+
+    setActiveScreen('share', { scroll: false });
+    setResetButton('Cancel', false);
 
     window.addEventListener('beforeunload', () => {
         isCancelled = true;
@@ -150,20 +205,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateSendBtnText() {
         if (selectedFiles.length === 0) {
-            UI.sendFilesBtn.innerText = transferMode === 'cloud' ? 'Upload Files' : 'Send Files';
+            UI.sendFilesBtn.innerText = transferMode === 'cloud' ? 'Create Link' : 'Share Files';
             return;
         }
         const count = selectedFiles.length;
-        UI.sendFilesBtn.innerText = transferMode === 'cloud' ? `Upload ${count} File${count > 1 ? 's' : ''}` : `Send ${count} File${count > 1 ? 's' : ''}`;
+        UI.sendFilesBtn.innerText = transferMode === 'cloud' ? `Create Link for ${count} File${count > 1 ? 's' : ''}` : `Share ${count} File${count > 1 ? 's' : ''}`;
     }
 
    function switchMode(mode) {
         transferMode = mode;
         document.querySelector('.mode-tabs').dataset.active = mode;
         
-        UI.modeP2P.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
-        UI.modeCloud.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
-        UI.modeClipboard.className = "flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+       [UI.modeP2P, UI.modeCloud, UI.modeClipboard].forEach((modeButton) => {
+           modeButton.className = baseTabClass;
+       });
 
         UI.fileUploadInner.classList.add('hidden');
         UI.fileUploadInner.classList.remove('flex');
@@ -174,19 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.cloudSettings.classList.add('hidden');
 
         if (mode === 'p2p') {
-            UI.modeP2P.classList.add('text-blue-600', 'dark:text-blue-400');
+            UI.modeP2P.classList.add('text-indigo-600', 'dark:text-indigo-300');
             UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
             UI.fileUploadInner.classList.remove('hidden');
             UI.fileUploadInner.classList.add('flex');
         } else if (mode === 'cloud') {
-            UI.modeCloud.classList.add('text-blue-600', 'dark:text-blue-400');
+            UI.modeCloud.classList.add('text-indigo-600', 'dark:text-indigo-300');
             UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
             UI.fileUploadInner.classList.remove('hidden');
             UI.fileUploadInner.classList.add('flex');
             UI.cloudSettings.classList.remove('hidden');
             UI.cloudSettings.classList.add('flex');
         } else if (mode === 'clipboard') {
-            UI.modeClipboard.classList.add('text-purple-600', 'dark:text-purple-400');
+            UI.modeClipboard.classList.add('text-violet-600', 'dark:text-violet-300');
             UI.modeClipboard.classList.remove('text-slate-500', 'dark:text-slate-400');
             UI.clipboardInitInner.classList.remove('hidden');
             UI.clipboardInitInner.classList.add('flex');
@@ -386,36 +441,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    UI.openCloudModalBtn.addEventListener('click', () => {
-        UI.cloudModal.classList.remove('hidden');
-        UI.cloudModal.classList.add('flex');
-        setTimeout(() => {
-            UI.cloudModal.classList.remove('opacity-0');
-            UI.cloudModalCard.classList.remove('scale-95');
-            UI.cloudModalCard.classList.add('scale-100');
-        }, 10);
-        loadCloudManager();
-    });
-
-    UI.closeCloudModalBtn.addEventListener('click', () => {
-        clearInterval(cloudTimerInterval);
-        UI.cloudModal.classList.add('opacity-0');
-        UI.cloudModalCard.classList.remove('scale-100');
-        UI.cloudModalCard.classList.add('scale-95');
-        setTimeout(() => {
-            UI.cloudModal.classList.add('hidden');
-            UI.cloudModal.classList.remove('flex');
-        }, 300);
-    });
-
     function renderFileList() {
         UI.fileList.innerHTML = '';
         
         if (selectedFiles.length === 0) {
             UI.stagedFilesSection.classList.add('hidden');
             UI.stagedFilesSection.classList.remove('flex');
-            UI.receiveSection.classList.remove('hidden');
-            UI.receiveSection.classList.add('flex');
             UI.fileInput.value = '';
             updateSendBtnText();
             return;
@@ -423,8 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         UI.stagedFilesSection.classList.remove('hidden');
         UI.stagedFilesSection.classList.add('flex');
-        UI.receiveSection.classList.add('hidden');
-        UI.receiveSection.classList.remove('flex');
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
@@ -527,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderFileList();
 
-        UI.resetBtn.innerText = "Cancel";
+        setResetButton("Cancel", false);
         UI.fileName.innerText = "Waiting...";
         UI.statusText.innerText = "Getting ready...";
     }
@@ -689,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.pairingCodeDisplay.innerText = fileId;
                     UI.shareOptions.classList.remove('hidden');
                     UI.statusText.innerText = "Ready! You can safely close this page now.";
-                    UI.resetBtn.innerText = "Start Over";
+                    setResetButton("Close", true);
                     setStatusDot('green');
 
                     UI.copyLinkBtn.onclick = () => {
@@ -801,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     UI.successArea.classList.add('flex');
                     UI.successText.innerText = "Sent";
                     UI.statusText.innerText = "File sent successfully!";
-                    UI.resetBtn.innerText = "Start Over";
+                    setResetButton("Close", true);
                     if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                     setStatusDot('green');
                     showToast("Transfer Complete!", "success");
@@ -991,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.successArea.classList.add('flex');
             UI.successText.innerText = "Received";
             UI.statusText.innerText = "File saved to your device!";
-            UI.resetBtn.innerText = "Start Over";
+            setResetButton("Close", true);
             if (UI.transferSpeed) UI.transferSpeed.innerText = '';
             setStatusDot('green');
             showToast("Download Complete!", "success");
@@ -1004,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             UI.progressArea.classList.add('hidden');
             UI.statusText.innerText = "Download opened in a new tab.";
-            UI.resetBtn.innerText = "Start Over";
+            setResetButton("Close", true);
         }
     }
 
@@ -1125,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         UI.successArea.classList.add('flex');
                         UI.successText.innerText = "Received";
                         UI.statusText.innerText = "File saved to your device!";
-                        UI.resetBtn.innerText = "Start Over";
+                        setResetButton("Close", true);
                         if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                         setStatusDot('green');
                         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
@@ -1157,13 +1186,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showTransferScreen(fileName, statusText) {
+        setActiveScreen('create');
         UI.initial.classList.add('hidden');
         UI.initial.classList.remove('flex');
         UI.transfer.classList.remove('hidden');
         UI.transfer.classList.add('flex', 'transfer-enter');
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
-        UI.resetBtn.innerText = "Cancel";
+        setResetButton("Cancel", false);
         setStatusDot('blue');
     }
 
@@ -1202,28 +1232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
-
-    UI.openModalBtn.addEventListener('click', () => {
-        UI.devModal.classList.remove('hidden');
-        UI.devModal.classList.add('flex');
-        setTimeout(() => {
-            UI.devModal.classList.remove('opacity-0');
-            UI.devModalCard.classList.remove('scale-95');
-            UI.devModalCard.classList.add('scale-100');
-        }, 10);
-    });
-
-    UI.closeModalBtn.addEventListener('click', () => {
-        UI.devModal.classList.add('opacity-0');
-        UI.devModalCard.classList.remove('scale-100');
-        UI.devModalCard.classList.add('scale-95');
-        setTimeout(() => {
-            UI.devModal.classList.add('hidden');
-            UI.devModal.classList.remove('flex');
-        }, 300);
-    });
-
-
 
 // --- NEW CLIPBOARD P2P LOGIC ---
     let clipboardHeartbeat = null;

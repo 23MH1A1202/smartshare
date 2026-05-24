@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,354 +26,406 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white font-sans overflow-x-hidden overflow-y-auto transition-colors duration-300">
-    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#f1f5f9,0,#cbd5e1_100%)] dark:bg-[radial-gradient(circle_at_50%_50%,#1e293b,0,#020617_100%)] transition-colors duration-300"></div>
-    <div class="bg-blob fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/20 dark:bg-blue-600/15 blur-[130px] rounded-full pointer-events-none"></div>
-    <div class="bg-blob-2 fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/20 dark:bg-emerald-600/15 blur-[130px] rounded-full pointer-events-none"></div>
-    <div class="bg-blob fixed top-[40%] right-[20%] w-64 h-64 bg-violet-500/10 dark:bg-violet-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-x-hidden transition-colors duration-300">
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,#eef2ff,transparent_55%),radial-gradient(circle_at_80%_0%,#dbeafe,transparent_45%),radial-gradient(circle_at_50%_80%,#f8fafc,transparent_50%)] dark:bg-[radial-gradient(circle_at_20%_20%,#1e1b4b,transparent_55%),radial-gradient(circle_at_80%_0%,#0f172a,transparent_45%),radial-gradient(circle_at_50%_80%,#020617,transparent_50%)] transition-colors duration-300"></div>
+    <div class="bg-blob fixed top-[-12%] left-[-8%] w-[520px] h-[520px] bg-indigo-500/20 dark:bg-indigo-500/15 blur-[140px] rounded-full pointer-events-none"></div>
+    <div class="bg-blob-2 fixed bottom-[-12%] right-[-12%] w-[520px] h-[520px] bg-sky-400/20 dark:bg-sky-500/15 blur-[140px] rounded-full pointer-events-none"></div>
 
-    <button id="theme-toggle" class="fixed top-6 right-6 p-2.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all z-50 shadow-lg border border-slate-200 dark:border-slate-700 hover:scale-110 active:scale-95">
-        <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-    </button>
+    <div id="toast-container" class="fixed top-24 sm:top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
-    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
-
-    <main class="flex flex-col items-center w-full fade-up">
-        
-        <div class="flex flex-col w-full min-h-[100dvh] relative z-20">
-            
-            <div class="flex-grow flex flex-col items-center justify-start w-full px-4 pt-6 sm:pt-8 pb-4">
-
-                <header class="text-center mb-8 sm:mb-12">
-                    <div class="flex items-center justify-center gap-3 mb-2">
-                        <div class="relative w-10 h-10 flex items-center justify-center">
-                            <svg class="logo-icon w-10 h-10 text-blue-500 dark:text-blue-400 opacity-30 absolute" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="1" stroke-dasharray="4 3"/></svg>
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                        </div>
-                        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-500 dark:from-blue-400 dark:via-blue-300 dark:to-emerald-400 bg-clip-text text-transparent pb-1">SmartShare</h1>
-                    </div>
-                    <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base transition-colors">Simple &amp; Fast File Sharing — No Account Needed</p>
-                </header>
-
-                <div id="drop-zone" class="glass-panel w-full max-w-md sm:max-w-lg p-6 sm:p-10 rounded-[2rem] transition-all duration-300 relative shadow-2xl flex flex-col justify-center my-auto">
-
-    <div id="initial-state" class="flex flex-col items-center text-center w-full">
-        <div class="mode-tabs flex bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl mb-5 w-full max-w-[380px] mx-auto shadow-inner border border-slate-200/60 dark:border-slate-700/60 relative z-20" data-active="p2p">
-            <div class="tab-slider"></div>
-            <button id="mode-p2p" class="flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl text-blue-600 dark:text-blue-400 transition-colors relative z-10">Direct P2P</button>
-            <button id="mode-cloud" class="flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl text-slate-500 dark:text-slate-400 transition-colors relative z-10">Cloud Link</button>
-            <button id="mode-clipboard" class="flex-1 py-2 text-[11px] sm:text-xs font-semibold rounded-xl text-slate-500 dark:text-slate-400 transition-colors relative z-10">Live Clipboard</button>
-        </div>
-
-        <div id="file-upload-inner" class="w-full flex flex-col items-center transition-all duration-250">
-            <div class="drop-zone-inner w-full border-2 border-dashed border-slate-300 dark:border-slate-700/70 hover:border-blue-400/70 dark:hover:border-blue-500/50 bg-slate-50/60 dark:bg-transparent rounded-[32px] p-6 mb-2 transition-all duration-250 flex flex-col items-center">
-                <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-500/15 dark:to-blue-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-blue-400/30 dark:ring-blue-500/25 shadow-sm">
-                    <svg class="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+    <header class="sticky top-0 z-50 w-full border-b border-slate-200/70 dark:border-slate-800/70 bg-white/75 dark:bg-slate-950/70 backdrop-blur-xl">
+        <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
+            <div class="flex items-center gap-3">
+                <div class="relative w-11 h-11 flex items-center justify-center">
+                    <svg class="logo-icon w-11 h-11 text-indigo-500/30 absolute" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="1" stroke-dasharray="4 3"/></svg>
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                 </div>
-                <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Drag &amp; Drop files here</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-500 mt-1 mb-5">or use the button below to browse</p>
-                <input type="file" id="file-input" multiple class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
-                <label for="file-input" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.45)] active:scale-[0.97] cursor-pointer inline-block text-center text-base tracking-wide">
-                    <span class="flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Select Files
-                    </span>
-                </label>
-            </div>
-
-            <div id="staged-files-section" class="w-full mt-4 hidden flex-col gap-3">
-                <ul id="file-list" class="max-h-60 overflow-y-auto pr-2 space-y-3"></ul>
-                <div id="cloud-settings" class="hidden flex-col gap-3 w-full mt-2 mb-2 text-left border-t border-slate-200 dark:border-slate-700/50 pt-4">
-                    <div class="flex gap-3">
-                        <div class="flex-1 flex flex-col gap-1">
-                            <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Available For</label>
-                            <select id="cloud-expire" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none font-medium">
-                                <option value="10m">10 Minutes</option>
-                                <option value="1h" selected>1 Hour</option>
-                                <option value="4h">4 Hours</option>
-                            </select>
-                        </div>
-                        <div class="flex-1 flex flex-col gap-1">
-                            <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Limit</label>
-                            <select id="cloud-limit" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none font-medium">
-                                <option value="unlimited" selected>Unlimited Downloads</option>
-                                <option value="one-time">Delete after 1 download</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-1 mt-1">
-                         <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Custom Link Word (Optional)</label>
-                         <input type="text" id="cloud-custom-code" placeholder="e.g. sagar" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder:text-slate-400 font-mono">
-                    </div>
-                </div>
-                <div class="flex gap-2 w-full mt-2">
-                    <label for="file-input" class="btn-ripple flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all text-center cursor-pointer border border-slate-200 dark:border-slate-700/80 text-sm flex items-center justify-center gap-2 active:scale-[0.97]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add More
-                    </label>
-                    <button id="send-files-btn" class="btn-ripple flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.45)] active:scale-[0.97] text-sm flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Send Files
-                    </button>
+                <div class="flex flex-col">
+                    <span class="text-base font-bold tracking-tight">SmartShare</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">Secure, Instant sharing</span>
                 </div>
             </div>
-
-            <div id="receive-section" class="flex flex-col gap-4 w-full mt-2">
-                <div class="relative flex items-center py-1">
-                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
-                    <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-[11px] font-bold tracking-[0.18em] uppercase bg-white/70 dark:bg-transparent px-2 rounded">Or Receive</span>
-                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
-                </div>
-                <div class="flex gap-2 h-14">
-                    <input type="text" id="receive-code-input" placeholder="ENTER CODE OR LINK ID" class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-slate-900 dark:text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-slate-400 shadow-inner backdrop-blur-sm">
-                    <button id="receive-btn" class="btn-ripple px-5 bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-medium transition-all shadow-[0_4px_16px_rgba(5,150,105,0.35)] active:scale-[0.97] flex items-center justify-center gap-1.5 text-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="clipboard-init-inner" class="hidden flex-col items-center w-full transition-all duration-250">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-500/15 dark:to-purple-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-purple-400/30 dark:ring-purple-500/25 shadow-sm">
-                <svg class="w-8 h-8 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-            </div>
-            <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Shared Clipboard</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-500 mt-1 mb-5 text-center">Sync copied text and links instantly between two devices securely.</p>
-            
-            <button id="start-clipboard-btn" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(168,85,247,0.35)] hover:shadow-[0_6px_24px_rgba(168,85,247,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                Generate Sync Code
-            </button>
-
-            <div class="flex flex-col gap-4 w-full mt-6">
-                <div class="relative flex items-center py-1">
-                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
-                    <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-[11px] font-bold tracking-[0.18em] uppercase">Or Connect</span>
-                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
-                </div>
-                <div class="flex gap-2 h-14">
-                    <input type="text" id="clipboard-receive-code" placeholder="ENTER SYNC CODE" class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-slate-900 dark:text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/25 uppercase shadow-inner">
-                    <button id="clipboard-receive-btn" class="btn-ripple px-5 bg-gradient-to-br from-purple-600 to-purple-500 text-white rounded-xl font-medium shadow-[0_4px_16px_rgba(168,85,247,0.35)] active:scale-[0.97] flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="transfer-state" class="hidden flex-col items-center w-full relative">
-        <div class="w-full flex justify-between items-center mb-8">
-            <div class="flex items-center gap-3 w-[75%]">
-                <div class="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/60 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
-                    <svg class="w-5 h-5 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <div class="flex flex-col overflow-hidden">
-                    <span id="file-name" class="truncate font-semibold text-slate-800 dark:text-slate-100 text-sm">Waiting...</span>
-                    <div class="flex items-center gap-1.5 mt-0.5">
-                        <div id="status-dot" class="status-dot dot-blue"></div>
-                        <span id="status-text" class="text-xs text-slate-500 dark:text-slate-400 leading-snug pr-2">Connecting...</span>
-                    </div>
-                </div>
-            </div>
-            <button id="reset-btn" class="btn-ripple text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200/80 active:scale-[0.97]">
-                Cancel
-            </button>
-        </div>
-
-        <div id="progress-area" class="w-full mb-8 hidden">
-            <div class="flex justify-between text-sm mb-2.5 font-medium">
-                <div class="flex items-center gap-2">
-                    <span class="connecting-dots"><span></span><span></span><span></span></span>
-                    <span id="progress-text" class="text-slate-600 dark:text-slate-300">Preparing...</span>
-                </div>
-                <div class="text-right flex flex-col items-end">
-                    <span id="percentage" class="text-blue-600 dark:text-blue-400 font-bold tabular-nums leading-none">0%</span>
-                    <span id="transfer-speed" class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1 h-3"></span>
-                </div>
-            </div>
-            <div class="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border shadow-inner">
-                <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-emerald-400 rounded-full w-0 relative"></div>
-            </div>
-        </div>
-
-        <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
-            <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
-                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
-            </div>
-            <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
-            <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Transfer completed successfully</p>
-        </div>
-
-        <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
-            <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5">
-                <div id="qr-container"></div>
-            </div>
-            <div class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/70 dark:to-slate-900/70 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl w-full p-4 text-center shadow-sm">
-                <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1.5 font-bold">Share Code / Link ID</p>
-                <h2 id="pairing-code-display" class="text-4xl font-mono tracking-[0.3em] text-slate-800 dark:text-white font-light select-all">------</h2>
-            </div>
-            <button id="copy-link-btn" class="btn-ripple mt-5 px-7 py-2.5 bg-white dark:bg-slate-800 text-sm text-blue-600 dark:text-blue-400 rounded-full shadow-lg active:scale-[0.97] font-medium flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                Copy Share Link
-            </button>
-        </div>
-    </div>
-
-    <div id="clipboard-active-state" class="hidden flex-col items-center w-full relative">
-        <div class="w-full flex justify-between items-center mb-5">
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-lg">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Devices Synced</span>
-            </div>
-            <button id="clipboard-disconnect-btn" class="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors">
-                Disconnect
-            </button>
-        </div>
-       <div id="shared-textpad" contenteditable="true" data-placeholder="Type, paste text, drop links, or paste images here..." class="w-full bg-white dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-400/20 rounded-2xl p-4 text-slate-800 dark:text-slate-100 shadow-inner transition-all mb-4 text-sm sm:text-base leading-relaxed min-h-[150px] max-h-[350px] overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 break-words"></div>
-        <div class="flex gap-3 w-full">
-            <button id="copy-clipboard-btn" class="btn-ripple flex-[2] py-3.5 bg-slate-800 dark:bg-slate-100 hover:bg-slate-700 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                Copy to Device
-            </button>
-            <button id="clear-clipboard-btn" class="btn-ripple flex-[1] py-3.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 rounded-xl font-bold transition-all shadow-sm active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Clear
-            </button>
-        </div>
-    </div>
-
-</div>
-
-            <div class="w-full flex flex-col items-center gap-5 pb-8 shrink-0 relative z-20 mb-auto mt-8 sm:mt-12">
-
-                <button id="my-cloud-files-btn" class="btn-ripple text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white dark:bg-slate-800 border border-blue-200/70 dark:border-blue-800/50 shadow-lg hover:shadow-xl active:scale-[0.97] backdrop-blur-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                    Manage Active Links
+            <div class="flex items-center gap-3">
+                <nav class="hidden md:flex items-center gap-3 text-sm font-semibold">
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
+</nav>
+                <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-all shadow-md border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95" aria-label="Toggle theme">
+                    <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
-                
-                <a href="#features-info" aria-label="Scroll to info" class="animate-bounce flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-slate-800/80 shadow-md border border-slate-200 dark:border-slate-700/80 text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                </a>
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-full border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300" aria-label="Open menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
             </div>
-            
         </div>
+        <div id="mobile-menu" class="md:hidden hidden border-t border-slate-200/70 dark:border-slate-800/70 bg-white/90 dark:bg-slate-950/90 px-4 pb-4">
+            <div class="flex flex-col gap-2 pt-3 text-sm font-semibold">
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
+</div>
+        </div>
+    </header>
 
-        <section id="features-info" class="w-full max-w-3xl mx-auto flex flex-col gap-12 pb-16 pt-10 px-5 sm:px-8 scroll-mt-6 z-10 relative">
-            <div class="text-center space-y-8">
-                <h2 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">What is SmartShare?</h2>
-                
-                <div class="glass-panel p-6 sm:p-10 rounded-[2rem] w-full max-w-2xl mx-auto relative overflow-hidden flex flex-col gap-10 border border-slate-200/50 dark:border-slate-700/50 bg-white/40 dark:bg-slate-900/40 shadow-xl">
-                    
-                    <style>
-                        .data-packet { animation: fly 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); }
-                        .data-packet-delay { animation: fly 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); animation-delay: 1.25s; }
-                        @keyframes fly {
-                            0% { left: 0%; opacity: 0; transform: scale(0.5); }
-                            10% { opacity: 1; transform: scale(1); }
-                            90% { opacity: 1; transform: scale(1); }
-                            100% { left: 100%; opacity: 0; transform: scale(0.5); }
-                        }
-                    </style>
+    <main class="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-20 pt-2 sm:pt-3">
+        <section data-screen="share" id="screen-share" class="screen-panel min-h-[calc(100vh-120px)] flex items-center">
+            <div class="grid gap-14 lg:gap-20 lg:grid-cols-[1.15fr_0.85fr] items-center">
+                <div class="space-y-8 lg:space-y-10">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-50/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-300">
+                        Trusted, secure, Fast
+                    </div>
+                    <div class="space-y-3">
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">Share files with confidence.</h1>
+                        <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300">Create secure Direct or Link shares in seconds, or sync a Live Clipboard between devices. No accounts, no clutter, just clean sharing.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="btn-ripple rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500" data-screen-link="create" id="cta-create">Start Sharing</button>
+                        <button class="btn-ripple rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-screen-link="about">Learn More</button>
+                    </div>
+                    </div>
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+                    <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold">Receive a file or link</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-3">Paste a share code, link ID, or clipboard code to connect instantly.</p>
+                    <div id="receive-section" class="mt-5 flex flex-col gap-3">
+                        <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Code or Link ID</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="receive-code-input" placeholder="Enter code or ID" class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-700/80 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-base text-slate-900 dark:text-white focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-slate-400 shadow-inner">
+                            <button id="receive-btn" class="btn-ripple px-6 py-3 bg-gradient-to-br from-indigo-600 to-violet-500 hover:from-indigo-500 hover:to-violet-400 text-white rounded-xl font-semibold shadow-[0_4px_16px_rgba(79,70,229,0.35)] active:scale-[0.97]">Open</button>
+                        </div>
+                    </div>
+                    <div class="mt-4 rounded-xl border border-slate-200/70 bg-slate-50/70 px-4 py-3 text-xs text-slate-500 dark:border-slate-800/70 dark:bg-slate-900/50 dark:text-slate-400">
+                        Tip: You can also scan a QR code from the sender to connect instantly.
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="flex flex-col items-center w-full">
-                        <h4 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase mb-6 text-center">1. Direct Transfer (Device-to-Device)</h4>
-                        <div class="flex items-center justify-between w-full px-1 sm:px-8">
-                            <div class="flex flex-col items-center gap-3 z-10">
-                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-200 dark:border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <section data-screen="create" id="screen-create" class="screen-panel hidden">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">Start Sharing</h2>
+                <p class="text-slate-600 dark:text-slate-300 mt-2">Choose Direct, Link, or Clipboard, then add files or create a sync code to start sharing.</p>
+            </div>
+            <div class="flex justify-center">
+               <div id="drop-zone" class="glass-panel w-[92%] sm:w-[88%] md:w-[720px] lg:w-[640px] xl:w-[620px] p-5 sm:p-8 rounded-[2rem] transition-all duration-300 relative shadow-2xl flex flex-col justify-center mx-auto">
+                    <div id="initial-state" class="flex flex-col items-center text-center w-full">
+                        <div class="mode-tabs flex bg-slate-200/70 dark:bg-slate-800/60 p-1.5 rounded-2xl mb-6 w-full max-w-[420px] mx-auto shadow-inner border border-slate-200/80 dark:border-slate-700/60 relative z-20" data-active="p2p">
+                            <div class="tab-slider"></div>
+                            <button id="mode-p2p" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-indigo-600 dark:text-indigo-300 transition-colors relative z-10">Direct</button>
+                            <button id="mode-cloud" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-slate-500 dark:text-slate-400 transition-colors relative z-10">Link</button>
+                            <button id="mode-clipboard" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-slate-500 dark:text-slate-400 transition-colors relative z-10">Clipboard</button>
+                        </div>
+
+                        <div id="file-upload-inner" class="w-full flex flex-col items-center transition-all duration-250">
+                            <div class="drop-zone-inner w-full border border-dashed border-slate-300/80 dark:border-slate-700/70 hover:border-indigo-400/70 dark:hover:border-indigo-500/50 bg-white/60 dark:bg-transparent rounded-[32px] p-6 mb-3 transition-all duration-250 flex flex-col items-center">
+                                <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-indigo-100 to-white dark:from-indigo-500/15 dark:to-indigo-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-indigo-400/30 dark:ring-indigo-500/25 shadow-sm">
+                                    <svg class="w-10 h-10 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Drag &amp; drop files here</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-5">or browse from your device</p>
+                                <input type="file" id="file-input" multiple class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
+                                <label for="file-input" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-500 hover:from-indigo-500 hover:to-violet-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(79,70,229,0.35)] hover:shadow-[0_6px_24px_rgba(79,70,229,0.45)] active:scale-[0.97] cursor-pointer inline-block text-center text-base tracking-wide">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Select Files
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="staged-files-section" class="w-full mt-4 hidden flex-col gap-3">
+                                <div class="file-list-box">
+                                    <ul id="file-list" class="space-y-3"></ul>
+                                </div>
+                                <div id="cloud-settings" class="hidden flex-col gap-3 w-full mt-4 mb-2 text-left border-t border-slate-200/80 dark:border-slate-700/50 pt-4">
+                                    <div class="flex gap-3">
+                                        <div class="flex-1 flex flex-col gap-1">
+                                            <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Available For</label>
+                                            <select id="cloud-expire" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-medium">
+                                                <option value="10m">10 Minutes</option>
+                                                <option value="1h" selected>1 Hour</option>
+                                                <option value="4h">4 Hours</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex-1 flex flex-col gap-1">
+                                            <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Limit</label>
+                                            <select id="cloud-limit" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none font-medium">
+                                                <option value="unlimited" selected>Unlimited Downloads</option>
+                                                <option value="one-time">Delete after 1 download</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-1 mt-1">
+                                        <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider ml-1">Custom Link Word (Optional)</label>
+                                        <input type="text" id="cloud-custom-code" placeholder="e.g. myfiles" class="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none placeholder:text-slate-400 font-mono">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-2 w-full mt-2">
+                                    <label for="file-input" class="btn-ripple flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all text-center cursor-pointer border border-slate-200 dark:border-slate-700/80 text-sm flex items-center justify-center gap-2 active:scale-[0.97]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add More
+                                    </label>
+                                    <button id="send-files-btn" class="btn-ripple flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.45)] active:scale-[0.97] text-sm flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Share Files
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div class="flex-1 mx-3 sm:mx-4 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
-                                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-emerald-400 opacity-40 rounded-full"></div>
-                                <div class="absolute w-full flex justify-center -top-6">
-                                    <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800/50 whitespace-nowrap">Encrypted P2P</span>
-                                </div>
-                                <div class="absolute w-3 h-3 bg-white border-2 border-emerald-400 rounded-full data-packet shadow-[0_0_10px_rgba(52,211,153,0.8)] -ml-1.5"></div>
-                                <div class="absolute w-3 h-3 bg-white border-2 border-blue-400 rounded-full data-packet-delay shadow-[0_0_10px_rgba(59,130,246,0.8)] -ml-1.5"></div>
-                            </div>
+                        </div>
 
-                            <div class="flex flex-col items-center gap-3 z-10">
-                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        <div id="clipboard-init-inner" class="hidden flex-col items-center w-full transition-all duration-250">
+                            <div class="w-16 h-16 bg-gradient-to-br from-violet-100 to-violet-50 dark:from-violet-500/15 dark:to-violet-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-violet-400/30 dark:ring-violet-500/25 shadow-sm">
+                                <svg class="w-8 h-8 text-violet-500 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Clipboard Sync</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-5 text-center">Connect two devices instantly and sync copied text, links, and images live between them in real time.</p>
+
+                            <button id="start-clipboard-btn" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Create Sync Code
+                            </button>
+
+                            <div class="flex flex-col gap-4 w-full mt-6">
+                                <div class="relative flex items-center py-1">
+                                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
+                                    <span class="flex-shrink-0 mx-4 text-slate-400 dark:text-slate-500 text-[11px] font-bold tracking-[0.18em] uppercase">Or Join</span>
+                                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700/60"></div>
+                                </div>
+                                <div class="flex gap-2 h-14">
+                                    <input type="text" id="clipboard-receive-code" placeholder="ENTER SYNC CODE" class="w-full bg-white/80 dark:bg-slate-900/60 border border-slate-300/80 dark:border-slate-700/80 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-slate-900 dark:text-white focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/25 uppercase shadow-inner">
+                                    <button id="clipboard-receive-btn" class="btn-ripple px-5 bg-gradient-to-br from-violet-600 to-violet-500 text-white rounded-xl font-medium shadow-[0_4px_16px_rgba(139,92,246,0.35)] active:scale-[0.97] flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700/70 to-transparent"></div>
-
-                    <div class="flex flex-col items-center w-full">
-                        <h4 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase mb-6 text-center">2. Cloud Vault (Link Share)</h4>
-                        <div class="flex items-center justify-between w-full px-0 sm:px-2">
-                            <div class="flex flex-col items-center z-10">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-200 dark:border-blue-500/30">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <div id="transfer-state" class="hidden flex-col items-center w-full relative">
+                        <div class="w-full flex justify-between items-center mb-8">
+                            <div class="flex items-center gap-3 w-[75%]">
+                                <div class="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/60 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                                    <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="flex flex-col overflow-hidden">
+                                    <span id="file-name" class="truncate font-semibold text-slate-800 dark:text-slate-100 text-sm">Waiting...</span>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <div id="status-dot" class="status-dot dot-blue"></div>
+                                        <span id="status-text" class="text-xs text-slate-500 dark:text-slate-400 leading-snug pr-2">Connecting...</span>
+                                    </div>
                                 </div>
                             </div>
+                            <button id="reset-btn" class="btn-ripple reset-btn text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 bg-slate-100 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200/80 active:scale-[0.97] flex items-center gap-2" aria-label="Cancel transfer">
+                                <span class="reset-icon">✕</span>
+                                <span class="reset-label">Cancel</span>
+                            </button>
+                        </div>
 
-                            <div class="flex-1 mx-2 sm:mx-3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
-                                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-40 rounded-full"></div>
-                                <div class="absolute w-2 h-2 sm:w-3 sm:h-3 bg-white border border-purple-400 rounded-full data-packet shadow-[0_0_8px_rgba(168,85,247,0.8)] -ml-1"></div>
-                            </div>
-
-                            <div class="flex flex-col items-center gap-2 z-10">
-                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.25rem] bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center border border-purple-300 dark:border-purple-500/40 shadow-[0_0_25px_rgba(168,85,247,0.25)] relative">
-                                    <div class="absolute -top-2 -right-2 sm:-right-3 bg-red-500 text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md animate-pulse border border-red-400">TIMER</div>
-                                    <svg class="w-7 h-7 sm:w-8 sm:h-8 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        <div id="progress-area" class="w-full mb-8 hidden">
+                            <div class="flex justify-between text-sm mb-2.5 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="connecting-dots"><span></span><span></span><span></span></span>
+                                    <span id="progress-text" class="text-slate-600 dark:text-slate-300">Preparing...</span>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <span id="percentage" class="text-indigo-600 dark:text-indigo-400 font-bold tabular-nums leading-none">0%</span>
+                                    <span id="transfer-speed" class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-1 h-3"></span>
                                 </div>
                             </div>
-
-                            <div class="flex-1 mx-2 sm:mx-3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
-                                <div class="absolute inset-0 bg-gradient-to-r from-purple-400 to-emerald-400 opacity-40 rounded-full"></div>
-                                <div class="absolute w-2 h-2 sm:w-3 sm:h-3 bg-white border border-emerald-400 rounded-full data-packet-delay shadow-[0_0_8px_rgba(52,211,153,0.8)] -ml-1"></div>
+                            <div class="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border shadow-inner">
+                                <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-emerald-400 rounded-full w-0 relative"></div>
                             </div>
+                        </div>
 
-                            <div class="flex flex-col items-center z-10">
-                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/30">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                                </div>
+                        <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
+                            <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
+                                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
                             </div>
+                            <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Transfer completed successfully</p>
+                        </div>
+
+                        <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
+                            <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5">
+                                <div id="qr-container"></div>
+                            </div>
+                            <div class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-800/70 dark:to-slate-900/70 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl w-full p-4 text-center shadow-sm">
+                                <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1.5 font-bold">Share Code</p>
+                                <h2 id="pairing-code-display" class="text-4xl font-mono tracking-[0.3em] text-slate-800 dark:text-white font-light select-all">------</h2>
+                            </div>
+                            <button id="copy-link-btn" class="btn-ripple mt-5 px-7 py-2.5 bg-white dark:bg-slate-800 text-sm text-indigo-600 dark:text-indigo-400 rounded-full shadow-lg active:scale-[0.97] font-medium flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Copy Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="clipboard-active-state" class="hidden flex-col items-center w-full relative">
+                        <div class="w-full flex justify-between items-center mb-5">
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-lg">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Devices Synced</span>
+                            </div>
+                            <button id="clipboard-disconnect-btn" class="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors">Disconnect</button>
+                        </div>
+                        <div id="shared-textpad" contenteditable="true" data-placeholder="Type, paste text, drop links, or paste images here..." class="w-full bg-white dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-700 focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-400/20 rounded-2xl p-4 text-slate-800 dark:text-slate-100 shadow-inner transition-all mb-4 text-sm sm:text-base leading-relaxed min-h-[150px] max-h-[350px] overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 break-words"></div>
+                        <div class="flex gap-3 w-full">
+                            <button id="copy-clipboard-btn" class="btn-ripple flex-[2] py-3.5 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                Copy to Device
+                            </button>
+                            <button id="clear-clipboard-btn" class="btn-ripple flex-[1] py-3.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 rounded-xl font-bold transition-all shadow-sm active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Clear
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base max-w-xl mx-auto italic mt-4">
-                    We are a free, independent hybrid file-sharing service. Our mission is to make sure people keep their data safely in their own hands, exactly as it should be.
-                </p>
-                <div class="w-12 h-1.5 bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full mx-auto"></div>
             </div>
+        </section>
 
-            <div class="flex flex-col items-center text-center gap-4 mt-4">
-                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <section data-screen="manage" id="screen-manage" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Manage Active Links</h2>
+                        <p class="text-slate-600 dark:text-slate-300 mt-2">Track your active Link shares, extend time, or remove them anytime.</p>
+                    </div>
+                    <button id="refresh-cloud-links" class="btn-ripple w-fit self-start sm:self-auto rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">     Refresh </button>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Straight from your device</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    When using Direct Mode, we store absolutely nothing online. Your files never touch a server. Simply close your browser tab to stop sending. We use WebRTC technology to find the shortest path, meaning your data might not even leave the building.
-                </p>
-            </div>
-
-            <div class="flex flex-col items-center text-center gap-4">
-                <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+                    <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[420px]">
+                        <p class="text-center text-sm text-slate-500 py-10">Loading your files...</p>
+                    </div>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">True Auto-Resume & Perfect Sync</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    Unstable internet? No problem. SmartShare uses military-grade Stop-and-Wait flow control. If your Wi-Fi drops halfway through a massive file, the transfer pauses. The moment you reconnect, it resumes exactly on the byte it left off.
-                </p>
             </div>
+        </section>
 
-            <div class="flex flex-col items-center text-center gap-4">
-                <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+        <section data-screen="about" id="screen-about" class="screen-panel hidden">
+            <div class="max-w-5xl mx-auto space-y-12">
+                <div class="text-center space-y-3">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">About SmartShare</h2>
+                    <p class="text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">SmartShare keeps sharing fast, private, and beautifully simple. Direct shares never touch a server, Link shares are secured with timers, and Clipboard sync keeps your ideas moving.</p>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">No file size limits (Direct Mode)</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    Because we don't store your data in Direct Mode, there are zero limits on file sizes. Share gigabytes of 4K video or massive project folders instantly. You are only limited by your own data usage and hard drive space.
-                </p>
-            </div>
 
-            <div class="flex flex-col items-center text-center gap-4">
+                <section id="features-info" class="w-full flex flex-col gap-12">
+                    <div class="text-center space-y-8">
+                        <div class="glass-panel p-6 sm:p-10 rounded-[2rem] w-full max-w-3xl mx-auto relative overflow-hidden flex flex-col gap-10 border border-slate-200/50 dark:border-slate-700/50 bg-white/40 dark:bg-slate-900/40 shadow-xl">
+                            <style>
+                                .data-packet { animation: fly 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+                                .data-packet-delay { animation: fly 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1); animation-delay: 1.25s; }
+                                @keyframes fly {
+                                    0% { left: 0%; opacity: 0; transform: scale(0.5); }
+                                    10% { opacity: 1; transform: scale(1); }
+                                    90% { opacity: 1; transform: scale(1); }
+                                    100% { left: 100%; opacity: 0; transform: scale(0.5); }
+                                }
+                            </style>
+
+                            <div class="flex flex-col items-center w-full">
+                                <h4 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase mb-6 text-center">1. Direct Transfer (Device-to-Device)</h4>
+                                <div class="flex items-center justify-between w-full px-1 sm:px-8">
+                                    <div class="flex flex-col items-center gap-3 z-10">
+                                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+                                            <svg class="w-6 h-6 sm:w-7 sm:h-7 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 mx-3 sm:mx-4 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-400 to-emerald-400 opacity-40 rounded-full"></div>
+                                        <div class="absolute w-full flex justify-center -top-6">
+                                            <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800/50 whitespace-nowrap">Encrypted P2P</span>
+                                        </div>
+                                        <div class="absolute w-3 h-3 bg-white border-2 border-emerald-400 rounded-full data-packet shadow-[0_0_10px_rgba(52,211,153,0.8)] -ml-1.5"></div>
+                                        <div class="absolute w-3 h-3 bg-white border-2 border-indigo-400 rounded-full data-packet-delay shadow-[0_0_10px_rgba(99,102,241,0.8)] -ml-1.5"></div>
+                                    </div>
+
+                                    <div class="flex flex-col items-center gap-3 z-10">
+                                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                                            <svg class="w-6 h-6 sm:w-7 sm:h-7 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700/70 to-transparent"></div>
+
+                            <div class="flex flex-col items-center w-full">
+                                <h4 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-[0.2em] uppercase mb-6 text-center">2. Link Share</h4>
+                                <div class="flex items-center justify-between w-full px-0 sm:px-2">
+                                    <div class="flex flex-col items-center z-10">
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 mx-2 sm:mx-3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-400 to-violet-400 opacity-40 rounded-full"></div>
+                                        <div class="absolute w-2 h-2 sm:w-3 sm:h-3 bg-white border border-violet-400 rounded-full data-packet shadow-[0_0_8px_rgba(139,92,246,0.8)] -ml-1"></div>
+                                    </div>
+
+                                    <div class="flex flex-col items-center gap-2 z-10">
+                                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.25rem] bg-violet-50 dark:bg-violet-500/15 flex items-center justify-center border border-violet-300 dark:border-violet-500/40 shadow-[0_0_25px_rgba(139,92,246,0.25)] relative">
+                                            <div class="absolute -top-2 -right-2 sm:-right-3 bg-rose-500 text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-md animate-pulse border border-rose-400">TIMER</div>
+                                            <svg class="w-7 h-7 sm:w-8 sm:h-8 text-violet-500 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 mx-2 sm:mx-3 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full relative flex items-center">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-violet-400 to-emerald-400 opacity-40 rounded-full"></div>
+                                        <div class="absolute w-2 h-2 sm:w-3 sm:h-3 bg-white border border-emerald-400 rounded-full data-packet-delay shadow-[0_0_8px_rgba(52,211,153,0.8)] -ml-1"></div>
+                                    </div>
+
+                                    <div class="flex flex-col items-center z-10">
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/30">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base max-w-xl mx-auto italic mt-4">
+                            We are a free, independent hybrid file-sharing service. Our mission is to keep your data in your hands—exactly as it should be.
+                        </p>
+                        <div class="w-12 h-1.5 bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full mx-auto"></div>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Straight from your device</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                When using Direct sharing, we store absolutely nothing online. Your files never touch a server—close the tab and you stop sharing instantly.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Auto-resume &amp; smart recovery</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                SmartShare keeps transfers stable on shaky networks. If your connection drops, the transfer pauses and resumes once you are back.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">No limits in Direct mode</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                Because we do not store your data during Direct sharing, you can send files of any size. You are only limited by your connection.
+                            </p>
+                        </div>
+
+                          <div class="flex flex-col items-center text-center gap-4">
                 <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center shadow-inner">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
@@ -382,18 +434,18 @@
                     Only you and the receiver can access your files. Your data is encrypted end-to-end, and can only be read by your receiver (and you of course). SmartShare currently uses an implementation of DTLS 1.3.
                 </p>
             </div>
-
-            <div class="flex flex-col items-center text-center gap-4">
-                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Self-Cleaning Cloud Links</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    Need to share a file quickly via a link? Switch to Link Share. We vault your file securely in the cloud. You set the expiration timer or limit it to a single download, and our servers automatically shred the file the second time runs out. 
-                </p>
-            </div>
-
-            <div class="flex flex-col items-center text-center gap-4">
+                        
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Self-cleaning Link shares</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                Link shares expire automatically on your schedule. Set a timer or a download limit and let SmartShare clean up for you.
+                            </p>
+                        </div>
+                        
+                         <div class="flex flex-col items-center text-center gap-4">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center shadow-inner">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                 </div>
@@ -412,64 +464,74 @@
                     By bypassing bulky, energy-hungry server farms and routing data directly between phones and laptops, you have a much smaller carbon footprint than when using traditional big-tech cloud storage providers.
                 </p>
             </div>
-            
-            <div class="w-1/2 h-px bg-slate-200 dark:bg-slate-800 mx-auto mt-4"></div>
-        </section>
+                    </div>
+                </section>
 
-        <footer class="mt-4 mb-20 text-center z-10 flex flex-col gap-3 items-center px-4 w-full">
-            <button id="about-dev-btn" class="btn-ripple text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-200/60 dark:bg-slate-800/60 active:scale-[0.97]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                About the Developer
-            </button>
-            <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Built with ❤️ by <span class="font-bold text-slate-700 dark:text-slate-200">Ambati Lalitha Sagar</span></p>
-        </footer>
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <div class="glass-panel p-6 rounded-[2rem]">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 bg-gradient-to-tr from-indigo-500 to-emerald-400 rounded-2xl flex items-center justify-center shadow-lg text-white text-2xl font-bold">AS</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Ambati Lalitha Sagar</h3>
+                                <p class="text-sm text-indigo-600 dark:text-indigo-300 font-semibold">B.Tech — Information Technology</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Aditya College of Engineering &amp; Technology (ACET)</p>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-sm text-slate-600 dark:text-slate-400 space-y-2">
+                            <p>Student developer focused on building minimal, user-first digital products.</p>
+                            <p class="font-mono text-xs bg-slate-100 dark:bg-slate-800 inline-block px-3 py-1 rounded-full">Roll No: 23MH1A1202</p>
+                        </div>
+                        <a href="mailto:alalithasagar355@gmail.com" class="btn-ripple mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white transition-all text-sm font-semibold shadow-[0_4px_16px_rgba(79,70,229,0.35)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.45)] active:scale-[0.97] w-full justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            Email Me
+                        </a>
+                    </div>
+                    <div class="glass-panel p-6 rounded-[2rem]">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Contact &amp; Support</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-3">Need help, or want to share feedback? Reach out anytime. SmartShare is built to stay lightweight, secure, and easy to use.</p>
+                        <div class="mt-6 space-y-3 text-sm">
+                            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path></svg>
+                                24/7 availability for critical share links
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path></svg>
+                                Built with privacy and minimal storage
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <div id="cloud-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xl rounded-3xl p-6 max-w-md w-[95%] relative transform scale-95 transition-transform duration-300 flex flex-col max-h-[80vh]" id="cloud-modal-card">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center">
-                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                    </div>
-                    My Active Links
-                </h3>
-                <button id="close-cloud-modal-btn" class="btn-ripple text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.95]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+    <footer class="border-t border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl">
+        <div class="mx-auto max-w-6xl px-4 py-8 grid gap-8 md:grid-cols-3">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">S</div>
+                    <span class="font-bold">SmartShare</span>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Fast, secure file sharing with Direct, Link, and Clipboard modes.</p>
             </div>
-
-            <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                <p class="text-center text-sm text-slate-500 py-10">Loading your files...</p>
+            <div class="space-y-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <p class="uppercase tracking-wider text-xs text-slate-500 dark:text-slate-400">Navigate</p>
+                <div class="flex flex-col gap-2">
+    <button class="footer-link" data-screen-link="share">Home</button>
+    <button class="footer-link" data-screen-link="manage">Manage Active Links</button>
+    <button class="footer-link" data-screen-link="about">About</button>
+</div>
+            </div>
+            <div class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <p class="uppercase tracking-wider text-xs text-slate-500 dark:text-slate-400">Contact</p>
+                <p><a class="text-indigo-600 dark:text-indigo-400" href="mailto:alalithasagar355@gmail.com">Email Me</a></p>
+                <p>Made with ❤️ by Lalitha Sagar Ambati</p>
+                <p><a class="text-indigo-600 dark:text-indigo-400" href="https://alsagar.tech/">Portfolio</p>
             </div>
         </div>
-    </div>
+        <div class="text-center text-xs text-slate-500 dark:text-slate-400 pb-6">© 2026 SmartShare. All rights reserved.</div>
+    </footer>
 
-    <div id="dev-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
-        <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/80 shadow-2xl rounded-3xl p-8 max-w-sm w-[90%] relative transform scale-95 transition-transform duration-300" id="dev-modal-card">
-            <button id="close-modal-btn" class="btn-ripple absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-[0.95]">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <div class="text-center mt-2">
-                <div class="relative w-20 h-20 mx-auto mb-5">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full opacity-20 blur-lg animate-pulse"></div>
-                    <div class="w-20 h-20 bg-gradient-to-tr from-blue-500 to-emerald-400 rounded-full flex items-center justify-center shadow-lg relative">
-                        <span class="text-white text-3xl font-bold tracking-wider">AS</span>
-                    </div>
-                </div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white tracking-wide">AMBATI LALITHA SAGAR</h3>
-                <div class="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                    <p class="font-semibold text-blue-600 dark:text-blue-400 tracking-wide">B.Tech — INFORMATION TECHNOLOGY</p>
-                    <p class="font-mono text-xs opacity-80 bg-slate-100 dark:bg-slate-800 inline-block px-2.5 py-1 rounded-lg">Roll No: 23MH1A1202</p>
-                    <p class="pt-2 leading-relaxed text-slate-500 dark:text-slate-500">Aditya College of Engineering &amp; Technology (ACET)</p>
-                </div>
-                <a href="mailto:alalithasagar355@gmail.com" class="btn-ripple mt-7 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white transition-all text-sm font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.45)] active:scale-[0.97] w-full justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    Email Me
-                </a>
-            </div>
-        </div>
-    </div>
     <script type="module" src="main.js"></script>
 </body>
 </html>
