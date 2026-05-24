@@ -206,9 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
         transferMode = mode;
         document.querySelector('.mode-tabs').dataset.active = mode;
         
-       UI.modeP2P.className = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
-       UI.modeCloud.className = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
-       UI.modeClipboard.className = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+       const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+       UI.modeP2P.className = baseTabClass;
+       UI.modeCloud.className = baseTabClass;
+       UI.modeClipboard.className = baseTabClass;
 
         UI.fileUploadInner.classList.add('hidden');
         UI.fileUploadInner.classList.remove('flex');
