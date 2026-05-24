@@ -79,8 +79,8 @@ input, button, label {
 
 /* --- DROP ZONE STATES --- */
 #drop-zone.drop-active {
-  border-color: rgba(59, 130, 246, 0.7) !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12), 0 24px 64px -16px rgba(0,0,0,0.12);
+  border-color: rgba(99, 102, 241, 0.7) !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
   transform: scale(1.01);
 }
 
@@ -89,7 +89,7 @@ input, button, label {
 }
 
 #drop-zone.drop-active .drop-zone-inner {
-  background: rgba(59, 130, 246, 0.06) !important;
+  background: rgba(99, 102, 241, 0.08) !important;
 }
 
 /* Drop zone upload icon bounce */
@@ -100,22 +100,86 @@ input, button, label {
   transform: translateY(-6px) scale(1.1);
 }
 
+/* --- NAVIGATION --- */
+.nav-link {
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  color: rgba(51, 65, 85, 0.9);
+  transition: all 0.2s ease;
+}
+.nav-link:hover {
+  background: rgba(226, 232, 240, 0.7);
+  color: #0f172a;
+}
+.nav-link.is-active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4338ca;
+}
+html.dark .nav-link {
+  color: rgba(226, 232, 240, 0.85);
+}
+html.dark .nav-link:hover {
+  background: rgba(30, 41, 59, 0.9);
+  color: #fff;
+}
+html.dark .nav-link.is-active {
+  background: rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+}
+
+/* --- SCREEN PANELS --- */
+.screen-panel {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.screen-panel.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* --- FILE LIST BOX --- */
+.file-list-box {
+  max-height: 240px;
+  overflow-y: auto;
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.8);
+  padding: 14px;
+}
+html.dark .file-list-box {
+  border-color: rgba(51, 65, 85, 0.8);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+/* --- RESET BUTTON --- */
+.reset-btn .reset-icon {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.reset-btn.compact .reset-label {
+  display: none;
+}
+
 /* --- CUSTOM SCROLLBAR --- */
 #file-list::-webkit-scrollbar,
-#cloud-files-list::-webkit-scrollbar {
+#cloud-files-list::-webkit-scrollbar,
+.file-list-box::-webkit-scrollbar {
   width: 4px;
 }
 #file-list::-webkit-scrollbar-track,
-#cloud-files-list::-webkit-scrollbar-track {
+#cloud-files-list::-webkit-scrollbar-track,
+.file-list-box::-webkit-scrollbar-track {
   background: transparent;
 }
 #file-list::-webkit-scrollbar-thumb,
-#cloud-files-list::-webkit-scrollbar-thumb {
+#cloud-files-list::-webkit-scrollbar-thumb,
+.file-list-box::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.35);
   border-radius: 10px;
 }
 html.dark #file-list::-webkit-scrollbar-thumb,
-html.dark #cloud-files-list::-webkit-scrollbar-thumb {
+html.dark #cloud-files-list::-webkit-scrollbar-thumb,
+html.dark .file-list-box::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.18);
 }
 
@@ -132,7 +196,7 @@ html.dark #cloud-files-list::-webkit-scrollbar-thumb {
 
 /* --- PROGRESS BAR SHIMMER & GLOW --- */
 #progress-bar {
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.45);
   transition: width 0.2s ease-out;
 }
 
@@ -299,15 +363,15 @@ html.dark #cloud-files-list::-webkit-scrollbar-thumb {
 
 /* --- RECEIVE CODE INPUT GLOW --- */
 #receive-code-input:focus {
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 0 16px rgba(99, 102, 241, 0.12);
 }
 
 /* --- SHARE CODE DISPLAY GLOW --- */
 #pairing-code-display {
-  text-shadow: 0 0 20px rgba(59,130,246,0.15);
+  text-shadow: 0 0 20px rgba(99,102,241,0.2);
 }
 html.dark #pairing-code-display {
-  text-shadow: 0 0 24px rgba(96,165,250,0.25);
+  text-shadow: 0 0 24px rgba(129,140,248,0.35);
 }
 
 /* --- CARD HOVER LIFT (for file manager cards) --- */
