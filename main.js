@@ -207,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
         transferMode = mode;
         document.querySelector('.mode-tabs').dataset.active = mode;
         
-       UI.modeP2P.className = baseTabClass;
-       UI.modeCloud.className = baseTabClass;
-       UI.modeClipboard.className = baseTabClass;
+       [UI.modeP2P, UI.modeCloud, UI.modeClipboard].forEach((modeButton) => {
+           modeButton.className = baseTabClass;
+       });
 
         UI.fileUploadInner.classList.add('hidden');
         UI.fileUploadInner.classList.remove('flex');
