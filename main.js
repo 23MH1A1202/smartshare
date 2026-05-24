@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isTransferring = false;
     let selectedFiles = [];
     const resetLabel = UI.resetBtn ? UI.resetBtn.querySelector('.reset-label') : null;
+    const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
 
     function setResetButton(label, compact = false) {
         if (!UI.resetBtn) return;
@@ -206,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         transferMode = mode;
         document.querySelector('.mode-tabs').dataset.active = mode;
         
-       const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
        UI.modeP2P.className = baseTabClass;
        UI.modeCloud.className = baseTabClass;
        UI.modeClipboard.className = baseTabClass;
