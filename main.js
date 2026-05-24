@@ -155,18 +155,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
         // Update your navLinks click listener in main.js
-    UI.navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            const target = link.dataset.screenLink;
-            if (target) {
-                // 1. Explicitly close menu if open
-                if (UI.mobileMenu) UI.mobileMenu.classList.add('hidden');
-                // 2. Switch screen
-                setActiveScreen(target);
-            }
-        });
+    // Replace your existing navLinks listener in main.js
+UI.navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.stopPropagation(); // CRITICAL: Stop the click from hitting the document listener
+        
+        const target = link.dataset.screenLink;
+        if (target) {
+            setActiveScreen(target);
+            // closeMobileMenu is already called by the specific mobile menu links
+        }
     });
-
+});
 
     if (UI.mobileMenuBtn && UI.mobileMenu) {
 
