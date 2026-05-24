@@ -1,23 +1,20 @@
-/* ============================================================
-   SMARTSHARE – ENHANCED UI v2  |  Modern Look & Animations
-   ============================================================ */
-/* Update these rules in style.css */
-/* Base panel style: ensure there's enough space under the nav bar */
+
+/* 1. Reset any global padding that might be pushing content down */
 .screen-panel {
-    margin-top: 2rem; /* 32px gap for Manage/About screens */
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    margin-top: 0px; 
 }
 
-/* Home screen specifically: keep it tight as requested */
-#screen-home.screen-panel {
-    margin-top: 8px; /* Your preferred small gap for Home */
+/* 2. Target Manage and About specifically */
+/* This adds a 40px top gap ONLY to these screens */
+#screen-manage, 
+#screen-about {
+    margin-top: 40px; 
 }
 
-/* Ensure container isn't hidden by the fixed nav */
-.screen-panel {
-    scroll-margin-top: 100px; 
+/* 3. Keep Home screen tight as you currently have it */
+#screen-home {
+    margin-top: 8px;
 }
-
 
 
 
