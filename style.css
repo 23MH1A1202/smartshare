@@ -1,17 +1,12 @@
-
-/* 1. Reset any global padding that might be pushing content down */
-/* Fix the header overlap issue */
-.screen-panel {
-    /* This forces the browser to leave space for the sticky header */
-    scroll-margin-top: 100px; 
-    transition: opacity 0.25s ease, transform 0.25s ease;
+/* Update your main container style */
+main {
+    /* 64px is exactly the height of your 16-rem/4-rem header */
+    padding-top: 4rem !important; 
 }
 
-/* Ensure the main container doesn't have fighting top padding */
-main {
-    /* Use padding-top to ensure content starts AFTER the header, 
-       but not so much that it creates a huge gap */
-    padding-top: 2rem; 
+/* Remove or set to 0 the margin on your screen panels to prevent extra gaps */
+.screen-panel {
+    margin-top: 0px !important;
 }
 
 
