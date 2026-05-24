@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedFiles = [];
     const resetLabel = UI.resetBtn ? UI.resetBtn.querySelector('.reset-label') : null;
     const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+    const homeScreens = new Set(['share', 'create']);
 
     function setResetButton(label, compact = false) {
         if (!UI.resetBtn) return;
@@ -125,11 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.resetBtn.classList.toggle('compact', compact);
     }
 
-    function setActiveScreen(screenId) {
+    function setActiveScreen(screenId, { scroll = true } = {}) {
         if (!UI.screenPanels) return;
+        const isHome = homeScreens.has(screenId);
         UI.screenPanels.forEach(panel => {
-            const isActive = panel.dataset.screen === screenId;
-            panel.classList.toggle('hidden', !isActive);
+            const panelId = panel.dataset.screen;
+            const shouldShow = isHome ? homeScreens.has(panelId) : panelId === screenId;
+            panel.classList.toggle('hidden', !shouldShow);
         });
         UI.navLinks.forEach(link => {
             const target = link.dataset.screenLink;
@@ -142,6 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadCloudManager();
         } else {
             clearInterval(cloudTimerInterval);
+        }
+        if (scroll) {
+            const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
+            if (targetPanel) {
+                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }
 
@@ -162,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.refreshCloudLinks.addEventListener('click', loadCloudManager);
     }
 
-    setActiveScreen('share');
+    setActiveScreen('share', { scroll: false });
     setResetButton('Cancel', false);
 
     window.addEventListener('beforeunload', () => {

@@ -127,9 +127,33 @@ html.dark .nav-link.is-active {
   color: #c7d2fe;
 }
 
+/* --- FOOTER LINKS --- */
+.footer-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  color: rgba(51, 65, 85, 0.85);
+  transition: color 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.footer-link:hover {
+  color: #4338ca;
+}
+html.dark .footer-link {
+  color: rgba(226, 232, 240, 0.85);
+}
+html.dark .footer-link:hover {
+  color: #c7d2fe;
+}
+
 /* --- SCREEN PANELS --- */
 .screen-panel {
   transition: opacity 0.25s ease, transform 0.25s ease;
+  scroll-margin-top: 110px;
 }
 .screen-panel.hidden {
   opacity: 0;
