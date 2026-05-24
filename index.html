@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>SmartShare — Premium File Sharing</title>
-    <meta name="description" content="SmartShare is a fast, account-free file sharing app with Direct sharing, secure Link sharing, and Live Clipboard sync." />
-    <meta name="keywords" content="SmartShare, file sharing, direct share, link share, live clipboard, webRTC, cloud link" />
+    
+    <title>SmartShare | P2P File Sharing by Ambati Lalitha Sagar</title>
+    <meta name="description" content="SmartShare is a fast, secure, and account-free peer-to-peer file sharing and live clipboard web application built by B.Tech IT student Ambati Lalitha Sagar." />
+    <meta name="keywords" content="SmartShare, Ambati Lalitha Sagar, Lalitha Sagar Ambati, P2P file sharing, WebRTC file transfer, secure file share, cloud vault, ACET student project" />
     <meta name="author" content="Ambati Lalitha Sagar" />
     <link rel="canonical" href="https://smartshare.alsagar.tech/" />
-
-    <meta property="og:title" content="SmartShare — Premium File Sharing" />
-    <meta property="og:description" content="Direct, Link, and Live Clipboard sharing with no account required. Built by Ambati Lalitha Sagar." />
+    
+    <meta property="og:title" content="SmartShare | P2P File Sharing by Ambati Lalitha Sagar" />
+    <meta property="og:description" content="A fast, account-free file sharing web app with Direct P2P transfer and Cloud Vault. Built by Ambati Lalitha Sagar." />
     <meta property="og:url" content="https://smartshare.alsagar.tech/" />
     <meta property="og:type" content="website" />
     <meta name="google-site-verification" content="LYr189UZImmGhxoNL2Q9R8DFqXjDYZ2WMrDi62YSg-A" />
-
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#3b82f6">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
@@ -426,6 +425,16 @@
                             </p>
                         </div>
 
+                          <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center shadow-inner">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Only the receiver can access your files</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    Only you and the receiver can access your files. Your data is encrypted end-to-end, and can only be read by your receiver (and you of course). SmartShare currently uses an implementation of DTLS 1.3.
+                </p>
+            </div>
+                        
                         <div class="flex flex-col items-center text-center gap-4">
                             <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center shadow-inner">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
@@ -435,6 +444,26 @@
                                 Link shares expire automatically on your schedule. Set a timer or a download limit and let SmartShare clean up for you.
                             </p>
                         </div>
+                        
+                         <div class="flex flex-col items-center text-center gap-4">
+                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center shadow-inner">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Real-Time Live Clipboard</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    Instantly sync text, clickable links, and images across devices. Our rich-text pad supports drag-and-drop, smart URL detection, and a continuous background heartbeat so your session never drops. Disconnections are caught and reported instantly.
+                </p>
+            </div>
+            
+            <div class="flex flex-col items-center text-center gap-4 mb-4">
+                <div class="w-16 h-16 bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400 rounded-full flex items-center justify-center shadow-inner">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Low environmental impact</h3>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                    By bypassing bulky, energy-hungry server farms and routing data directly between phones and laptops, you have a much smaller carbon footprint than when using traditional big-tech cloud storage providers.
+                </p>
+            </div>
                     </div>
                 </section>
 
