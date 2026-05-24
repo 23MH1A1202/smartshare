@@ -8,7 +8,7 @@
 /* This adds a 40px top gap ONLY to these screens */
 #screen-manage, 
 #screen-about {
-    margin-top: 64px; 
+    margin-top: 40px; 
 }
 
 /* 3. Keep Home screen tight as you currently have it */
