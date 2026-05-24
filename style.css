@@ -1,17 +1,17 @@
 /* ============================================================
    SMARTSHARE – ENHANCED UI v2  |  Modern Look & Animations
    ============================================================ */
-
-/* Update these in your style.css */
+/* Update these rules in style.css */
 .screen-panel {
-    margin-top: 0px; /* Reset base margin */
+    margin-top: 0px; /* Removes default gap for all screens */
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-/* Home screen specifically: reduced from 40px to 16px */
+/* Home screen specifically: set to a tiny 8px to clear the nav */
 #screen-home.screen-panel {
-    margin-top: 16px; 
+    margin-top: 8px; 
 }
+
 
 
 /* --- GLASS PANEL (Enhanced) --- */
