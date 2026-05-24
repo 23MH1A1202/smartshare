@@ -1,8 +1,19 @@
 
 /* 1. Reset any global padding that might be pushing content down */
+/* Fix the header overlap issue */
 .screen-panel {
-    margin-top: 0px; 
+    /* This forces the browser to leave space for the sticky header */
+    scroll-margin-top: 100px; 
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
+
+/* Ensure the main container doesn't have fighting top padding */
+main {
+    /* Use padding-top to ensure content starts AFTER the header, 
+       but not so much that it creates a huge gap */
+    padding-top: 2rem; 
+}
+
 
 /* 2. Target Manage and About specifically */
 /* This adds a 40px top gap ONLY to these screens */
