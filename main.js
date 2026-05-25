@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(cloudTimerInterval);
         }
         if (updateHistory) {
-            const currentScreen = window.history.state && window.history.state.screen;
+            const currentScreen = window.history.state?.screen;
             if (currentScreen !== screenId) {
                 const url = `${window.location.pathname}${window.location.search}${window.location.hash}`;
                 if (!window.history.state && screenId === 'share') {
@@ -275,6 +275,7 @@ UI.navLinks.forEach(link => {
     };
 
     document.addEventListener('pointerup', handleOutsideMenu);
+    document.addEventListener('click', handleOutsideMenu);
 
     window.addEventListener('scroll', () => {
         if (isMobileMenuOpen()) {
