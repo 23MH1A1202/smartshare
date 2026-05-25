@@ -38,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         requestUrl.pathname === scopePathNoSlash ||
         requestUrl.pathname === `${scopePath}index.html`
     );
-    const isShareTargetPost = event.request.method === 'POST' && event.request.mode === 'navigate' && isShareTargetPath;
+    const isShareTargetPost = event.request.method === 'POST' && isShareTargetPath;
 
     // Intercept share-target POST requests to capture shared files
     if (isShareTargetPost) {
@@ -98,6 +98,11 @@ self.addEventListener('fetch', (event) => {
             }
         })());
         return; 
+    }
+
+    if (event.request.method !== 'GET') {
+        event.respondWith(fetch(event.request));
+        return;
     }
 
     // Standard Offline Caching for GET requests
