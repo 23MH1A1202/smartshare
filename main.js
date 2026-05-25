@@ -275,7 +275,6 @@ UI.navLinks.forEach(link => {
     };
 
     document.addEventListener('pointerup', handleOutsideMenu);
-    document.addEventListener('click', handleOutsideMenu);
 
     window.addEventListener('scroll', () => {
         if (isMobileMenuOpen()) {
