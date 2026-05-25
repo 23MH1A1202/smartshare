@@ -1,4 +1,5 @@
-const CACHE_NAME = 'instant-share-v6';
+// BUMP THIS TO V7
+const CACHE_NAME = 'instant-share-v7';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -29,8 +30,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+
     // 🌟 AGGRESSIVE POST INTERCEPT FOR NATIVE SHARING
-    if (event.request.method === 'POST') {
+    if (event.request.method === 'POST' && url.pathname.includes('/share-target')) {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -52,14 +55,12 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
 
-                // Safely construct the absolute URL for the redirect
-                const redirectUrl = new URL('index.html?shared=true', event.request.url).href;
-                return Response.redirect(redirectUrl, 303);
+                // Redirect to the home page with the shared flag
+                return Response.redirect('/?shared=true', 303);
 
             } catch (error) {
                 console.error('SW Share Error:', error);
-                const errorUrl = new URL('index.html?error=share_failed', event.request.url).href;
-                return Response.redirect(errorUrl, 303);
+                return Response.redirect('/?error=share_failed', 303);
             }
         })());
         return; 
