@@ -4,7 +4,7 @@
 }
 
 main {
-    /* 4rem is the height of your header (64px at default font size) */
+    /* Fallback header height; updated at runtime to match the actual header size. */
     padding-top: var(--header-height) !important; 
 }
 
