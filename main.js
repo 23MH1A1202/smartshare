@@ -265,6 +265,7 @@ UI.navLinks.forEach(link => {
     );
 
     const handleOutsideMenu = (e) => {
+        if (!isMobileMenuOpen()) return;
         if (
             !UI.mobileMenu.contains(e.target) &&
             !UI.mobileMenuBtn.contains(e.target)
@@ -273,7 +274,7 @@ UI.navLinks.forEach(link => {
         }
     };
 
-    document.addEventListener('pointerdown', handleOutsideMenu);
+    document.addEventListener('pointerup', handleOutsideMenu);
 
     window.addEventListener('scroll', () => {
         if (isMobileMenuOpen()) {
