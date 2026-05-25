@@ -268,6 +268,15 @@
                                 <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1.5 font-bold">Share Code</p>
                                 <h2 id="pairing-code-display" class="text-4xl font-mono tracking-[0.3em] text-slate-800 dark:text-white font-light select-all">------</h2>
                             </div>
+                            <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
+    <div class="mb-5 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl flex items-center gap-3 text-amber-800 dark:text-amber-300 text-xs font-medium">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <span>Keep this tab open until the transfer is 100% complete.</span>
+    </div>
+    <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5">
+        <div id="qr-container"></div>
+    </div>
+    </div>
                             <button id="copy-link-btn" class="btn-ripple mt-5 px-7 py-2.5 bg-white dark:bg-slate-800 text-sm text-indigo-600 dark:text-indigo-400 rounded-full shadow-lg active:scale-[0.97] font-medium flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                 Copy Link
