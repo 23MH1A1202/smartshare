@@ -167,7 +167,7 @@ html.dark .footer-link:hover {
 /* --- SCREEN PANELS --- */
 .screen-panel {
   transition: opacity 0.25s ease, transform 0.25s ease;
-  scroll-margin-top: calc(4rem + 8px);
+  scroll-margin-top: 4rem;
 }
 .screen-panel.hidden {
   opacity: 0;
