@@ -58,6 +58,17 @@ function initializeTheme() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeTheme(); 
 
+    const syncHeaderHeight = () => {
+        const header = document.querySelector('header');
+        if (header) {
+            document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+        }
+    };
+
+    syncHeaderHeight();
+    window.addEventListener('resize', syncHeaderHeight);
+    window.addEventListener('load', syncHeaderHeight);
+
     const UI = {
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
@@ -235,10 +246,6 @@ UI.navLinks.forEach(link => {
         ) {
             closeMobileMenu();
         }
-    });
-
-    window.addEventListener('scroll', () => {
-        closeMobileMenu();
     });
 
     window.addEventListener('resize', () => {

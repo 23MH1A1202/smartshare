@@ -1,25 +1,16 @@
 /* Update your main container style */
+:root {
+    --header-height: 4rem;
+}
+
 main {
-    /* 64px is exactly the height of your 16-rem/4-rem header */
-    padding-top: 4rem !important; 
+    /* Fallback header height; updated at runtime to match the actual header size. */
+    padding-top: var(--header-height) !important; 
 }
 
 /* Remove or set to 0 the margin on your screen panels to prevent extra gaps */
 .screen-panel {
     margin-top: 0px !important;
-}
-
-
-/* 2. Target Manage and About specifically */
-/* This adds a 40px top gap ONLY to these screens */
-#screen-manage, 
-#screen-about {
-    margin-top: 40px; 
-}
-
-/* 3. Keep Home screen tight as you currently have it */
-#screen-home {
-    margin-top: 8px;
 }
 
 
@@ -149,6 +140,11 @@ html.dark .nav-link.is-active {
   color: #c7d2fe;
 }
 
+#mobile-menu {
+  transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+
 /* --- FOOTER LINKS --- */
 .footer-link {
   background: transparent;
@@ -175,7 +171,7 @@ html.dark .footer-link:hover {
 /* --- SCREEN PANELS --- */
 .screen-panel {
   transition: opacity 0.25s ease, transform 0.25s ease;
-  scroll-margin-top: 110px;
+  scroll-margin-top: var(--header-height);
 }
 .screen-panel.hidden {
   opacity: 0;
