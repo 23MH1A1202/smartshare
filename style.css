@@ -4,7 +4,7 @@
 }
 
 main {
-    /* 64px is exactly the height of your 16-rem/4-rem header */
+    /* 4rem is the height of your header (64px at default font size) */
     padding-top: var(--header-height) !important; 
 }
 
