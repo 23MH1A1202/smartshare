@@ -812,7 +812,7 @@ UI.navLinks.forEach(link => {
                 if (peer) peer.destroy();
             }
         } catch (e) { }
-
+        localStorage.removeItem('p2p_active_id'); // Clear the persisted ID
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         isTransferComplete = false; // Reset the flag here
         selectedFiles = [];
@@ -1070,10 +1070,24 @@ UI.navLinks.forEach(link => {
     function startP2PTransfer(file) {
         if (!file) return;
         isCancelled = false;
+        
 
         fileToSend = file;
+        let roomCode = localStorage.getItem('p2p_active_id');
+        if (!roomCode) {
+            roomCode = generateShortCode();
+            localStorage.setItem('p2p_active_id', roomCode);
+        }
+
         showTransferScreen(file.name, "Setting up secure connection...");
-        const roomCode = generateShortCode();
+        
+        // --- 10 Minute Auto-Expiry Timer ---
+        const sessionTimer = setTimeout(() => {
+            if (!isTransferring && !currentConnection) {
+                showToast("P2P session expired due to inactivity.", "info");
+                resetApp();
+            }
+        }, 10 * 60 * 1000);
         
         peer = new Peer(roomCode, {
             config: {
@@ -1093,7 +1107,7 @@ UI.navLinks.forEach(link => {
             const transferUrl = `${cleanUrl}#${id}`;
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
-
+            localStorage.setItem('p2p_active_id', id);
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
             UI.statusText.innerText = "Waiting for the other person to join...";
@@ -1105,6 +1119,7 @@ UI.navLinks.forEach(link => {
         });
 
         peer.on('connection', (conn) => {
+            clearTimeout(sessionTimer);
             currentConnection = conn;
             isTransferring = true;
             
@@ -1841,5 +1856,16 @@ UI.navLinks.forEach(link => {
         clearInterval(clipboardHeartbeat);
         resetApp();
     });
-
+// Auto-recover P2P session if we were in the middle of one
+   // Auto-recover P2P session
+    const recoveredId = localStorage.getItem('p2p_active_id');
+    if (recoveredId) {
+        // If we have an ID but no files, we can't send, so just clear it
+        if (selectedFiles.length === 0) {
+            localStorage.removeItem('p2p_active_id');
+        } else {
+            showToast("Recovering previous session...", "info");
+            UI.sendFilesBtn.click();
+        }
+    }
 });
