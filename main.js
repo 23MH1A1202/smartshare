@@ -857,8 +857,14 @@ UI.navLinks.forEach(link => {
 
     UI.resetBtn.addEventListener('click', resetApp);
 
-    function generateShortCode() {
-        return Math.random().toString(36).substring(2, 8).toUpperCase();
+   function generateShortCode() {
+        // Excluded: 0, O, 1, I to prevent visual confusion
+        const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
+        let code = "";
+        for (let i = 0; i < 6; i++) {
+            code += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        return code;
     }
 
     function handleFiles(fileList) {
