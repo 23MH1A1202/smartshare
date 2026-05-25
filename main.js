@@ -13,7 +13,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app); 
-
+let myClipId = localStorage.getItem('smartshare_clip_id');
+if (!myClipId) {
+    myClipId = 'clip_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('smartshare_clip_id', myClipId);
+}
+let myClipName = localStorage.getItem('smartshare_clip_name') || 'Device-' + Math.floor(Math.random() * 1000);
+let trustedDevices = JSON.parse(localStorage.getItem('smartshare_trusted_devices') || '[]');
+let backgroundPeer = null; // Listens for trusted connections
 let myOwnerId = localStorage.getItem('smartshare_owner_id');
 if (!myOwnerId) {
     myOwnerId = 'owner_' + Math.random().toString(36).substring(2, 15);
@@ -119,7 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent: document.querySelector('main'),
         mobileMenuBtn: document.getElementById('mobile-menu-btn'),
         mobileMenu: document.getElementById('mobile-menu'),
-        refreshCloudLinks: document.getElementById('refresh-cloud-links')
+        refreshCloudLinks: document.getElementById('refresh-cloud-links'),
+        myDeviceName: document.getElementById('my-device-name'),
+        trustedDevicesContainer: document.getElementById('trusted-devices-container'),
+        trustedDevicesList: document.getElementById('trusted-devices-list'),
+        saveDevicePrompt: document.getElementById('save-device-prompt'),
+        saveDeviceName: document.getElementById('save-device-name'),
+        btnSaveDeviceYes: document.getElementById('btn-save-device-yes'),
+        btnSaveDeviceNo: document.getElementById('btn-save-device-no')
     };
 
     let peer = null;
@@ -190,6 +204,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    UI.myDeviceName.value = myClipName;
+    UI.myDeviceName.addEventListener('input', (e) => {
+        myClipName = e.target.value.trim() || 'Device-' + Math.floor(Math.random() * 1000);
+        localStorage.setItem('smartshare_clip_name', myClipName);
+    });
+
+    function renderTrustedDevices() {
+        UI.trustedDevicesList.innerHTML = '';
+        if (trustedDevices.length === 0) {
+            UI.trustedDevicesContainer.classList.add('hidden');
+            UI.trustedDevicesContainer.classList.remove('flex');
+            return;
+        }
+        
+        UI.trustedDevicesContainer.classList.remove('hidden');
+        UI.trustedDevicesContainer.classList.add('flex');
+
+        trustedDevices.forEach((device, index) => {
+            const btn = document.createElement('button');
+            btn.className = "flex items-center justify-between w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 rounded-xl p-3 transition-all text-left shadow-sm group";
+            btn.innerHTML = `
+                <div class="flex items-center gap-3 truncate">
+                    <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <span class="font-semibold text-slate-800 dark:text-slate-200 text-sm truncate">${device.name}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">Connect</span>
+                    <div class="delete-trusted-btn text-slate-400 hover:text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all" data-index="${index}">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </div>
+                </div>
+            `;
+            
+            btn.addEventListener('click', (e) => {
+                if (e.target.closest('.delete-trusted-btn')) {
+                    const idx = e.target.closest('.delete-trusted-btn').getAttribute('data-index');
+                    trustedDevices.splice(idx, 1);
+                    localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                    renderTrustedDevices();
+                    showToast("Device removed", "info");
+                    return;
+                }
+                startP2PClipboardReceive(device.id, true);
+            });
+            UI.trustedDevicesList.appendChild(btn);
+        });
+    }
+    
+    // Call it immediately
+    renderTrustedDevices();
         // Update your navLinks click listener in main.js
     // Replace your existing navLinks listener in main.js
 UI.navLinks.forEach(link => {
@@ -377,6 +443,7 @@ UI.navLinks.forEach(link => {
             UI.cloudSettings.classList.remove('hidden');
             UI.cloudSettings.classList.add('flex');
         } else if (mode === 'clipboard') {
+            startClipboardListener();
             UI.modeClipboard.classList.add('text-violet-600', 'dark:text-violet-300');
             UI.modeClipboard.classList.remove('text-slate-500', 'dark:text-slate-400');
             UI.clipboardInitInner.classList.remove('hidden');
@@ -389,6 +456,18 @@ UI.navLinks.forEach(link => {
     UI.modeCloud.addEventListener('click', () => switchMode('cloud'));
     UI.modeClipboard.addEventListener('click', () => switchMode('clipboard'));
 
+    function startClipboardListener() {
+        if (backgroundPeer && !backgroundPeer.destroyed) return;
+        
+        backgroundPeer = new Peer(myClipId, {
+            config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+        });
+        
+        backgroundPeer.on('connection', (conn) => {
+            setupClipboardConnection(conn); // Auto-accept incoming trusted connections
+        });
+    }
+    
     function showToast(message, type = "info") {
         const toast = document.createElement('div');
         const isError = type === "error";
@@ -1416,9 +1495,17 @@ UI.navLinks.forEach(link => {
         setupPeerErrorHandling(peer);
     }
 
-    function startP2PClipboardReceive(targetId) {
+    function startP2PClipboardReceive(targetId, isTrusted = false) {
         isCancelled = false;
-        showTransferScreen("Clipboard Sync", `Connecting to ${targetId}...`);
+        showTransferScreen("Clipboard Sync", `Connecting to ${isTrusted ? 'Trusted Device' : targetId}...`);
+        
+        // If connecting via Trusted Device, bypass the temporary peer
+        if (isTrusted && backgroundPeer && !backgroundPeer.destroyed) {
+            const conn = backgroundPeer.connect(targetId, { reliable: true });
+            setupClipboardConnection(conn);
+            return;
+        }
+
         peer = new Peer({
             config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
         });
@@ -1438,6 +1525,10 @@ UI.navLinks.forEach(link => {
             UI.clipboardActiveState.classList.remove('hidden');
             UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
             
+            // Hide prompt initially on new connection
+            UI.saveDevicePrompt.classList.add('hidden');
+            UI.saveDevicePrompt.classList.remove('flex');
+
             if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
             else UI.sharedTextpad.innerHTML = "";
             
@@ -1451,22 +1542,45 @@ UI.navLinks.forEach(link => {
                 }
             }, 25000); 
 
-            // Tell the peer we are in clipboard mode
             conn.send({ type: 'init-clipboard' });
+            
+            // Send our persistent ID to the other device so they can save us
+            conn.send({ type: 'device-info', id: myClipId, name: myClipName });
         };
 
-        // Fire immediately if already open (crucial for Receiver side)
-        if (conn.open) {
-            onOpen();
-        } else {
-            conn.on('open', onOpen);
-        }
+        if (conn.open) onOpen(); else conn.on('open', onOpen);
 
         conn.on('data', (payload) => {
-            if (payload.type === 'init-clipboard') return; // Ignore if already handled
+            if (payload.type === 'init-clipboard') return;
+            
+            // Handle incoming Device Info for saving
+            if (payload.type === 'device-info') {
+                const isTrusted = trustedDevices.some(d => d.id === payload.id);
+                
+                if (!isTrusted && payload.id !== myClipId) {
+                    UI.saveDevicePrompt.classList.remove('hidden');
+                    UI.saveDevicePrompt.classList.add('flex');
+                    UI.saveDeviceName.innerText = payload.name;
+                    
+                    UI.btnSaveDeviceYes.onclick = () => {
+                        trustedDevices.push({ id: payload.id, name: payload.name });
+                        localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                        renderTrustedDevices();
+                        UI.saveDevicePrompt.classList.add('hidden');
+                        UI.saveDevicePrompt.classList.remove('flex');
+                        showToast("Device saved to Trusted List!", "success");
+                    };
+                    
+                    UI.btnSaveDeviceNo.onclick = () => {
+                        UI.saveDevicePrompt.classList.add('hidden');
+                        UI.saveDevicePrompt.classList.remove('flex');
+                    };
+                }
+                return;
+            }
 
             if (payload.type === 'clipboard-sync') {
-                const incomingData = payload.html !== undefined ? payload.html : payload.text;                
+                const incomingData = payload.html !== undefined ? payload.html : payload.text;
                 if (UI.sharedTextpad.tagName === 'TEXTAREA') {
                     UI.sharedTextpad.value = incomingData;
                 } else {
