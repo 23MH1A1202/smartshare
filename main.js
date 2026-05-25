@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clipboardDisconnectBtn: document.getElementById('clipboard-disconnect-btn'),
         navLinks: document.querySelectorAll('[data-screen-link]'),
         screenPanels: document.querySelectorAll('[data-screen]'),
+        mainContent: document.querySelector('main'),
         mobileMenuBtn: document.getElementById('mobile-menu-btn'),
         mobileMenu: document.getElementById('mobile-menu'),
         refreshCloudLinks: document.getElementById('refresh-cloud-links')
@@ -137,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.resetBtn.classList.toggle('compact', compact);
     }
 
-    function setActiveScreen(screenId, { scroll = true } = {}) {
+    function setActiveScreen(screenId, { scroll = true, updateHistory = true } = {}) {
         if (!UI.screenPanels) return;
         const isHome = homeScreens.has(screenId);
         UI.screenPanels.forEach(panel => {
@@ -151,11 +152,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.toggle('is-active', target === screenId);
             }
         });
+        if (UI.mainContent) {
+            UI.mainContent.classList.toggle('has-nav-gap', !isHome);
+        }
         if (UI.mobileMenu) UI.mobileMenu.classList.add('hidden');
         if (screenId === 'manage') {
             loadCloudManager();
         } else {
             clearInterval(cloudTimerInterval);
+        }
+        if (updateHistory) {
+            const currentScreen = window.history.state && window.history.state.screen;
+            if (currentScreen !== screenId) {
+                const url = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+                if (!window.history.state && screenId === 'share') {
+                    window.history.replaceState({ screen: screenId }, '', url);
+                } else {
+                    window.history.pushState({ screen: screenId }, '', url);
+                }
+            }
         }
         if (scroll) {
             const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
@@ -178,6 +193,11 @@ UI.navLinks.forEach(link => {
         }
     });
 });
+
+    window.addEventListener('popstate', (event) => {
+        const targetScreen = event.state && event.state.screen ? event.state.screen : 'share';
+        setActiveScreen(targetScreen, { scroll: false, updateHistory: false });
+    });
 
     if (UI.mobileMenuBtn && UI.mobileMenu) {
 
@@ -239,14 +259,27 @@ UI.navLinks.forEach(link => {
 
     UI.mobileMenuBtn.addEventListener('click', toggleMobileMenu);
 
-    document.addEventListener('click', (e) => {
+    const isMobileMenuOpen = () => (
+        !UI.mobileMenu.classList.contains('hidden') &&
+        !UI.mobileMenu.classList.contains('opacity-0')
+    );
+
+    const handleOutsideMenu = (e) => {
         if (
             !UI.mobileMenu.contains(e.target) &&
             !UI.mobileMenuBtn.contains(e.target)
         ) {
             closeMobileMenu();
         }
-    });
+    };
+
+    document.addEventListener('pointerdown', handleOutsideMenu);
+
+    window.addEventListener('scroll', () => {
+        if (isMobileMenuOpen()) {
+            closeMobileMenu();
+        }
+    }, { passive: true });
 
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 768) {
