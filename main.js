@@ -174,9 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (scroll) {
-            const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
-            if (targetPanel) {
-                targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // If navigating down to the dropzone on the home page, scroll to that specific panel
+            if (screenId === 'create') {
+                const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
+                if (targetPanel) {
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } else {
+                // For all other full-page changes (About, Manage, or back to Home), just scroll to absolute top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
     }
