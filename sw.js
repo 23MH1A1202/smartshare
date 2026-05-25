@@ -1,5 +1,5 @@
-// BUMP THIS TO V7
-const CACHE_NAME = 'instant-share-v7';
+// BUMP TO V8
+const CACHE_NAME = 'instant-share-v8';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -32,8 +32,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // 🌟 AGGRESSIVE POST INTERCEPT FOR NATIVE SHARING
-    if (event.request.method === 'POST' && url.pathname.includes('/share-target')) {
+    // 🌟 ONLY intercept POST requests to our own domain (Prevents breaking Cloudinary)
+    if (event.request.method === 'POST' && url.origin === location.origin) {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -55,12 +55,40 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
 
-                // Redirect to the home page with the shared flag
-                return Response.redirect('/?shared=true', 303);
+                // 🌟 BUG FIX: Return a fake 200 OK HTML page that redirects via JS
+                // This prevents Chrome from crashing the Service Worker on POST redirects.
+                const htmlResponse = `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <meta http-equiv="refresh" content="0;url=/?shared=true">
+                        <script>window.location.replace('/?shared=true');</script>
+                        <style>
+                            body { background: #020617; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+                            .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; mb-4; }
+                            @keyframes spin { 100% { transform: rotate(360deg); } }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="loader"></div>
+                        <h3 style="margin-top: 20px; font-weight: 500;">Processing file...</h3>
+                    </body>
+                    </html>
+                `;
+
+                return new Response(htmlResponse, {
+                    status: 200,
+                    headers: { 'Content-Type': 'text/html' }
+                });
 
             } catch (error) {
                 console.error('SW Share Error:', error);
-                return Response.redirect('/?error=share_failed', 303);
+                // Fallback to error state using the same JS redirect method
+                return new Response(`<script>window.location.replace('/?error=share_failed');</script>`, {
+                    status: 200,
+                    headers: { 'Content-Type': 'text/html' }
+                });
             }
         })());
         return; 
