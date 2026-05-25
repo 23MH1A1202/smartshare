@@ -28,6 +28,7 @@ window.onerror = function(message) {
 let transferMode = 'p2p'; 
 let cloudTimerInterval = null;
 let isCancelled = false; 
+let isTransferComplete = false;
 
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
@@ -635,7 +636,10 @@ UI.navLinks.forEach(link => {
         
         try {
             if (currentConnection && currentConnection.open) {
-                currentConnection.send({ type: 'transfer-cancelled' });
+                // Check if transfer is NOT complete before sending cancel
+                if (!isTransferComplete) {
+                    currentConnection.send({ type: 'transfer-cancelled' });
+                }
                 setTimeout(() => {
                     if (currentConnection) currentConnection.close();
                     if (peer) peer.destroy();
@@ -647,6 +651,7 @@ UI.navLinks.forEach(link => {
         } catch (e) { }
 
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
+        isTransferComplete = false; // Reset the flag here
         selectedFiles = [];
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 
@@ -951,6 +956,7 @@ UI.navLinks.forEach(link => {
             conn.on('data', (payload) => {
                 if (payload.type === 'transfer-complete') {
                     isTransferring = false;
+                    isTransferComplete = true; // Add this line
                     UI.progressArea.classList.add('hidden');
                     UI.successArea.classList.remove('hidden');
                     UI.successArea.classList.add('flex');
@@ -1233,6 +1239,12 @@ UI.navLinks.forEach(link => {
         });
 
         conn.on('data', (payload) => {
+            // Intercept clipboard mode request
+            if (payload.type === 'init-clipboard') {
+                isTransferring = false; // Disconnects it from file transfer close logic
+                setupClipboardConnection(conn); // Hand it over to the clipboard handler
+                return;
+            }
             if (!isTransferring || isCancelled) return;
 
             if (payload.type === 'transfer-cancelled') {
@@ -1271,6 +1283,7 @@ UI.navLinks.forEach(link => {
 
                 if (p2pTransferState.bytesReceived >= p2pTransferState.meta.size) {
                     isTransferring = false;
+                    isTransferComplete = true;
                     try {
                         saveFile(p2pTransferState.buffer, p2pTransferState.meta);
                         conn.send({ type: 'transfer-complete' });
@@ -1407,35 +1420,44 @@ UI.navLinks.forEach(link => {
         setupPeerErrorHandling(peer);
     }
 
-    function setupClipboardConnection(conn) {
+   function setupClipboardConnection(conn) {
         currentConnection = conn;
-        conn.on('open', () => {
+        
+        const onOpen = () => {
             UI.transfer.classList.add('hidden');
             UI.initial.classList.add('hidden');
             UI.clipboardActiveState.classList.remove('hidden');
             UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
             
-            // Works for both textarea and contenteditable
             if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
             else UI.sharedTextpad.innerHTML = "";
             
             UI.sharedTextpad.focus();
             showToast("Devices Synced!", "success");
 
-            // HEARTBEAT: Keeps the firewall connection alive indefinitely
             clearInterval(clipboardHeartbeat);
             clipboardHeartbeat = setInterval(() => {
                 if (currentConnection && currentConnection.open) {
                     currentConnection.send({ type: 'heartbeat' });
                 }
             }, 25000); 
-        });
+
+            // Tell the peer we are in clipboard mode
+            conn.send({ type: 'init-clipboard' });
+        };
+
+        // Fire immediately if already open (crucial for Receiver side)
+        if (conn.open) {
+            onOpen();
+        } else {
+            conn.on('open', onOpen);
+        }
 
         conn.on('data', (payload) => {
+            if (payload.type === 'init-clipboard') return; // Ignore if already handled
+
             if (payload.type === 'clipboard-sync') {
-                // BULLETPROOF: Accepts both old text and new html to prevent "undefined"
-                const incomingData = payload.html !== undefined ? payload.html : payload.text;
-                
+                const incomingData = payload.html !== undefined ? payload.html : payload.text;                
                 if (UI.sharedTextpad.tagName === 'TEXTAREA') {
                     UI.sharedTextpad.value = incomingData;
                 } else {
