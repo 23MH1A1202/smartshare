@@ -1,6 +1,4 @@
-const CACHE_NAME = 'instant-share-v13';
-
-// 🌟 FIX: Removed external CDNs. Only cache local files to prevent CORS crashes!
+const CACHE_NAME = 'instant-share-v14';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -51,15 +49,15 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
 
-                // 🌟 RESTORED HTML REDIRECT FIX TO PREVENT PROTOCOL / 405 ERRORS
+                // 🌟 FIX: Use Absolute Path (/) instead of Relative Path (./)
                 const htmlResponse = `
                     <!DOCTYPE html>
                     <html lang="en">
                     <head>
                         <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <meta http-equiv="refresh" content="0;url=./?shared=true">
-                        <script>window.location.replace('./?shared=true');</script>
+                        <meta http-equiv="refresh" content="0;url=/?shared=true">
+                        <script>window.location.replace('/?shared=true');</script>
                         <style>
                             body { background: #020617; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; color: white;}
                             .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px;}
@@ -80,7 +78,8 @@ self.addEventListener('fetch', (event) => {
 
             } catch (error) {
                 console.error('SW Share Error:', error);
-                return new Response(`<script>window.location.replace('./?error=share_failed');</script>`, {
+                // 🌟 FIX: Use Absolute Path (/)
+                return new Response(`<script>window.location.replace('/?error=share_failed');</script>`, {
                     status: 200,
                     headers: { 'Content-Type': 'text/html' }
                 });
