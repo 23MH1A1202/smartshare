@@ -45,7 +45,7 @@ let transferMode = 'p2p';
 let cloudTimerInterval = null;
 let isCancelled = false; 
 let isTransferComplete = false;
-
+let p2pSessionInterval = null; // Add this
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
 
@@ -796,6 +796,9 @@ UI.navLinks.forEach(link => {
         isCancelled = true;
         clearTimeout(connectionTimeout);
         clearTimeout(reconnectTimer);
+        clearInterval(p2pSessionInterval); // ADD THIS
+
+        document.getElementById('session-timer-display')?.classList.add('hidden');
         
         try {
             if (currentConnection && currentConnection.open) {
@@ -1087,14 +1090,25 @@ UI.navLinks.forEach(link => {
 
         showTransferScreen(file.name, "Setting up secure connection...");
         
-        // --- 10 Minute Auto-Expiry Timer ---
-        const sessionTimer = setTimeout(() => {
-            if (!isTransferring && !currentConnection) {
+       // --- NEW: Visual 10 Minute Countdown ---
+        let timeLeft = 600; // 10 minutes in seconds
+        const timerEl = document.getElementById('timer-value');
+        const timerContainer = document.getElementById('session-timer-display');
+        timerContainer.classList.remove('hidden');
+
+        p2pSessionInterval = setInterval(() => {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerEl.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(p2pSessionInterval);
+                timerContainer.classList.add('hidden');
                 showToast("P2P session expired due to inactivity.", "info");
                 resetApp();
             }
-        }, 10 * 60 * 1000);
-        
+        }, 1000);        
         peer = new Peer(roomCode, {
             config: {
                 'iceServers': [
@@ -1125,7 +1139,10 @@ UI.navLinks.forEach(link => {
         });
 
         peer.on('connection', (conn) => {
-            clearTimeout(sessionTimer);
+            clearInterval(p2pSessionInterval);
+            // Hide the timer UI immediately
+            const timerContainer = document.getElementById('session-timer-display');
+            if (timerContainer) timerContainer.classList.add('hidden');
             currentConnection = conn;
             isTransferring = true;
             
