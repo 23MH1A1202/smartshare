@@ -1,13 +1,12 @@
-const CACHE_NAME = 'instant-share-v12';
+const CACHE_NAME = 'instant-share-v13';
+
+// 🌟 FIX: Removed external CDNs. Only cache local files to prevent CORS crashes!
 const STATIC_ASSETS = [
     './',
     './index.html',
     './style.css',
     './main.js',
-    './manifest.json',
-    'https://cdn.tailwindcss.com',
-    'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
+    './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
