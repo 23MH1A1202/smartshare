@@ -204,10 +204,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    UI.myDeviceName.value = myClipName;
-    UI.myDeviceName.addEventListener('input', (e) => {
+UI.myDeviceName.value = myClipName;
+    UI.myDeviceName.addEventListener('change', (e) => {
         myClipName = e.target.value.trim() || 'Device-' + Math.floor(Math.random() * 1000);
+        UI.myDeviceName.value = myClipName; // Reset UI if user left it blank
         localStorage.setItem('smartshare_clip_name', myClipName);
+        
+        // Broadcast the new name instantly if a connection is active
+        if (currentConnection && currentConnection.open) {
+            currentConnection.send({ type: 'device-info', id: myClipId, name: myClipName });
+        }
     });
 
     function renderTrustedDevices() {
@@ -222,35 +228,46 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.trustedDevicesContainer.classList.add('flex');
 
         trustedDevices.forEach((device, index) => {
-            const btn = document.createElement('button');
-            btn.className = "flex items-center justify-between w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 rounded-xl p-3 transition-all text-left shadow-sm group";
-            btn.innerHTML = `
-                <div class="flex items-center gap-3 truncate">
+            const div = document.createElement('div');
+            // Wrapper is now a div, not a button, to prevent tap conflicts
+            div.className = "flex items-center justify-between w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 rounded-xl p-1.5 pl-2 transition-all shadow-sm group";
+            
+            div.innerHTML = `
+                <button class="connect-trusted-btn flex-1 flex items-center gap-3 truncate text-left py-1.5 outline-none" data-id="${device.id}" aria-label="Connect to ${device.name}">
                     <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                     </div>
                     <span class="font-semibold text-slate-800 dark:text-slate-200 text-sm truncate">${device.name}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">Connect</span>
-                    <div class="delete-trusted-btn text-slate-400 hover:text-red-500 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all" data-index="${index}">
+                </button>
+                <div class="flex items-center gap-1 shrink-0 pr-1">
+                    <button class="connect-trusted-btn hidden sm:flex items-center justify-center text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2 py-1.5 rounded-md hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors uppercase tracking-wider" data-id="${device.id}">Connect</button>
+                    
+                    <button class="delete-trusted-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors" data-index="${index}" aria-label="Remove device">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </div>
+                    </button>
                 </div>
             `;
             
+            UI.trustedDevicesList.appendChild(div);
+        });
+
+        // Add event listeners separately so taps don't bleed into each other
+        document.querySelectorAll('.delete-trusted-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                if (e.target.closest('.delete-trusted-btn')) {
-                    const idx = e.target.closest('.delete-trusted-btn').getAttribute('data-index');
-                    trustedDevices.splice(idx, 1);
-                    localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
-                    renderTrustedDevices();
-                    showToast("Device removed", "info");
-                    return;
-                }
-                startP2PClipboardReceive(device.id, true);
+                e.stopPropagation();
+                const idx = e.currentTarget.getAttribute('data-index');
+                trustedDevices.splice(idx, 1);
+                localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                renderTrustedDevices();
+                showToast("Device removed", "info");
             });
-            UI.trustedDevicesList.appendChild(btn);
+        });
+
+        document.querySelectorAll('.connect-trusted-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                startP2PClipboardReceive(id, true);
+            });
         });
     }
     
@@ -1554,10 +1571,23 @@ UI.navLinks.forEach(link => {
             if (payload.type === 'init-clipboard') return;
             
             // Handle incoming Device Info for saving
+            // Handle incoming Device Info for saving OR updating
             if (payload.type === 'device-info') {
-                const isTrusted = trustedDevices.some(d => d.id === payload.id);
+                const existingIndex = trustedDevices.findIndex(d => d.id === payload.id);
                 
-                if (!isTrusted && payload.id !== myClipId) {
+                // If it's already a trusted device, update the name if it changed
+                if (existingIndex !== -1) {
+                    if (trustedDevices[existingIndex].name !== payload.name) {
+                        trustedDevices[existingIndex].name = payload.name;
+                        localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                        renderTrustedDevices();
+                        showToast(`Device name updated to: ${payload.name}`, "info");
+                    }
+                    return; // Stop here since it's already saved
+                }
+                
+                // If not trusted, show the prompt to save it
+                if (payload.id !== myClipId) {
                     UI.saveDevicePrompt.classList.remove('hidden');
                     UI.saveDevicePrompt.classList.add('flex');
                     UI.saveDeviceName.innerText = payload.name;
