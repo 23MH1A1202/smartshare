@@ -1,7 +1,11 @@
 /* Update your main container style */
+:root {
+    --header-height: 4rem;
+}
+
 main {
     /* 64px is exactly the height of your 16-rem/4-rem header */
-    padding-top: 4rem !important; 
+    padding-top: var(--header-height) !important; 
 }
 
 /* Remove or set to 0 the margin on your screen panels to prevent extra gaps */
@@ -167,7 +171,7 @@ html.dark .footer-link:hover {
 /* --- SCREEN PANELS --- */
 .screen-panel {
   transition: opacity 0.25s ease, transform 0.25s ease;
-  scroll-margin-top: 4rem;
+  scroll-margin-top: var(--header-height);
 }
 .screen-panel.hidden {
   opacity: 0;
