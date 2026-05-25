@@ -29,36 +29,43 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-
-    // 🌟 AGGRESSIVE POST INTERCEPT
+    // 🌟 AGGRESSIVE POST INTERCEPT FOR NATIVE SHARING
     if (event.request.method === 'POST') {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
-                const file = formData.get('file');
+                const files = formData.getAll('file'); // Handle single or multiple files
 
-                if (file) {
+                if (files && files.length > 0) {
                     const cache = await caches.open('shared-file-cache');
-                    await cache.put('/shared-file', new Response(file, {
-                        headers: {
-                            'Content-Type': file.type || 'application/octet-stream',
-                            'Content-Length': file.size,
-                            'X-File-Name': encodeURIComponent(file.name)
-                        }
-                    }));
+                    // Store the count of files
+                    await cache.put('/shared-file-count', new Response(files.length.toString()));
+
+                    // Store each file individually with its metadata
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        await cache.put('/shared-file-' + i, new Response(file, {
+                            headers: {
+                                'Content-Type': file.type || 'application/octet-stream',
+                                'Content-Length': file.size,
+                                'X-File-Name': encodeURIComponent(file.name || `Shared_File_${i}`)
+                            }
+                        }));
+                    }
                 }
-                
-                return Response.redirect('/?shared=true', 303);
-                
+
+                // Redirect to a safe GET request
+                return Response.redirect('./?shared=true', 303);
+
             } catch (error) {
                 console.error('SW Share Error:', error);
-                return Response.redirect('/?error=share_failed', 303);
+                return Response.redirect('./?error=share_failed', 303);
             }
         })());
-        return;
+        return; // Halt execution so it doesn't fall through to the standard fetch
     }
 
-    // Standard Offline Caching
+    // Standard Offline Caching for GET requests
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             return cachedResponse || fetch(event.request);
