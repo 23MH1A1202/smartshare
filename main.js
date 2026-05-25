@@ -216,6 +216,55 @@ UI.myDeviceName.value = myClipName;
         }
     });
 
+
+    // --- NATIVE PWA SHARE TARGET HANDLER ---
+    if (window.location.search.includes('shared=true')) {
+        window.history.replaceState(null, null, window.location.pathname); // Clean the URL
+        handleIncomingShare();
+    }
+
+    async function handleIncomingShare() {
+        try {
+            const cache = await caches.open('shared-file-cache');
+            const countResponse = await cache.match('/shared-file-count');
+            
+            if (countResponse) {
+                const countStr = await countResponse.text();
+                const count = parseInt(countStr, 10);
+                
+                let incomingFiles = [];
+                for (let i = 0; i < count; i++) {
+                    const response = await cache.match('/shared-file-' + i);
+                    if (response) {
+                        const blob = await response.blob();
+                        const fileName = decodeURIComponent(response.headers.get('X-File-Name') || `Shared_File_${i}`);
+                        incomingFiles.push(new File([blob], fileName, { type: blob.type }));
+                        
+                        // Delete the file from cache immediately to save storage space
+                        await cache.delete('/shared-file-' + i); 
+                    }
+                }
+                await cache.delete('/shared-file-count');
+                
+                if (incomingFiles.length > 0) {
+                    // Inject files into the staging area
+                    selectedFiles = incomingFiles;
+                    switchMode('p2p');
+                    renderFileList(); 
+                    
+                    // Auto-trigger the "Share Files" process so the QR code appears instantly
+                    setTimeout(() => {
+                        UI.sendFilesBtn.click();
+                        showToast("File loaded from Gallery!", "success");
+                    }, 400);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to load shared file:", err);
+            showToast("Failed to process shared files.", "error");
+        }
+    }
+    
     function renderTrustedDevices() {
         UI.trustedDevicesList.innerHTML = '';
         if (trustedDevices.length === 0) {
