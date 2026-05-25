@@ -1,11 +1,10 @@
-// BUMP TO V8
-const CACHE_NAME = 'instant-share-v8';
+const CACHE_NAME = 'instant-share-v9';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/main.js',
-    '/manifest.json',
+    './',
+    './index.html',
+    './style.css',
+    './main.js',
+    './manifest.json',
     'https://cdn.tailwindcss.com',
     'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
@@ -30,10 +29,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-
-    // 🌟 ONLY intercept POST requests to our own domain (Prevents breaking Cloudinary)
-    if (event.request.method === 'POST' && url.origin === location.origin) {
+    // Intercept POST requests to capture shared files
+    if (event.request.method === 'POST') {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -48,31 +45,30 @@ self.addEventListener('fetch', (event) => {
                         await cache.put('/shared-file-' + i, new Response(file, {
                             headers: {
                                 'Content-Type': file.type || 'application/octet-stream',
-                                'Content-Length': file.size,
+                                'Content-Length': file.size.toString(),
                                 'X-File-Name': encodeURIComponent(file.name || `Shared_File_${i}`)
                             }
                         }));
                     }
                 }
 
-                // 🌟 BUG FIX: Return a fake 200 OK HTML page that redirects via JS
-                // This prevents Chrome from crashing the Service Worker on POST redirects.
+                // Return a safe HTML page that redirects to the sharing UI
                 const htmlResponse = `
                     <!DOCTYPE html>
                     <html lang="en">
                     <head>
+                        <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <meta http-equiv="refresh" content="0;url=/?shared=true">
-                        <script>window.location.replace('/?shared=true');</script>
+                        <meta http-equiv="refresh" content="0;url=./?shared=true">
+                        <script>window.location.replace('./?shared=true');</script>
                         <style>
-                            body { background: #020617; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
-                            .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; mb-4; }
+                            body { background: #020617; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                            .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
                             @keyframes spin { 100% { transform: rotate(360deg); } }
                         </style>
                     </head>
                     <body>
                         <div class="loader"></div>
-                        <h3 style="margin-top: 20px; font-weight: 500;">Processing file...</h3>
                     </body>
                     </html>
                 `;
@@ -84,8 +80,7 @@ self.addEventListener('fetch', (event) => {
 
             } catch (error) {
                 console.error('SW Share Error:', error);
-                // Fallback to error state using the same JS redirect method
-                return new Response(`<script>window.location.replace('/?error=share_failed');</script>`, {
+                return new Response(`<script>window.location.replace('./?error=share_failed');</script>`, {
                     status: 200,
                     headers: { 'Content-Type': 'text/html' }
                 });
