@@ -7,6 +7,10 @@ main {
     padding-top: 0 !important;
 }
 
+main.has-nav-gap {
+    padding-top: 1.5rem !important;
+}
+
 /* Remove or set to 0 the margin on your screen panels to prevent extra gaps */
 .screen-panel {
     margin-top: 0px !important;
