@@ -29,8 +29,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    // Intercept POST requests to capture shared files
-    if (event.request.method === 'POST') {
+    const requestUrl = new URL(event.request.url);
+    const scopeUrl = new URL(self.registration.scope);
+    const scopePath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : `${scopeUrl.pathname}/`;
+    const scopePathNoSlash = scopePath.length > 1 ? scopePath.slice(0, -1) : scopePath;
+    const isShareTargetPath = requestUrl.origin === scopeUrl.origin && (
+        requestUrl.pathname === scopePath ||
+        requestUrl.pathname === scopePathNoSlash ||
+        requestUrl.pathname === `${scopePath}index.html`
+    );
+    const isShareTargetPost = event.request.method === 'POST' && event.request.mode === 'navigate' && isShareTargetPath;
+
+    // Intercept share-target POST requests to capture shared files
+    if (isShareTargetPost) {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
