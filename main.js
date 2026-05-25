@@ -237,10 +237,6 @@ UI.navLinks.forEach(link => {
         }
     });
 
-    window.addEventListener('scroll', () => {
-        closeMobileMenu();
-    });
-
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 768) {
             closeMobileMenu();
