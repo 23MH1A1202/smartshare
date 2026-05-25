@@ -185,7 +185,7 @@ UI.navLinks.forEach(link => {
         UI.mobileMenu.classList.remove(
             'hidden',
             'opacity-0',
-            '-translate-y-2',
+            '-translate-y-3',
             'pointer-events-none'
         );
 
@@ -210,7 +210,7 @@ UI.navLinks.forEach(link => {
 
         UI.mobileMenu.classList.add(
             'opacity-0',
-            '-translate-y-2',
+            '-translate-y-3',
             'scale-95',
             'pointer-events-none'
         );
@@ -221,7 +221,7 @@ UI.navLinks.forEach(link => {
             ) {
                 UI.mobileMenu.classList.add('hidden');
             }
-        }, 250);
+        }, 320);
     }
 
     function toggleMobileMenu(e) {
