@@ -173,17 +173,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        if (scroll) {
-            // If navigating down to the dropzone on the home page, scroll to that specific panel
-            if (screenId === 'create') {
-                const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
-                if (targetPanel) {
-                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+       if (scroll) {
+            // Wait 10ms for the browser to finish hiding/showing sections 
+            // before calculating the scroll position.
+            setTimeout(() => {
+                if (screenId === 'create') {
+                    const targetPanel = document.querySelector(`[data-screen="${screenId}"]`);
+                    if (targetPanel) {
+                        targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                } else {
+                    // Snap instantly to the absolute top for page changes
+                    window.scrollTo(0, 0);
                 }
-            } else {
-                // For all other full-page changes (About, Manage, or back to Home), just scroll to absolute top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            }, 10);
         }
     }
 
