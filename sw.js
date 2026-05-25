@@ -1,4 +1,4 @@
-const CACHE_NAME = 'instant-share-v5';
+const CACHE_NAME = 'instant-share-v6';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -34,14 +34,12 @@ self.addEventListener('fetch', (event) => {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
-                const files = formData.getAll('file'); // Handle single or multiple files
+                const files = formData.getAll('file');
 
                 if (files && files.length > 0) {
                     const cache = await caches.open('shared-file-cache');
-                    // Store the count of files
                     await cache.put('/shared-file-count', new Response(files.length.toString()));
 
-                    // Store each file individually with its metadata
                     for (let i = 0; i < files.length; i++) {
                         const file = files[i];
                         await cache.put('/shared-file-' + i, new Response(file, {
@@ -54,15 +52,17 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
 
-                // Redirect to a safe GET request
-                return Response.redirect('./?shared=true', 303);
+                // Safely construct the absolute URL for the redirect
+                const redirectUrl = new URL('index.html?shared=true', event.request.url).href;
+                return Response.redirect(redirectUrl, 303);
 
             } catch (error) {
                 console.error('SW Share Error:', error);
-                return Response.redirect('./?error=share_failed', 303);
+                const errorUrl = new URL('index.html?error=share_failed', event.request.url).href;
+                return Response.redirect(errorUrl, 303);
             }
         })());
-        return; // Halt execution so it doesn't fall through to the standard fetch
+        return; 
     }
 
     // Standard Offline Caching for GET requests
