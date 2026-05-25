@@ -1,10 +1,10 @@
-const CACHE_NAME = 'instant-share-v9';
+const CACHE_NAME = 'instant-share-v11';
 const STATIC_ASSETS = [
-    './',
-    './index.html',
-    './style.css',
-    './main.js',
-    './manifest.json',
+    '/',
+    '/index.html',
+    '/style.css',
+    '/main.js',
+    '/manifest.json',
     'https://cdn.tailwindcss.com',
     'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
@@ -29,19 +29,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    const requestUrl = new URL(event.request.url);
-    const scopeUrl = new URL(self.registration.scope);
-    const scopePath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : `${scopeUrl.pathname}/`;
-    const scopePathNoSlash = scopePath.length > 1 ? scopePath.slice(0, -1) : scopePath;
-    const isShareTargetPath = requestUrl.origin === scopeUrl.origin && (
-        requestUrl.pathname === scopePath ||
-        requestUrl.pathname === scopePathNoSlash ||
-        requestUrl.pathname === `${scopePath}index.html`
-    );
-    const isShareTargetPost = event.request.method === 'POST' && isShareTargetPath;
+    const url = new URL(event.request.url);
 
-    // Intercept share-target POST requests to capture shared files
-    if (isShareTargetPost) {
+    // 🌟 THE CATCH-ALL INTERCEPTOR
+    // Because SmartShare is static, ANY POST request to our own domain is guaranteed to be a native gallery share.
+    // This catches the file regardless of what path the Android WebAPK has cached.
+    if (event.request.method === 'POST' && url.origin === location.origin) {
         event.respondWith((async () => {
             try {
                 const formData = await event.request.formData();
@@ -62,47 +55,21 @@ self.addEventListener('fetch', (event) => {
                         }));
                     }
                 }
-
-                // Return a safe HTML page that redirects to the sharing UI
-                const htmlResponse = `
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <meta http-equiv="refresh" content="0;url=./?shared=true">
-                        <script>window.location.replace('./?shared=true');</script>
-                        <style>
-                            body { background: #020617; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-                            .loader { border: 4px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-                            @keyframes spin { 100% { transform: rotate(360deg); } }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="loader"></div>
-                    </body>
-                    </html>
-                `;
-
-                return new Response(htmlResponse, {
-                    status: 200,
-                    headers: { 'Content-Type': 'text/html' }
-                });
-
+                
+                // Redirect back to the UI to process the cached file
+                return Response.redirect('/?shared=true', 303);
+                
             } catch (error) {
                 console.error('SW Share Error:', error);
-                return new Response(`<script>window.location.replace('./?error=share_failed');</script>`, {
-                    status: 200,
-                    headers: { 'Content-Type': 'text/html' }
-                });
+                return Response.redirect('/?error=share_failed', 303);
             }
         })());
         return; 
     }
 
+    // Let external POSTs (Firebase/Cloudinary API calls) pass through untouched
     if (event.request.method !== 'GET') {
-        event.respondWith(fetch(event.request));
-        return;
+        return; 
     }
 
     // Standard Offline Caching for GET requests
