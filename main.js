@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', syncHeaderHeight);
     window.addEventListener('load', syncHeaderHeight);
 
-    const UI = {
+   const UI = {
         initial: document.getElementById('initial-state'),
         transfer: document.getElementById('transfer-state'),
         shareOptions: document.getElementById('share-options'),
@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveDeviceName: document.getElementById('save-device-name'),
         btnSaveDeviceYes: document.getElementById('btn-save-device-yes'),
         btnSaveDeviceNo: document.getElementById('btn-save-device-no'),
+        // --- NEW VARIABLES ADDED HERE ---
         p2pWarningSender: document.getElementById('p2p-warning-sender'),
         cloudSafeMsg: document.getElementById('cloud-safe-msg'),
         p2pWarningReceiver: document.getElementById('p2p-warning-receiver'),
