@@ -1074,6 +1074,8 @@ UI.navLinks.forEach(link => {
                     UI.progressArea.classList.add('hidden');
                     UI.qrContainer.innerHTML = "";
                     new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+                    UI.pairingCodeDisplay.innerText = fileId;
+                    UI.shareOptions.classList.remove('hidden');
 
                     UI.p2pWarningSender.classList.add('hidden');
                     UI.p2pWarningSender.classList.remove('flex');
@@ -1188,6 +1190,8 @@ UI.navLinks.forEach(link => {
             const transferUrl = `${cleanUrl}#${id}`;
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+            UI.pairingCodeDisplay.innerText = id;
+            UI.shareOptions.classList.remove('hidden');
             localStorage.setItem('p2p_active_id', id);
            // NEW: Show P2P Warning, Hide Cloud Safe Msg
             UI.p2pWarningSender.classList.remove('hidden');
