@@ -42,7 +42,7 @@ function offlineResponse() {
     });
 }
 
-async function networkFirst(request, { cacheName, fallbackUrl } = {}) {
+async function networkFirst(request, { cacheName = RUNTIME_NAME, fallbackUrl } = {}) {
     const cache = await caches.open(cacheName);
     try {
         const response = await fetch(request, { cache: 'no-cache' });
@@ -61,7 +61,7 @@ async function networkFirst(request, { cacheName, fallbackUrl } = {}) {
     }
 }
 
-async function staleWhileRevalidate(request, cacheName) {
+async function staleWhileRevalidate(request, cacheName = RUNTIME_NAME) {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
     const networkPromise = fetch(request)
@@ -71,10 +71,12 @@ async function staleWhileRevalidate(request, cacheName) {
             }
             return response;
         })
-        .catch(() => null);
+        .catch((error) => {
+            console.debug('SW cache update failed:', error);
+            return null;
+        });
 
     if (cachedResponse) {
-        networkPromise.catch(() => {});
         return cachedResponse;
     }
 
