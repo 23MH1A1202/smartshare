@@ -35,10 +35,17 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+function offlineResponse() {
+    return new Response('App is offline.', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
+}
+
 async function networkFirst(request, { cacheName, fallbackUrl } = {}) {
     const cache = await caches.open(cacheName);
     try {
-        const response = await fetch(request, { cache: 'no-store' });
+        const response = await fetch(request, { cache: 'no-cache' });
         if (response && response.status === 200) {
             await cache.put(request, response.clone());
         }
@@ -50,7 +57,7 @@ async function networkFirst(request, { cacheName, fallbackUrl } = {}) {
             const fallbackResponse = await caches.match(fallbackUrl);
             if (fallbackResponse) return fallbackResponse;
         }
-        return new Response('App is offline.');
+        return offlineResponse();
     }
 }
 
@@ -72,7 +79,7 @@ async function staleWhileRevalidate(request, cacheName) {
     }
 
     const networkResponse = await networkPromise;
-    return networkResponse || new Response('App is offline.');
+    return networkResponse || offlineResponse();
 }
 
 self.addEventListener('fetch', (event) => {
