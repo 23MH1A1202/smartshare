@@ -733,15 +733,23 @@ UI.navLinks.forEach(link => {
 
         document.querySelectorAll('.extend-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
+                // Prevent the click from bubbling up
+                e.preventDefault(); 
+                e.stopPropagation();
+
                 const id = e.target.getAttribute('data-id');
-               // Replace prompt() with the new custom modal
+                
+                // Call the custom modal
                 let mins = await promptExtendTime();
+                
                 if (mins === null) return; // User clicked Cancel
+                
                 mins = parseInt(mins, 10);
                 if (isNaN(mins) || mins <= 0 || mins > 60) {
                     showToast("Please enter a valid number from 1 to 60.", "error");
                     return;
                 }
+                
                 e.target.innerText = "...";
                 try {
                     const docRef = doc(db, "links", id);
@@ -749,7 +757,7 @@ UI.navLinks.forEach(link => {
                     if (snap.exists()) {
                         const newTime = snap.data().expiresAt + (mins * 60 * 1000);
                         await updateDoc(docRef, { expiresAt: newTime });
-                        showToast(`Time successfully extended by ${mins} minutes!`, "success");
+                        showToast(`Time extended by ${mins} minutes!`, "success");
                         loadCloudManager();
                     }
                 } catch(err) {
@@ -1667,10 +1675,17 @@ UI.navLinks.forEach(link => {
             const transferUrl = `${cleanUrl}#clip-${id}`; 
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+            
+            // --- RESTORED: Show the Code and QR section ---
+            UI.pairingCodeDisplay.innerText = id;
+            UI.shareOptions.classList.remove('hidden');
+
+            // Hide File Transfer specific warnings since this is Clipboard Mode
             UI.p2pWarningSender.classList.add('hidden');
             UI.p2pWarningSender.classList.remove('flex');
             UI.cloudSafeMsg.classList.add('hidden');
             UI.cloudSafeMsg.classList.remove('flex');
+            
             setStatusDot('amber');
         });
 
