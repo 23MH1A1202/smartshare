@@ -142,7 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
         saveDevicePrompt: document.getElementById('save-device-prompt'),
         saveDeviceName: document.getElementById('save-device-name'),
         btnSaveDeviceYes: document.getElementById('btn-save-device-yes'),
-        btnSaveDeviceNo: document.getElementById('btn-save-device-no')
+        btnSaveDeviceNo: document.getElementById('btn-save-device-no'),
+        p2pWarningSender: document.getElementById('p2p-warning-sender'),
+        cloudSafeMsg: document.getElementById('cloud-safe-msg'),
+        p2pWarningReceiver: document.getElementById('p2p-warning-receiver'),
+        extendModal: document.getElementById('extend-modal'),
+        extendMinsInput: document.getElementById('extend-mins-input'),
+        cancelExtendBtn: document.getElementById('cancel-extend-btn'),
+        confirmExtendBtn: document.getElementById('confirm-extend-btn')
     };
 
     let peer = null;
@@ -652,6 +659,39 @@ UI.navLinks.forEach(link => {
         return `${hours}h ${minutes}m ${seconds}s`;
     }
 
+    function promptExtendTime() {
+        return new Promise((resolve) => {
+            UI.extendModal.classList.remove('hidden');
+            UI.extendModal.classList.add('flex');
+            
+            // Allow display block to apply before animating opacity
+            requestAnimationFrame(() => {
+                UI.extendModal.classList.remove('opacity-0');
+                UI.extendModal.querySelector('div').classList.remove('scale-95');
+            });
+
+            UI.extendMinsInput.value = "15";
+            UI.extendMinsInput.focus();
+
+            const cleanup = () => {
+                UI.extendModal.classList.add('opacity-0');
+                UI.extendModal.querySelector('div').classList.add('scale-95');
+                setTimeout(() => {
+                    UI.extendModal.classList.add('hidden');
+                    UI.extendModal.classList.remove('flex');
+                }, 200); // Wait for transition
+                UI.cancelExtendBtn.removeEventListener('click', onCancel);
+                UI.confirmExtendBtn.removeEventListener('click', onConfirm);
+            };
+
+            const onCancel = () => { cleanup(); resolve(null); };
+            const onConfirm = () => { cleanup(); resolve(UI.extendMinsInput.value); };
+
+            UI.cancelExtendBtn.addEventListener('click', onCancel);
+            UI.confirmExtendBtn.addEventListener('click', onConfirm);
+        });
+    }
+    
     function renderCloudManagerUI(files) {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
@@ -694,8 +734,9 @@ UI.navLinks.forEach(link => {
         document.querySelectorAll('.extend-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.target.getAttribute('data-id');
-                let mins = prompt("How many extra minutes? (Max: 60)", "15");
-                if (mins === null) return; 
+               // Replace prompt() with the new custom modal
+                let mins = await promptExtendTime();
+                if (mins === null) return; // User clicked Cancel
                 mins = parseInt(mins, 10);
                 if (isNaN(mins) || mins <= 0 || mins > 60) {
                     showToast("Please enter a valid number from 1 to 60.", "error");
@@ -856,6 +897,13 @@ UI.navLinks.forEach(link => {
         setResetButton("Cancel", false);
         UI.fileName.innerText = "Waiting...";
         UI.statusText.innerText = "Getting ready...";
+
+        if(UI.p2pWarningSender) UI.p2pWarningSender.classList.add('hidden');
+        if(UI.cloudSafeMsg) UI.cloudSafeMsg.classList.add('hidden');
+        if(UI.p2pWarningReceiver) {
+            UI.p2pWarningReceiver.classList.add('hidden');
+            UI.p2pWarningReceiver.classList.remove('flex');
+        }
     }
 
     UI.resetBtn.addEventListener('click', resetApp);
@@ -1018,9 +1066,13 @@ UI.navLinks.forEach(link => {
                     UI.qrContainer.innerHTML = "";
                     new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
 
-                    UI.pairingCodeDisplay.innerText = fileId;
-                    UI.shareOptions.classList.remove('hidden');
-                    UI.statusText.innerText = "Ready! You can safely close this page now.";
+                    UI.p2pWarningSender.classList.add('hidden');
+                    UI.p2pWarningSender.classList.remove('flex');
+                    UI.cloudSafeMsg.classList.remove('hidden');
+                    UI.cloudSafeMsg.classList.add('flex');
+
+                    // NEW: Clarified status text below filename
+                    UI.statusText.innerText = "Link generated successfully!";
                     setResetButton("Close", true);
                     setStatusDot('green');
 
@@ -1128,8 +1180,11 @@ UI.navLinks.forEach(link => {
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
             localStorage.setItem('p2p_active_id', id);
-            UI.pairingCodeDisplay.innerText = id;
-            UI.shareOptions.classList.remove('hidden');
+           // NEW: Show P2P Warning, Hide Cloud Safe Msg
+            UI.p2pWarningSender.classList.remove('hidden');
+            UI.p2pWarningSender.classList.add('flex');
+            UI.cloudSafeMsg.classList.add('hidden');
+            UI.cloudSafeMsg.classList.remove('flex');
             UI.statusText.innerText = "Waiting for the other person to join...";
             setStatusDot('amber');
             UI.copyLinkBtn.onclick = () => {
@@ -1396,6 +1451,12 @@ UI.navLinks.forEach(link => {
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: targetId, isReconnecting: false, reconnectAttempts: 0 };
         showTransferScreen("Connecting...", `Looking for connection code ${targetId}...`);
 
+        // --- NEW: Show P2P Receiver Warning ---
+        if (UI.p2pWarningReceiver) {
+            UI.p2pWarningReceiver.classList.remove('hidden');
+            UI.p2pWarningReceiver.classList.add('flex');
+        }
+
         peer = new Peer({
             config: {
                 'iceServers': [
@@ -1494,6 +1555,13 @@ UI.navLinks.forEach(link => {
                         UI.successArea.classList.add('flex');
                         UI.successText.innerText = "Received";
                         UI.statusText.innerText = "File saved to your device!";
+                        
+                        // --- NEW: Hide the receiver warning once done ---
+                        if (UI.p2pWarningReceiver) {
+                            UI.p2pWarningReceiver.classList.add('hidden');
+                            UI.p2pWarningReceiver.classList.remove('flex');
+                        }
+
                         setResetButton("Close", true);
                         if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                         setStatusDot('green');
@@ -1599,8 +1667,10 @@ UI.navLinks.forEach(link => {
             const transferUrl = `${cleanUrl}#clip-${id}`; 
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
-            UI.pairingCodeDisplay.innerText = id;
-            UI.shareOptions.classList.remove('hidden');
+            UI.p2pWarningSender.classList.add('hidden');
+            UI.p2pWarningSender.classList.remove('flex');
+            UI.cloudSafeMsg.classList.add('hidden');
+            UI.cloudSafeMsg.classList.remove('flex');
             setStatusDot('amber');
         });
 
