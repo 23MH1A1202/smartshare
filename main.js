@@ -4,8 +4,11 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https:/
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then((reg) => console.log('Service Worker registered successfully!', reg))
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+            .then((reg) => {
+                console.log('Service Worker registered successfully!', reg);
+                reg.update();
+            })
             .catch((err) => console.error('Service Worker registration failed:', err));
     });
 }

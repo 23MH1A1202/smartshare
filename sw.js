@@ -1,16 +1,24 @@
-const CACHE_NAME = 'instant-share-v14';
+const CACHE_VERSION = 'v2';
+const PRECACHE_NAME = `instant-share-precache-${CACHE_VERSION}`;
+const RUNTIME_NAME = `instant-share-runtime-${CACHE_VERSION}`;
+const SHARED_FILE_CACHE = 'shared-file-cache';
 const STATIC_ASSETS = [
     './',
     './index.html',
     './style.css',
     './main.js',
-    './manifest.json'
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png',
+    './icon.svg'
 ];
+const NETWORK_FIRST_DESTINATIONS = new Set(['document', 'script', 'style', 'manifest']);
+const STATIC_EXTENSIONS = ['.js', '.css', '.json', '.png', '.svg', '.ico', '.webp', '.jpg', '.jpeg', '.gif', '.woff', '.woff2'];
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+        caches.open(PRECACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
     );
 });
 
@@ -18,12 +26,54 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+                keys
+                    .filter(key => ![PRECACHE_NAME, RUNTIME_NAME, SHARED_FILE_CACHE].includes(key))
+                    .map(key => caches.delete(key))
             );
         })
     );
     self.clients.claim();
 });
+
+async function networkFirst(request, { cacheName, fallbackUrl } = {}) {
+    const cache = await caches.open(cacheName);
+    try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response && response.status === 200) {
+            await cache.put(request, response.clone());
+        }
+        return response;
+    } catch (error) {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) return cachedResponse;
+        if (fallbackUrl) {
+            const fallbackResponse = await caches.match(fallbackUrl);
+            if (fallbackResponse) return fallbackResponse;
+        }
+        return new Response('App is offline.');
+    }
+}
+
+async function staleWhileRevalidate(request, cacheName) {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
+    const networkPromise = fetch(request)
+        .then((response) => {
+            if (response && response.status === 200) {
+                cache.put(request, response.clone());
+            }
+            return response;
+        })
+        .catch(() => null);
+
+    if (cachedResponse) {
+        networkPromise.catch(() => {});
+        return cachedResponse;
+    }
+
+    const networkResponse = await networkPromise;
+    return networkResponse || new Response('App is offline.');
+}
 
 self.addEventListener('fetch', (event) => {
     // 🌟 NATIVE SHARE INTERCEPTOR
@@ -91,12 +141,20 @@ self.addEventListener('fetch', (event) => {
     // Let external POSTs (Firebase/Cloudinary API calls) pass through untouched
     if (event.request.method !== 'GET') return;
 
-    // Standard Offline Caching for GET requests
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || fetch(event.request);
-        }).catch(() => {
-            return new Response('App is offline.');
-        })
-    );
+    const url = new URL(event.request.url);
+    const isSameOrigin = url.origin === self.location.origin;
+
+    if (!isSameOrigin) return;
+
+    if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+        event.respondWith(networkFirst(event.request, { cacheName: RUNTIME_NAME, fallbackUrl: './index.html' }));
+        return;
+    }
+
+    if (NETWORK_FIRST_DESTINATIONS.has(event.request.destination) || STATIC_EXTENSIONS.some(ext => url.pathname.endsWith(ext))) {
+        event.respondWith(networkFirst(event.request, { cacheName: RUNTIME_NAME }));
+        return;
+    }
+
+    event.respondWith(staleWhileRevalidate(event.request, RUNTIME_NAME));
 });
