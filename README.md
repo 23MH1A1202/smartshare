@@ -38,6 +38,10 @@ Live here:
 - **Background Heartbeat**: Keeps the firewall connection alive indefinitely, preventing idle timeouts
 - Instant disconnection detection and reporting
 
+### Native OS Integration & UX
+- **Native Android Sharing (PWA):** Leverages the **Web Share Target API**. When installed as a Progressive Web App, SmartShare registers as a system-level share target. Users can share photos, videos, or documents directly from their native Android Gallery, Camera, or File Manager straight into the application.
+- **Quality-of-Life:** Drag & drop uploads, asynchronous multi-file bundling via **JSZip**, inline image controls ("Save to Device"), and a Light/Dark theme toggle.
+
 ### Quality-of-Life
 - Drag & drop uploads
 - Multi-file sending (zips using **JSZip**)
