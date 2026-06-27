@@ -2472,7 +2472,7 @@ UI.navLinks.forEach(link => {
         if (!qrVideoStream) return;
 
         try {
-            // 1. Try Native BarcodeDetector First (Fastest)
+            // 1. Try Native BarcodeDetector First (Fastest, mostly Chrome/Android)
             if ('BarcodeDetector' in window) {
                 try {
                     const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
@@ -2482,28 +2482,34 @@ UI.navLinks.forEach(link => {
                         return; // Stop looping on success
                     }
                 } catch (nativeErr) {
-                    // Native API exists but failed on this frame (or device). Fall through silently.
+                    // Native API exists but failed on this frame. Fall through silently.
                 }
             }
 
-            // 2. Fallback to jsQR (Software Decoder for Firefox/Desktop/iQOO)
+            // 2. Fallback to jsQR (Software Decoder for Firefox/Desktop/Mac)
             if (typeof jsQR !== 'undefined' && UI.qrVideo.readyState === UI.qrVideo.HAVE_ENOUGH_DATA) {
-                // Set canvas size to match the video feed
-                qrCanvas.height = UI.qrVideo.videoHeight;
-                qrCanvas.width = UI.qrVideo.videoWidth;
                 
-                // Draw current video frame to canvas
-                qrCtx.drawImage(UI.qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-                const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-                
-                // Decode using jsQR
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert", // Keeps performance high
-                });
-                
-                if (code && code.data) {
-                    handleScannedQR(code.data);
-                    return; // Stop looping on success
+                // BUG FIX: Downscale the HD video feed so jsQR doesn't choke on millions of pixels
+                const scanWidth = Math.min(UI.qrVideo.videoWidth, 600); // Cap width at 600px
+                const scanHeight = Math.min(UI.qrVideo.videoHeight, 600 * (UI.qrVideo.videoHeight / UI.qrVideo.videoWidth));
+
+                if (scanWidth > 0 && scanHeight > 0) {
+                    qrCanvas.width = scanWidth;
+                    qrCanvas.height = scanHeight;
+                    
+                    // Draw the shrunken frame
+                    qrCtx.drawImage(UI.qrVideo, 0, 0, scanWidth, scanHeight);
+                    const imageData = qrCtx.getImageData(0, 0, scanWidth, scanHeight);
+                    
+                    // Decode using jsQR
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "attemptBoth", // BUG FIX: Helps read dark-mode QR codes off phone screens
+                    });
+                    
+                    if (code && code.data) {
+                        handleScannedQR(code.data);
+                        return; // Stop looping on success
+                    }
                 }
             }
         } catch (e) {
