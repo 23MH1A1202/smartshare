@@ -34,6 +34,7 @@ Live here:
 - **Rich-Text Pad**: Supports drag-and-drop images, copy-pasting, and smart URL detection (auto-clickable links)
 - **Image Controls**: Inline "Save to Device" and "Remove" options for shared images
 - **One-Tap Copy**: Extract the synced clipboard directly to your system
+- **Trusted Devices Ecosystem:** Includes a local device-trust layer allowing users to remember and authenticate specific local hardware profiles, facilitating fast, zero-friction pairing for recurring cross-device workflows.
 - **Background Heartbeat**: Keeps the firewall connection alive indefinitely, preventing idle timeouts
 - Instant disconnection detection and reporting
 
