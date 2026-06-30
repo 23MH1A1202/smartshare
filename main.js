@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!UI.installModal) return;
         UI.installModal.classList.remove('hidden');
         UI.installModal.classList.add('flex');
-        
+
         requestAnimationFrame(() => {
             UI.installModal.classList.remove('opacity-0');
             UI.installModal.querySelector('div').classList.remove('scale-95');
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function hideInstallModal() {
         if (!UI.installModal) return;
-        
+
         // Save user preference if they checked the box
         if (UI.dontShowInstallCheck && UI.dontShowInstallCheck.checked) {
             localStorage.setItem('smartshare_hide_install', 'true');
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         UI.installModal.classList.add('opacity-0');
         UI.installModal.querySelector('div').classList.add('scale-95');
-        
+
         setTimeout(() => {
             UI.installModal.classList.add('hidden');
             UI.installModal.classList.remove('flex');
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (UI.confirmInstallBtn) {
         UI.confirmInstallBtn.addEventListener('click', async () => {
             hideInstallModal(); // Close our custom modal
-            
+
             if (deferredPrompt) {
                 deferredPrompt.prompt(); // Show the native OS install prompt
                 const { outcome } = await deferredPrompt.userChoice;
@@ -281,7 +281,7 @@ UI.myDeviceName.value = myClipName;
         myClipName = e.target.value.trim() || 'Device-' + Math.floor(Math.random() * 1000);
         UI.myDeviceName.value = myClipName; // Reset UI if user left it blank
         localStorage.setItem('smartshare_clip_name', myClipName);
-        
+
         // Broadcast the new name instantly if a connection is active
         if (currentConnection && currentConnection.open) {
             currentConnection.send({ type: 'device-info', id: myClipId, name: myClipName });
@@ -299,11 +299,11 @@ UI.myDeviceName.value = myClipName;
         try {
             const cache = await caches.open('shared-file-cache');
             const countResponse = await cache.match('/shared-file-count');
-            
+
             if (countResponse) {
                 const countStr = await countResponse.text();
                 const count = parseInt(countStr, 10);
-                
+
                 let incomingFiles = [];
                 for (let i = 0; i < count; i++) {
                     const response = await cache.match('/shared-file-' + i);
@@ -311,24 +311,24 @@ UI.myDeviceName.value = myClipName;
                         const blob = await response.blob();
                         const fileName = decodeURIComponent(response.headers.get('X-File-Name') || `Shared_File_${i}`);
                         incomingFiles.push(new File([blob], fileName, { type: blob.type }));
-                        
+
                         // Delete the file from cache immediately to save storage space
                         await cache.delete('/shared-file-' + i); 
                     }
                 }
                 await cache.delete('/shared-file-count');
-                
+
                 if (incomingFiles.length > 0) {
                     // Inject files into the staging area
                     selectedFiles = incomingFiles;
-                    
+
                     // Keep P2P as default tab
                     switchMode('p2p'); 
                     renderFileList(); 
-                    
+
                     // NEW: Scroll the user down to the drag-and-drop section
                     setActiveScreen('create');
-                    
+
                     showToast("Files loaded! Choose Direct or Link mode, then share.", "success");
                 }
             }
@@ -337,7 +337,7 @@ UI.myDeviceName.value = myClipName;
             showToast("Failed to process shared files.", "error");
         }
     }
-    
+
     function renderTrustedDevices() {
         UI.trustedDevicesList.innerHTML = '';
         if (trustedDevices.length === 0) {
@@ -345,7 +345,7 @@ UI.myDeviceName.value = myClipName;
             UI.trustedDevicesContainer.classList.remove('flex');
             return;
         }
-        
+
         UI.trustedDevicesContainer.classList.remove('hidden');
         UI.trustedDevicesContainer.classList.add('flex');
 
@@ -353,7 +353,7 @@ UI.myDeviceName.value = myClipName;
             const div = document.createElement('div');
             // Wrapper is now a div, not a button, to prevent tap conflicts
             div.className = "flex items-center justify-between w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 rounded-xl p-1.5 pl-2 transition-all shadow-sm group";
-            
+
             div.innerHTML = `
                 <button class="connect-trusted-btn flex-1 flex items-center gap-3 truncate text-left py-1.5 outline-none" data-id="${device.id}" aria-label="Connect to ${device.name}">
                     <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
@@ -369,7 +369,7 @@ UI.myDeviceName.value = myClipName;
                     </button>
                 </div>
             `;
-            
+
             UI.trustedDevicesList.appendChild(div);
         });
 
@@ -392,7 +392,7 @@ UI.myDeviceName.value = myClipName;
             });
         });
     }
-    
+
     // Call it immediately
     renderTrustedDevices();
         // Update your navLinks click listener in main.js
@@ -400,7 +400,7 @@ UI.myDeviceName.value = myClipName;
 UI.navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.stopPropagation(); // CRITICAL: Stop the click from hitting the document listener
-        
+
         const target = link.dataset.screenLink;
         if (target) {
             setActiveScreen(target);
@@ -562,7 +562,7 @@ UI.navLinks.forEach(link => {
    function switchMode(mode) {
         transferMode = mode;
         document.querySelector('.mode-tabs').dataset.active = mode;
-        
+
        [UI.modeP2P, UI.modeCloud, UI.modeClipboard].forEach((modeButton) => {
            modeButton.className = baseTabClass;
        });
@@ -596,23 +596,23 @@ UI.navLinks.forEach(link => {
         }
         updateSendBtnText();
     }
-    
+
     UI.modeP2P.addEventListener('click', () => switchMode('p2p'));
     UI.modeCloud.addEventListener('click', () => switchMode('cloud'));
     UI.modeClipboard.addEventListener('click', () => switchMode('clipboard'));
 
     function startClipboardListener() {
         if (backgroundPeer && !backgroundPeer.destroyed) return;
-        
+
         backgroundPeer = new Peer(myClipId, {
             config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
         });
-        
+
         backgroundPeer.on('connection', (conn) => {
             setupClipboardConnection(conn); // Auto-accept incoming trusted connections
         });
     }
-    
+
 
     function saveFileToLocalLedger(fileId) {
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
@@ -637,7 +637,7 @@ UI.navLinks.forEach(link => {
     async function loadCloudManager() {
         UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">Fetching your files...</p>`;
         clearInterval(cloudTimerInterval);
-        
+
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         if (myLinks.length === 0) {
             UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active shared links.</p>`;
@@ -700,7 +700,7 @@ UI.navLinks.forEach(link => {
         return new Promise((resolve) => {
             UI.extendModal.classList.remove('hidden');
             UI.extendModal.classList.add('flex');
-            
+
             // Allow display block to apply before animating opacity
             requestAnimationFrame(() => {
                 UI.extendModal.classList.remove('opacity-0');
@@ -728,14 +728,14 @@ UI.navLinks.forEach(link => {
             UI.confirmExtendBtn.addEventListener('click', onConfirm);
         });
     }
-    
+
     function renderCloudManagerUI(files) {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
             const card = document.createElement('div');
             card.className = "cloud-file-card bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 flex flex-col";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-            
+
             // Determine what to show in the thumbnail box
             let mediaPreview = file.thumbnail 
                 ? `<img src="${file.thumbnail}" class="w-full h-full object-cover">`
@@ -789,7 +789,7 @@ UI.navLinks.forEach(link => {
                 }
             });
         });
-        
+
         document.querySelectorAll('.copy-link-manager-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.target.getAttribute('data-id');
@@ -806,18 +806,18 @@ UI.navLinks.forEach(link => {
                 e.stopPropagation();
 
                 const id = e.target.getAttribute('data-id');
-                
+
                 // Call the custom modal
                 let mins = await promptExtendTime();
-                
+
                 if (mins === null) return; // User clicked Cancel
-                
+
                 mins = parseInt(mins, 10);
                 if (isNaN(mins) || mins <= 0 || mins > 60) {
                     showToast("Please enter a valid number from 1 to 60.", "error");
                     return;
                 }
-                
+
                 e.target.innerText = "...";
                 try {
                     const docRef = doc(db, "links", id);
@@ -850,7 +850,7 @@ UI.navLinks.forEach(link => {
 
     function renderFileList() {
         UI.fileList.innerHTML = '';
-        
+
         if (selectedFiles.length === 0) {
             UI.stagedFilesSection.classList.add('hidden');
             UI.stagedFilesSection.classList.remove('flex');
@@ -866,10 +866,10 @@ UI.navLinks.forEach(link => {
             const li = document.createElement('li');
             li.className = "file-item-enter flex items-center justify-between bg-white/60 dark:bg-slate-800/50 backdrop-blur-md p-3 rounded-3xl border border-white/70 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/80 dark:hover:bg-slate-800/70 hover:shadow-md group";
             li.style.setProperty('--stagger', index);
-            
+
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
             if (file.size < 1024 * 1024) sizeText = (file.size / 1024).toFixed(2) + " KB";
-            
+
             let mediaPreview = '';
             const objectUrl = URL.createObjectURL(file);
 
@@ -919,7 +919,7 @@ UI.navLinks.forEach(link => {
         if(UI.transferEta) UI.transferEta.innerText = ''; // Clears the ETA
         speedSamples = []; // Resets speed averaging
         document.getElementById('session-timer-display')?.classList.add('hidden');
-        
+
         try {
             if (currentConnection && currentConnection.open) {
                 // Check if transfer is NOT complete before sending cancel
@@ -956,7 +956,7 @@ UI.navLinks.forEach(link => {
             UI.clipboardActiveState.classList.remove('flex');
         }
         if(UI.sharedTextpad) UI.sharedTextpad.value = '';
-        
+
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
         }
@@ -970,6 +970,16 @@ UI.navLinks.forEach(link => {
         UI.shareOptions.classList.add('hidden');
         UI.successArea.classList.add('hidden');
         UI.successArea.classList.remove('flex');
+        
+        // --- NEW: Clear file preview and memory ---
+        const previewContainer = document.getElementById('success-preview-container');
+        if (previewContainer) previewContainer.innerHTML = '';
+        if (typeof lastSavedUrl !== 'undefined' && lastSavedUrl) {
+            URL.revokeObjectURL(lastSavedUrl);
+            lastSavedUrl = null;
+        }
+        // ------------------------------------------
+
         updateProgress(0, 100);
 
         renderFileList();
@@ -1019,7 +1029,7 @@ UI.navLinks.forEach(link => {
             showTransferScreen("Multiple Files", "Packing files together... Please wait.");
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Zipping...";
-            
+
             try {
                 const zip = new JSZip();
                 for (let i = 0; i < selectedFiles.length; i++) {
@@ -1028,11 +1038,11 @@ UI.navLinks.forEach(link => {
                 const zipBlob = await zip.generateAsync({ type: "blob" }, (metadata) => {
                     updateProgress(metadata.percent, 100);
                 });
-                
+
                 UI.progressArea.classList.add('hidden');
                 UI.progressBar.style.width = "0%";
                 UI.percentage.innerText = "0%";
-                
+
                 finalFile = new File([zipBlob], "SmartShare_Files.zip", { type: "application/zip" });
                 updateTransferIcon(finalFile);
             } catch (error) {
@@ -1057,7 +1067,7 @@ UI.navLinks.forEach(link => {
         // --- 1. CLOUDINARY FREE TIER SIZE CHECK ---
         const isVideo = file.type.startsWith('video/');
         const isImage = file.type.startsWith('image/');
-        
+
         const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
         const MAX_OTHER_SIZE = 10 * 1024 * 1024;  // 10 MB in bytes
 
@@ -1209,7 +1219,7 @@ UI.navLinks.forEach(link => {
         peerInstance.on('error', (err) => {
             if (isCancelled) return;
             clearTimeout(connectionTimeout);
-            
+
             if (err.type === 'network' || err.type === 'disconnected' || err.type === 'webrtc') {
                 if (isTransferring || fileToSend || p2pTransferState.bytesReceived > 0) {
                     return; 
@@ -1236,7 +1246,7 @@ UI.navLinks.forEach(link => {
     function startP2PTransfer(file) {
         if (!file) return;
         isCancelled = false;
-        
+
 
         fileToSend = file;
         let roomCode = localStorage.getItem('p2p_active_id');
@@ -1246,7 +1256,7 @@ UI.navLinks.forEach(link => {
         }
 
         showTransferScreen(file.name, "Setting up secure connection...");
-        
+
        // --- NEW: Visual 10 Minute Countdown ---
         let timeLeft = 600; // 10 minutes in seconds
         const timerEl = document.getElementById('timer-value');
@@ -1258,7 +1268,7 @@ UI.navLinks.forEach(link => {
             const mins = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
             timerEl.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
-            
+
             if (timeLeft <= 0) {
                 clearInterval(p2pSessionInterval);
                 timerContainer.classList.add('hidden');
@@ -1297,13 +1307,13 @@ UI.navLinks.forEach(link => {
            UI.copyLinkBtn.onclick = () => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
-                
+
                 // Show the warning slightly after the success message
                 setTimeout(() => {
                     showToast("After sharing the code or link, immediately return to this page to continue the file transfer.", "info");
                 }, 600); 
             };
-            
+
             // --- NEW: Direct Share Native Share Logic ---
             if (UI.nativeShareBtn) {
                 UI.nativeShareBtn.onclick = async () => {
@@ -1311,7 +1321,7 @@ UI.navLinks.forEach(link => {
                         // Trigger the warning BEFORE the share sheet opens, 
                         // as the OS share sheet suspends browser execution.
                         showToast("After sharing the code or link, immediately return to this page to continue the file transfer.", "info");
-                        
+
                         await navigator.share({
                             title: 'Secure File Share',
                             text: `Hello,\n\nI have securely shared some files with you via SmartShare.\n\nPlease use the link below to access them:\n${transferUrl}\n\nAlternatively, open SmartShare and enter this code: ${id}\n\nRegards,\nSmartShare`,
@@ -1324,8 +1334,8 @@ UI.navLinks.forEach(link => {
         });
 
 
-        
-        
+
+
         peer.on('connection', (conn) => {
             clearInterval(p2pSessionInterval);
             // Hide the timer UI immediately
@@ -1333,11 +1343,11 @@ UI.navLinks.forEach(link => {
             if (timerContainer) timerContainer.classList.add('hidden');
             currentConnection = conn;
             isTransferring = true;
-            
+
             UI.shareOptions.classList.add('hidden');
             UI.progressArea.classList.remove('hidden');
             if(UI.progressText) UI.progressText.innerText = "Sending...";
-            
+
             const mbSize = (fileToSend.size / (1024 * 1024)).toFixed(2);
             UI.statusText.innerText = `Sending (${mbSize} MB)...`;
             setStatusDot('green');
@@ -1360,7 +1370,7 @@ UI.navLinks.forEach(link => {
                     if (UI.transferSpeed) UI.transferSpeed.innerText = '';
                     setStatusDot('green');
                     showToast("Transfer Complete!", "success");
-                
+
                 } else if (payload.type === 'transfer-cancelled') {
                     showToast("The receiver cancelled the transfer.", "error");
                     resetApp();
@@ -1368,14 +1378,14 @@ UI.navLinks.forEach(link => {
 
                 } else if (payload.type === 'ack') {
                     if (!fileToSend) return;
-                    
+
                     // We now only use the VERY FIRST ack to start the continuous stream
                     if (payload.bytesReceived === 0) {
                         lastSpeedBytes = 0;
                         lastSpeedTime = Date.now();
                         sendFileStream(conn, fileToSend, 0); // Launch the stream!
                     }
-                
+
                 } else if (payload.type === 'resume') {
                     if (!fileToSend) return;
 
@@ -1384,12 +1394,12 @@ UI.navLinks.forEach(link => {
                     UI.statusText.innerText = `Sending (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Sending...";
                     setStatusDot('green');
-                    
+
                     lastSpeedBytes = payload.offset;
                     lastSpeedTime = Date.now();
 
                     updateProgress(payload.offset, fileToSend.size);
-                    
+
                     // Resume the high-speed stream from where it dropped
                     sendFileStream(conn, fileToSend, payload.offset);
                 }
@@ -1463,7 +1473,7 @@ UI.navLinks.forEach(link => {
                 if(UI.progressText) UI.progressText.innerText = "Finishing...";
                 UI.statusText.innerText = "Receiver is saving the file... Please do not close!";
                 if (UI.transferSpeed) UI.transferSpeed.innerText = '';
-                
+
                 if (UI.p2pWarningSender) {
                     UI.p2pWarningSender.classList.remove('bg-amber-50', 'border-amber-200');
                     UI.p2pWarningSender.classList.add('bg-amber-100', 'border-amber-400');
@@ -1510,7 +1520,7 @@ UI.navLinks.forEach(link => {
             UI.receiveBtn.click();
         }
     });
-    
+
    /* if (window.location.hash.length > 1) {
         const hashVal = window.location.hash.substring(1);
         if (hashVal.startsWith('clip-')) {
@@ -1526,7 +1536,7 @@ UI.navLinks.forEach(link => {
     function handleIncomingHash(hashStr) {
         const hashVal = hashStr.substring(1);
         const activeId = localStorage.getItem('p2p_active_id');
-        
+
         let targetPeerId = hashVal;
         let isClip = false;
 
@@ -1541,7 +1551,7 @@ UI.navLinks.forEach(link => {
         if (targetPeerId === activeId) {
             showToast("You are currently hosting this session.", "info");
             window.history.replaceState(null, null, window.location.pathname); // Clean the URL
-            
+
             // Auto scroll to the active transfer box
             setActiveScreen('create');
             setTimeout(() => {
@@ -1628,14 +1638,15 @@ UI.navLinks.forEach(link => {
             }
 
             const blob = new Blob(chunks, { type: data.type || 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
+            if (lastSavedUrl) URL.revokeObjectURL(lastSavedUrl);
+            lastSavedUrl = URL.createObjectURL(blob);
+            
             const a = document.createElement('a');
-            a.href = url;
+            a.href = lastSavedUrl;
             a.download = data.name;
             document.body.appendChild(a);
-            a.click();
+            a.click(); // Auto-save
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
 
             if (data.isOneTime) {
                 await purgeCloudFile(docId, data.storagePath);
@@ -1646,6 +1657,8 @@ UI.navLinks.forEach(link => {
             UI.successArea.classList.add('flex');
             UI.successText.innerText = "Received";
             UI.statusText.innerText = "File saved to your device!";
+            // NEW: Show the clickable preview
+            showSuccessPreview(data, lastSavedUrl);
             setResetButton("Close", true);
             if (UI.transferSpeed) UI.transferSpeed.innerText = '';
             setStatusDot('green');
@@ -1780,7 +1793,7 @@ UI.navLinks.forEach(link => {
                     UI.statusText.innerText = `Downloading (${mbSize} MB)...`;
                     if (UI.progressText) UI.progressText.innerText = "Downloading...";
                     setStatusDot('green');
-                    
+
                     lastSpeedBytes = p2pTransferState.bytesReceived;
                     lastSpeedTime = Date.now();
                 }
@@ -1795,7 +1808,7 @@ UI.navLinks.forEach(link => {
                     isTransferring = false;
                     isTransferComplete = true;
                     try {
-                        saveFile(p2pTransferState.buffer, p2pTransferState.meta);
+                        const fileUrl = saveFile(p2pTransferState.buffer, p2pTransferState.meta);
                         conn.send({ type: 'transfer-complete' });
 
                         UI.progressArea.classList.add('hidden');
@@ -1804,11 +1817,13 @@ UI.navLinks.forEach(link => {
                         UI.successText.innerText = "Received";
                         UI.statusText.innerText = "File saved to your device!";
                         
-                        // --- NEW: Hide the receiver warning once done ---
                         if (UI.p2pWarningReceiver) {
                             UI.p2pWarningReceiver.classList.add('hidden');
                             UI.p2pWarningReceiver.classList.remove('flex');
                         }
+
+                        // NEW: Show the clickable preview
+                        showSuccessPreview(p2pTransferState.meta, fileUrl);
 
                         setResetButton("Close", true);
                         if (UI.transferSpeed) UI.transferSpeed.innerText = '';
@@ -1862,27 +1877,27 @@ UI.navLinks.forEach(link => {
 
         const now = Date.now();
         const timeDiff = now - lastSpeedTime;
-        
+
         if (timeDiff >= 250) {
             if (timeDiff < 5000 && current >= lastSpeedBytes) {
                 const bytesDiff = current - lastSpeedBytes;
                 const speedBps = bytesDiff / (timeDiff / 1000);
-                
+
                 // Smooth the speed reading using an array
                 speedSamples.push(speedBps);
                 if (speedSamples.length > 5) speedSamples.shift(); 
-                
+
                 const avgSpeedBps = speedSamples.reduce((a, b) => a + b, 0) / speedSamples.length;
                 const speedMBps = (avgSpeedBps / (1024 * 1024)).toFixed(1);
-                
+
                 if (UI.transferSpeed && speedMBps > 0) {
                     UI.transferSpeed.innerText = `${speedMBps} MB/s`;
-                    
+
                     // ETA Calculation
                     if (UI.transferEta && avgSpeedBps > 0) {
                         const bytesRemaining = total - current;
                         const secondsRemaining = Math.ceil(bytesRemaining / avgSpeedBps);
-                        
+
                         if (secondsRemaining < 2) {
                             UI.transferEta.innerText = 'Almost done';
                         } else if (secondsRemaining < 60) {
@@ -1907,12 +1922,12 @@ UI.navLinks.forEach(link => {
     }
     function updateTransferIcon(fileData) {
         if (!UI.transferIconContainer) return;
-        
+
         let mediaPreview = `<svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
 
         if (fileData) {
             const type = fileData.type || fileData.fileType || '';
-            
+
             // Sender side: Generate from local File object
             if (fileData instanceof Blob || fileData instanceof File) {
                 const objectUrl = URL.createObjectURL(fileData);
@@ -1948,10 +1963,10 @@ UI.navLinks.forEach(link => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     let width = img.width; let height = img.height;
-                    
+
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
                     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    
+
                     canvas.width = width; canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', 0.5));
@@ -1977,14 +1992,14 @@ UI.navLinks.forEach(link => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     let width = video.videoWidth; let height = video.videoHeight;
-                    
+
                     if (width === 0 || height === 0) {
                         URL.revokeObjectURL(url); resolve(null); return;
                     }
 
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
                     else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                    
+
                     canvas.width = width; canvas.height = height;
                     ctx.drawImage(video, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', 0.5)); // Compress to tiny JPEG
@@ -2008,16 +2023,53 @@ UI.navLinks.forEach(link => {
         return `<svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
     }
 
+    let lastSavedUrl = null; // Holds the URL so the user can open it later
+
     function saveFile(bufferArray, meta) {
-        const blob = new Blob(bufferArray, { type: meta.fileType });
-        const url = URL.createObjectURL(blob);
+        if (lastSavedUrl) URL.revokeObjectURL(lastSavedUrl); // Clean up previous memory
+        const blob = new Blob(bufferArray, { type: meta.fileType || 'application/octet-stream' });
+        lastSavedUrl = URL.createObjectURL(blob);
+        
         const a = document.createElement('a');
-        a.href = url;
+        a.href = lastSavedUrl;
         a.download = meta.name;
         document.body.appendChild(a);
-        a.click();
+        a.click(); // Auto-save to device
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        
+        return lastSavedUrl;
+    }
+
+    // NEW: Renders the clickable preview card
+    function showSuccessPreview(meta, url) {
+        const container = document.getElementById('success-preview-container');
+        if (!container) return;
+        
+        let sizeText = (meta.size / (1024 * 1024)).toFixed(2) + " MB";
+        if (meta.size < 1024 * 1024) sizeText = (meta.size / 1024).toFixed(2) + " KB";
+        
+        // Grab the beautiful icon/thumbnail we already generated during transfer
+        const iconHtml = UI.transferIconContainer ? UI.transferIconContainer.innerHTML : '';
+
+        container.innerHTML = `
+            <div id="file-preview-card" class="mt-6 w-full max-w-sm bg-white dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500 transition-all cursor-pointer flex items-center gap-4 group animate-fade-in">
+                <div class="w-12 h-12 shrink-0 bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm">
+                    ${iconHtml}
+                </div>
+                <div class="flex flex-col min-w-0 flex-1 text-left">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm truncate">${meta.name || 'Received File'}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${sizeText} • Tap to open</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </div>
+            </div>
+        `;
+        
+        // Clicking the card opens the downloaded file instantly
+        document.getElementById('file-preview-card').onclick = () => {
+            window.open(url, '_blank');
+        };
     }
 
 // --- NEW CLIPBOARD P2P LOGIC ---
@@ -2046,7 +2098,7 @@ UI.navLinks.forEach(link => {
             const transferUrl = `${cleanUrl}#clip-${id}`; 
             UI.qrContainer.innerHTML = "";
             new QRCode(UI.qrContainer, { text: transferUrl, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
-            
+
             // --- RESTORED: Show the Code and QR section ---
             UI.pairingCodeDisplay.innerText = id;
             UI.shareOptions.classList.remove('hidden');
@@ -2060,7 +2112,7 @@ UI.navLinks.forEach(link => {
                 navigator.clipboard.writeText(transferUrl);
                 showToast("Link copied to clipboard!", "success");
             };
-            
+
             // --- NEW: Clipboard Native Share Logic ---
             UI.nativeShareBtn.onclick = async () => {
                 try {
@@ -2072,7 +2124,7 @@ UI.navLinks.forEach(link => {
                     if (err.name !== 'AbortError') showToast("Could not open share menu.", "error");
                 }
             };
-            
+
             setStatusDot('amber');
         });
 
@@ -2116,30 +2168,30 @@ UI.navLinks.forEach(link => {
             return;
         }
         currentConnection = conn;
-        
+
         const onOpen = () => {
             UI.transfer.classList.add('hidden');
             UI.initial.classList.add('hidden');
             UI.clipboardActiveState.classList.remove('hidden');
             UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
-            
+
             // Hide prompt initially on new connection
             UI.saveDevicePrompt.classList.add('hidden');
             UI.saveDevicePrompt.classList.remove('flex');
 
             if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
             else UI.sharedTextpad.innerHTML = "";
-            
+
             UI.sharedTextpad.focus();
             showToast("Devices Synced!", "success");
 
             // Clear the 8-second timeout since we successfully connected
             if (clipboardConnTimeout) clearTimeout(clipboardConnTimeout);
-            
+
             // --- NEW: Start Heartbeat to kill Ghost Connections ---
             lastClipboardPong = Date.now();
             clearInterval(clipboardHeartbeat);
-            
+
             clipboardHeartbeat = setInterval(() => {
                 if (currentConnection && currentConnection.open) {
                     // If no pong in 15 seconds, device went to sleep
@@ -2157,7 +2209,7 @@ UI.navLinks.forEach(link => {
             }, 5000); // Ping every 5 seconds
 
             conn.send({ type: 'init-clipboard' });
-            
+
             // Send our persistent ID to the other device so they can save us
             conn.send({ type: 'device-info', id: myClipId, name: myClipName });
         };
@@ -2184,7 +2236,7 @@ UI.navLinks.forEach(link => {
             // Handle incoming Device Info for saving OR updating
             if (payload.type === 'device-info') {
                 const existingIndex = trustedDevices.findIndex(d => d.id === payload.id);
-                
+
                 // If it's already a trusted device, update the name if it changed
                 if (existingIndex !== -1) {
                     if (trustedDevices[existingIndex].name !== payload.name) {
@@ -2195,13 +2247,13 @@ UI.navLinks.forEach(link => {
                     }
                     return; // Stop here since it's already saved
                 }
-                
+
                 // If not trusted, show the prompt to save it
                 if (payload.id !== myClipId) {
                     UI.saveDevicePrompt.classList.remove('hidden');
                     UI.saveDevicePrompt.classList.add('flex');
                     UI.saveDeviceName.innerText = payload.name;
-                    
+
                     UI.btnSaveDeviceYes.onclick = () => {
                         trustedDevices.push({ id: payload.id, name: payload.name });
                         localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
@@ -2210,7 +2262,7 @@ UI.navLinks.forEach(link => {
                         UI.saveDevicePrompt.classList.remove('flex');
                         showToast("Device saved to Trusted List!", "success");
                     };
-                    
+
                     UI.btnSaveDeviceNo.onclick = () => {
                         UI.saveDevicePrompt.classList.add('hidden');
                         UI.saveDevicePrompt.classList.remove('flex');
@@ -2221,7 +2273,7 @@ UI.navLinks.forEach(link => {
 
             if (payload.type === 'clipboard-sync') {
                 const incomingData = payload.html !== undefined ? payload.html : payload.text;
-                
+
                 // CRITICAL FIX: Sanitize the incoming payload before rendering
                 const cleanHTML = DOMPurify.sanitize(incomingData, {
                     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
@@ -2250,7 +2302,7 @@ UI.navLinks.forEach(link => {
     }
 
     // --- RICH TEXT, LINKS & IMAGE HANDLING ---
-    
+
     // Master Sync Function
     function syncClipboardData() {
         if (currentConnection && currentConnection.open) {
@@ -2352,16 +2404,16 @@ UI.navLinks.forEach(link => {
     UI.sharedTextpad.addEventListener('paste', (e) => {
         let hasImage = false;
         const items = (e.clipboardData || window.clipboardData).items;
-        
+
         for (let index in items) {
             const item = items[index];
             if (item.kind === 'file' && item.type.startsWith('image/')) {
                 hasImage = true;
                 e.preventDefault();
                 const blob = item.getAsFile();
-                
+
                 if (blob.size > 2 * 1024 * 1024) return showToast("Image too large! Max 2MB for clipboard.", "error");
-                
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     safeInsertHTML(generateImageWrapper(event.target.result));
@@ -2370,7 +2422,7 @@ UI.navLinks.forEach(link => {
                 reader.readAsDataURL(blob);
             }
         }
-        
+
         if (!hasImage) {
             const pastedText = (e.clipboardData || window.clipboardData).getData('text');
             if (pastedText) {
@@ -2421,7 +2473,7 @@ UI.navLinks.forEach(link => {
     UI.clearClipboardBtn.addEventListener('click', () => {
         if (UI.sharedTextpad.tagName === 'TEXTAREA') UI.sharedTextpad.value = "";
         else UI.sharedTextpad.innerHTML = "";
-        
+
         syncClipboardData();
         UI.sharedTextpad.focus();
         showToast("Clipboard cleared", "info");
@@ -2434,7 +2486,7 @@ UI.navLinks.forEach(link => {
     // --- HYBRID QR SCANNER (Native + jsQR Fallback) ---
     let qrScannerRequest = null;
     let qrVideoStream = null;
-    
+
     // Create a hidden canvas for the jsQR fallback to read video frames
     const qrCanvas = document.createElement('canvas');
     const qrCtx = qrCanvas.getContext('2d', { willReadFrequently: true });
@@ -2444,18 +2496,18 @@ UI.navLinks.forEach(link => {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment' } // Prefer rear camera
             });
-            
+
             UI.qrVideo.srcObject = stream;
             qrVideoStream = stream;
-            
+
             UI.qrScannerContainer.classList.remove('hidden');
             UI.qrScannerContainer.classList.add('block');
-            
+
             // Smoothly scroll the scanner into the center of the viewport
             setTimeout(() => {
                 UI.qrScannerContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
-            
+
             // Wait for video metadata to load before playing and scanning
             UI.qrVideo.onloadedmetadata = async () => {
                 await UI.qrVideo.play();
@@ -2488,7 +2540,7 @@ UI.navLinks.forEach(link => {
 
             // 2. Fallback to jsQR (Software Decoder for Firefox/Desktop/Mac)
             if (typeof jsQR !== 'undefined' && UI.qrVideo.readyState === UI.qrVideo.HAVE_ENOUGH_DATA) {
-                
+
                 // BUG FIX: Downscale the HD video feed so jsQR doesn't choke on millions of pixels
                 const scanWidth = Math.min(UI.qrVideo.videoWidth, 600); // Cap width at 600px
                 const scanHeight = Math.min(UI.qrVideo.videoHeight, 600 * (UI.qrVideo.videoHeight / UI.qrVideo.videoWidth));
@@ -2496,16 +2548,16 @@ UI.navLinks.forEach(link => {
                 if (scanWidth > 0 && scanHeight > 0) {
                     qrCanvas.width = scanWidth;
                     qrCanvas.height = scanHeight;
-                    
+
                     // Draw the shrunken frame
                     qrCtx.drawImage(UI.qrVideo, 0, 0, scanWidth, scanHeight);
                     const imageData = qrCtx.getImageData(0, 0, scanWidth, scanHeight);
-                    
+
                     // Decode using jsQR
                     const code = jsQR(imageData.data, imageData.width, imageData.height, {
                         inversionAttempts: "attemptBoth", // BUG FIX: Helps read dark-mode QR codes off phone screens
                     });
-                    
+
                     if (code && code.data) {
                         handleScannedQR(code.data);
                         return; // Stop looping on success
@@ -2535,10 +2587,10 @@ UI.navLinks.forEach(link => {
 
     function handleScannedQR(qrData) {
         stopQRScanner();
-        
+
         let targetId = qrData;
         let isClipboard = false;
-        
+
         // Try to parse SmartShare URLs safely
         try {
             if (qrData.startsWith('http')) {
@@ -2556,9 +2608,9 @@ UI.navLinks.forEach(link => {
                 }
             }
         } catch (e) { } 
-        
+
         targetId = targetId.replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
-        
+
         if (!targetId) {
             showToast("Invalid QR Code content.", "error");
             return;
@@ -2569,7 +2621,7 @@ UI.navLinks.forEach(link => {
             showToast("You cannot connect to your own sharing session.", "error");
             return;
         }
-        
+
         if (isClipboard) {
             switchMode('clipboard');
             UI.clipboardReceiveCode.value = targetId;
@@ -2591,23 +2643,23 @@ UI.navLinks.forEach(link => {
     if (recoveredId) {
         // Wait for the database to check for saved files
         const cachedFiles = await getCachedFiles();
-        
+
         if (cachedFiles && cachedFiles.length > 0) {
             // FULL RECOVERY: Both ID and Files were saved
             selectedFiles = cachedFiles;
             renderFileList();
             showToast("Session and files recovered seamlessly!", "success");
-            
+
             // Automatically push them back into the transfer state
             setTimeout(() => {
                 UI.sendFilesBtn.click();
             }, 300);
-            
+
         } else if (selectedFiles.length === 0) {
             // PARTIAL RECOVERY: ID saved, but files were too big to cache or manually cleared
             showToast("Session recovered. Please re-select your file to resume sharing.", "info");
             setActiveScreen('create');
-            
+
             setTimeout(() => {
                 UI.dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 UI.dropZone.classList.add('drop-active');
@@ -2644,5 +2696,5 @@ UI.navLinks.forEach(link => {
 
     // Always start the background listener so we can receive clipboard connections anywhere in the app
     startClipboardListener();
-    
+
 }); 
