@@ -25,6 +25,11 @@
 
     <meta property="og:title" content="SmartShare | Secure P2P File Sharing" />
     <meta property="og:description" content="A fast, account-free file sharing web app with Direct P2P transfer and Cloud Vault. Built by Ambati Lalitha Sagar." />
+    <meta property="og:image" content="https://smartshare.alsagar.tech/icon.png" />
+<meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://smartshare.alsagar.tech/icon.png" />
+
+
     <meta property="og:url" content="https://smartshare.alsagar.tech/" />
     <meta property="og:type" content="website" />
     <meta name="google-site-verification" content="LYr189UZImmGhxoNL2Q9R8DFqXjDYZ2WMrDi62YSg-A" />
@@ -325,13 +330,16 @@
                             </div>
                         </div>
 
-                        <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
+                                                <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
                             <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
                                 <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
                             </div>
                             <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
                             <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Transfer completed successfully</p>
+                            
+                            <div id="success-preview-container" class="w-full flex justify-center"></div>
                         </div>
+
 
                         <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
 
