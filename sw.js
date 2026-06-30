@@ -5,12 +5,13 @@ const SHARED_FILE_CACHE = 'shared-file-cache';
 const STATIC_ASSETS = [
     './',
     './index.html',
+    './offline.html',
     './style.css',
     './main.js',
     './manifest.json',
     './icon-192.png',
     './icon-512.png',
-    './icon.svg'
+    './icon.png'
 ];
 const NETWORK_FIRST_DESTINATIONS = new Set(['document', 'script', 'style', 'manifest']);
 const STATIC_EXTENSIONS = ['.js', '.css', '.json', '.png', '.svg', '.ico', '.webp', '.jpg', '.jpeg', '.gif', '.woff', '.woff2'];
@@ -35,8 +36,13 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-function offlineResponse() {
-    return new Response('App is offline.', {
+// 🌟 UPDATED: Serve the beautifully styled HTML page instead of plain text
+async function offlineResponse() {
+    const offlinePage = await caches.match('./offline.html');
+    if (offlinePage) return offlinePage;
+    
+    // Failsafe if the offline page somehow didn't cache
+    return new Response('App is offline. Please check your connection.', {
         status: 503,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
@@ -57,7 +63,7 @@ async function networkFirst(request, { cacheName = RUNTIME_NAME, fallbackUrl } =
             const fallbackResponse = await caches.match(fallbackUrl);
             if (fallbackResponse) return fallbackResponse;
         }
-        return offlineResponse();
+        return await offlineResponse(); // 🌟 UPDATED to await the new async function
     }
 }
 
@@ -81,7 +87,7 @@ async function staleWhileRevalidate(request, cacheName = RUNTIME_NAME) {
     }
 
     const networkResponse = await networkPromise;
-    return networkResponse || offlineResponse();
+    return networkResponse || await offlineResponse(); // 🌟 UPDATED to await the new async function
 }
 
 self.addEventListener('fetch', (event) => {
