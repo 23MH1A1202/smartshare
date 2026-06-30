@@ -65,12 +65,14 @@
                 <nav class="hidden md:flex items-center gap-3 text-sm font-semibold">
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="faq">FAQ</button>
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
     <button class="nav-install-btn hidden px-4 py-2 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all items-center gap-2 ml-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
         Install App
     </button>
 </nav>
+
                 <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-all shadow-md border border-slate-200 dark:border-slate-800 hover:scale-105 active:scale-95" aria-label="Toggle theme">
                     <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -80,17 +82,20 @@
                 </button>
             </div>
         </div>
+        
         <div id="mobile-menu" class="hidden md:hidden absolute left-4 right-4 top-full mt-3 z-50 overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/95 dark:bg-slate-950/90 px-4 shadow-xl opacity-0 scale-95 -translate-y-3 pointer-events-none backdrop-blur-xl transform origin-top">
-            <div class="flex flex-col gap-2 pt-3 pb-4 text-sm font-semibold">
-    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
-    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
-    <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
-    <button class="nav-install-btn hidden w-full text-left px-4 py-3 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all items-center gap-3 mt-1">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        Install App
-    </button>
-            </div>
-        </div>
+    <div class="flex flex-col gap-2 pt-3 pb-4 text-sm font-semibold">
+        <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="share">Home</button>
+        <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+        <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="faq">FAQ</button>
+        <button class="nav-link w-full text-left px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-screen-link="about">About</button>
+        <button class="nav-install-btn hidden w-full text-left px-4 py-3 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all items-center gap-3 mt-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Install App
+        </button>
+    </div>
+</div>
+
     </header>
 
     <main class="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-20 pt-0">
@@ -665,6 +670,121 @@
                                 Built with privacy and minimal storage
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section data-screen="faq" id="screen-faq" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="text-center space-y-3">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-50/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-300 mb-2">
+                        Help & Support
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">Frequently Asked Questions</h2>
+                    <p class="text-slate-600 dark:text-slate-300">Everything you need to know about using SmartShare securely and efficiently.</p>
+                </div>
+
+                <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_80px_rgba(0,0,0,0.08)]">
+                    <div class="flex flex-col gap-4">
+                        
+                        <!-- FAQ Item 1 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Is SmartShare really free? Do I need an account?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                Yes! SmartShare is 100% free. There are no accounts, no logins, no subscriptions, and no tracking. You can start sharing files instantly while remaining completely anonymous.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 2 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>What is the maximum file size I can send?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                <strong>Direct (P2P):</strong> Unlimited! Because Direct mode sends files straight from your device to the receiver without using our servers, there are no file size limits. <br><br>
+                                <strong>Link Share (Cloud):</strong> Limited to 10MB per file (or 100MB for video files) to ensure our free cloud infrastructure remains fast for everyone.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 3 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Are my files secure and encrypted?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                Absolutely. <strong>Direct Transfers</strong> use WebRTC with DTLS 1.3 encryption, creating a secure, end-to-end encrypted tunnel between the sender and receiver. We cannot see, intercept, or store your files.<br><br>
+                                <strong>Link Shares</strong> are securely transmitted via HTTPS and stored in an isolated Firebase vault, which automatically permanently deletes your files once the timer expires or the download limit is reached.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 4 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>My Direct Transfer is stuck on "Connecting...". Why?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                This usually happens if one or both devices are on a strict corporate/university network, a VPN, or a "Symmetric NAT" firewall that blocks WebRTC P2P traffic.<br><br>
+                                <strong>The Fix:</strong> Try switching one of the devices from Wi-Fi to Mobile Data (Cellular), or use the <strong>Link Share</strong> mode instead, which easily bypasses local network restrictions.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 5 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Can I close the tab while sending a file?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                <strong>For Direct Transfers: No.</strong> Because the file is streaming directly from your device's memory, closing the tab will instantly kill the connection and cancel the transfer.<br><br>
+                                <strong>For Link Shares: Yes!</strong> Once the progress bar reaches 100% and you see the "Share Code" screen, the file is safely in the cloud. You can close the tab and share the code whenever you want.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 6 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>How do I use the Native OS Share feature?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                To unlock native sharing, click the <strong>"Install App"</strong> button in the SmartShare menu (or select "Add to Home Screen" in your browser). <br><br>
+                                Once installed as a Progressive Web App (PWA), SmartShare will appear in your phone's default share menu. You can open your Gallery or Files app, select a photo, tap "Share", and select SmartShare to instantly beam it to another device without ever opening your browser!
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 7 -->
+                        <details class="group bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>What are "Trusted Devices" in Live Clipboard?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400 group-hover:text-indigo-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed animate-fade-in border-t border-slate-100 dark:border-slate-800/50 mt-1 pt-4">
+                                If you frequently sync your clipboard between the same two devices (like your phone and your laptop), you can save them as "Trusted". <br><br>
+                                Once saved, you'll see a button for that device in the Clipboard menu. Clicking it will instantly ping the other device and reconnect your clipboard—no need to scan a QR code or type a 6-digit sync ID ever again!
+                            </div>
+                        </details>
+
                     </div>
                 </div>
             </div>
