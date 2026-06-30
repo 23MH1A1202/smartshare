@@ -416,7 +416,7 @@
             </div>
         </section>
 
-        <section data-screen="about" id="screen-about" class="screen-panel hidden">
+                <section data-screen="about" id="screen-about" class="screen-panel hidden">
             <div class="max-w-5xl mx-auto space-y-12">
                 <div class="text-center space-y-3">
                     <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">About SmartShare</h2>
@@ -537,15 +537,15 @@
                             </p>
                         </div>
 
-                          <div class="flex flex-col items-center text-center gap-4">
-                <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Only the receiver can access your files</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    Only you and the receiver can access your files. Your data is encrypted end-to-end, and can only be read by your receiver (and you of course). SmartShare currently uses an implementation of DTLS 1.3.
-                </p>
-            </div>
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Only the receiver can access</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                Only you and the receiver can access your files. Your data is encrypted end-to-end, and can only be read by your receiver. SmartShare currently uses an implementation of DTLS 1.3.
+                            </p>
+                        </div>
 
                         <div class="flex flex-col items-center text-center gap-4">
                             <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center shadow-inner">
@@ -557,25 +557,35 @@
                             </p>
                         </div>
 
-                         <div class="flex flex-col items-center text-center gap-4">
-                <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Real-Time Live Clipboard</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    Instantly sync text, clickable links, and images across devices. Our rich-text pad supports drag-and-drop, smart URL detection, and a continuous background heartbeat so your session never drops. Disconnections are caught and reported instantly.
-                </p>
-            </div>
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Real-Time Clipboard &amp; Trusted Devices</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                Instantly sync text, links, and images. Save frequent hardware to your <strong>Trusted Devices</strong> list for instant, one-tap reconnects! Our rich-text pad supports drag-and-drop and a continuous background heartbeat to prevent drops.
+                            </p>
+                        </div>
 
-            <div class="flex flex-col items-center text-center gap-4 mb-4">
-                <div class="w-16 h-16 bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400 rounded-full flex items-center justify-center shadow-inner">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Low environmental impact</h3>
-                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
-                    By bypassing bulky, energy-hungry server farms and routing data directly between phones and laptops, you have a much smaller carbon footprint than when using traditional big-tech cloud storage providers.
-                </p>
-            </div>
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Built-in HD QR Scanner</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                No need for third-party scanning apps. SmartShare features a blazing-fast, custom-built native QR scanner right in your browser. Just point your camera to pair devices instantly, with auto-contrast correction for glowing screens.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col items-center text-center gap-4">
+                            <div class="w-16 h-16 bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-400 rounded-full flex items-center justify-center shadow-inner">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">Native OS Share Integration</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-lg leading-relaxed">
+                                Install SmartShare as a PWA and it seamlessly integrates into your device's native share menu. Select files directly from your Android Gallery or Files app, tap "Share", and send them instantly without opening the browser!
+                            </p>
+                        </div>
                     </div>
                 </section>
 
@@ -593,7 +603,7 @@
                                 Direct creates an encrypted WebRTC tunnel between two devices, so your files never touch a server.
                             </p>
                             <ul class="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc list-inside">
-                                <li>Share using a code, QR scan, or link for fast pairing.</li>
+                                <li>Share using a code, <strong>built-in QR scan</strong>, or link for fast pairing.</li>
                                 <li>Auto-pause and resume transfers if your connection drops.</li>
                                 <li>End the session instantly by closing the tab.</li>
                             </ul>
@@ -615,8 +625,8 @@
                                 Live Clipboard keeps text, links, and images synced in real time between your devices.
                             </p>
                             <ul class="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-400 list-disc list-inside">
+                                <li><strong>Trusted Devices:</strong> Save frequent hardware for instant 1-tap connections without re-entering codes.</li>
                                 <li>Rich-text pad supports drag-and-drop images and smart URL detection.</li>
-                                <li>One-tap copy plus inline save/remove controls for images.</li>
                                 <li>Background heartbeat keeps sessions alive and reports disconnects.</li>
                             </ul>
                         </div>
@@ -659,6 +669,7 @@
                 </div>
             </div>
         </section>
+
     </main>
 
     <footer class="border-t border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl">
