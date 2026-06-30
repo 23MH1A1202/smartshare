@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartShare | Offline</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="./favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(64px) saturate(200%) brightness(1.04);
+            -webkit-backdrop-filter: blur(64px) saturate(200%) brightness(1.04);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 40px;
+            box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.09), 0 0 0 1px rgba(255, 255, 255, 0.35) inset, 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+        }
+        html.dark .glass-panel {
+            background: rgba(13, 18, 27, 0.74);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        }
+        .btn-ripple { position: relative; overflow: hidden; }
+        .btn-ripple::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.18); opacity: 0; transition: opacity 0.15s ease; }
+        .btn-ripple:active::after { opacity: 1; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,#eef2ff,transparent_55%),radial-gradient(circle_at_80%_0%,#dbeafe,transparent_45%),radial-gradient(circle_at_50%_80%,#f8fafc,transparent_50%)] dark:bg-[radial-gradient(circle_at_20%_20%,#1e1b4b,transparent_55%),radial-gradient(circle_at_80%_0%,#0f172a,transparent_45%),radial-gradient(circle_at_50%_80%,#020617,transparent_50%)]"></div>
+    
+    <div class="glass-panel max-w-md w-full p-8 sm:p-12 text-center flex flex-col items-center gap-6">
+        <div class="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center shadow-inner">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a2 2 0 112.828 2.828M3 3l18 18"></path></svg>
+        </div>
+        
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">You're Offline</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm leading-relaxed">SmartShare requires an internet connection to pair devices. Please check your connection and try again.</p>
+        </div>
+        
+        <button onclick="window.location.reload()" class="btn-ripple w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-[0_4px_16px_rgba(79,70,229,0.35)] active:scale-[0.97]">
+            Retry Connection
+        </button>
+    </div>
+    
+    <script>
+        if (localStorage.theme === 'light') { document.documentElement.classList.remove('dark'); }
+    </script>
+</body>
+</html>
