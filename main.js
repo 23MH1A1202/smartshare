@@ -2040,37 +2040,41 @@ UI.navLinks.forEach(link => {
         return lastSavedUrl;
     }
 
-    // NEW: Renders the clickable preview card
+        // NEW: Clean, minimalistic clickable preview that prevents the Zip redownload bug
     function showSuccessPreview(meta, url) {
         const container = document.getElementById('success-preview-container');
         if (!container) return;
         
-        let sizeText = (meta.size / (1024 * 1024)).toFixed(2) + " MB";
-        if (meta.size < 1024 * 1024) sizeText = (meta.size / 1024).toFixed(2) + " KB";
+        // 1. Safely grab the file type (handles both P2P and Cloud metadata formats)
+        const type = meta.type || meta.fileType || '';
         
-        // Grab the beautiful icon/thumbnail we already generated during transfer
-        const iconHtml = UI.transferIconContainer ? UI.transferIconContainer.innerHTML : '';
+        // 2. Check if the browser can actually open this file in a new tab
+        const isViewable = type.startsWith('image/') || 
+                           type.startsWith('video/') || 
+                           type.startsWith('audio/') || 
+                           type.startsWith('text/') || 
+                           type === 'application/pdf';
 
+        // 3. If it's a ZIP or unknown file, do not show the open button (fixes the redownload bug)
+        if (!isViewable) {
+            container.innerHTML = `<span class="text-xs text-slate-500 dark:text-slate-400 mt-3 font-medium">Check your device's Downloads folder.</span>`;
+            return;
+        }
+
+        // 4. If it IS viewable, show a clean, simple "Open" button
         container.innerHTML = `
-            <div id="file-preview-card" class="mt-6 w-full max-w-sm bg-white dark:bg-slate-800/60 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-500 transition-all cursor-pointer flex items-center gap-4 group animate-fade-in">
-                <div class="w-12 h-12 shrink-0 bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm">
-                    ${iconHtml}
-                </div>
-                <div class="flex flex-col min-w-0 flex-1 text-left">
-                    <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm truncate">${meta.name || 'Received File'}</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${sizeText} • Tap to open</span>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                </div>
-            </div>
+            <button id="open-downloaded-file-btn" class="btn-ripple mt-4 px-6 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-2">
+                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                Open File
+            </button>
         `;
         
-        // Clicking the card opens the downloaded file instantly
-        document.getElementById('file-preview-card').onclick = () => {
+        // 5. Attach the click event
+        document.getElementById('open-downloaded-file-btn').onclick = () => {
             window.open(url, '_blank');
         };
     }
+
 
 // --- NEW CLIPBOARD P2P LOGIC ---
     let clipboardHeartbeat = null;
