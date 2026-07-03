@@ -138,3 +138,4 @@ export function setResetButton(label, compact = false) {
     UI.resetBtn.setAttribute('aria-label', label);
     UI.resetBtn.classList.toggle('compact', compact);
 }
+ 
