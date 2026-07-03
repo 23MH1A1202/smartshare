@@ -101,27 +101,29 @@ export function initializeTheme() {
     });
 }
 
-// 3. Export Toast Notification Helper
+// 3. Export Toast Notification Helper (Minimalist UX)
 export function showToast(message, type = "info") {
     const toast = document.createElement('div');
     const isError = type === "error";
-    toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border ${
-        isError ? 'bg-red-50 dark:bg-red-950/90 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-200' 
-                : 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200'
-    } backdrop-blur-md pointer-events-auto z-50`;
+    
+    // Minimalist monochrome toast styling
+    toast.className = `toast-enter flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border backdrop-blur-xl pointer-events-auto z-50 
+        ${isError 
+            ? 'bg-white dark:bg-[#111111] border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-bold' 
+            : 'bg-black text-white dark:bg-white dark:text-black border-transparent font-bold tracking-wide'}`;
 
     const icon = isError 
-        ? `<svg class="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
-        : `<svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        ? `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+        : `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
 
-    toast.innerHTML = `${icon} <span class="text-sm font-medium">${message}</span>`;
+    toast.innerHTML = `${icon} <span class="text-sm">${message}</span>`;
     UI.toastContainer.appendChild(toast);
+    
     setTimeout(() => {
-        toast.classList.replace('toast-enter', 'toast-exit');
+        toast.style.animation = 'toastOut 0.3s ease-in forwards';
         setTimeout(() => toast.remove(), 300);
     }, 4000);
 }
-
 // 4. Export Status Dot Helper
 export function setStatusDot(color) {
     const dot = document.getElementById('status-dot');
