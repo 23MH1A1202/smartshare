@@ -1,4 +1,4 @@
-// ui.js
+ // ui.js
 
 // 1. Export all DOM Elements
 export const UI = {
