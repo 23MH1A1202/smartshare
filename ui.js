@@ -126,7 +126,7 @@ export function showToast(message, type = "info") {
 export function setStatusDot(color) {
     const dot = document.getElementById('status-dot');
     if (!dot) return;
-    dot.classList.remove('dot-blue', 'dot-green', 'dot-amber', 'dot-red');
+    dot.classList.remove('dot-cyan', 'dot-green', 'dot-amber', 'dot-red');
     dot.classList.add('dot-' + color);
 }
 
