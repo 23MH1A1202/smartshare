@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         requestAnimationFrame(() => {
             UI.installModal.classList.remove('opacity-0');
-            UI.installModal.querySelector('div').classList.remove('scale-95');
+            UI.installModal.querySelector('div').classList.remove('scale-[0.98]');
         });
     }
 
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         UI.installModal.classList.add('opacity-0');
-        UI.installModal.querySelector('div').classList.add('scale-95');
+        UI.installModal.querySelector('div').classList.add('scale-[0.98]');
 
         setTimeout(() => {
             UI.installModal.classList.add('hidden');
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let connectionTimeout = null;
     let isTransferring = false;
     let selectedFiles = [];
-    const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-slate-500 dark:text-slate-400";
+    const baseTabClass = "flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl transition-colors relative z-10 text-zinc-500 dark:text-zinc-400";
     const homeScreens = new Set(['share', 'create']);
 
 
@@ -352,19 +352,19 @@ UI.myDeviceName.value = myClipName;
         trustedDevices.forEach((device, index) => {
             const div = document.createElement('div');
             // Wrapper is now a div, not a button, to prevent tap conflicts
-            div.className = "flex items-center justify-between w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 rounded-xl p-1.5 pl-2 transition-all shadow-sm group";
+            div.className = "flex items-center justify-between w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-700 hover:border-teal-400 dark:hover:border-teal-500 rounded-xl p-1.5 pl-2 transition-all shadow-sm group";
 
             div.innerHTML = `
                 <button class="connect-trusted-btn flex-1 flex items-center gap-3 truncate text-left py-1.5 outline-none" data-id="${device.id}" aria-label="Connect to ${device.name}">
-                    <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                     </div>
-                    <span class="font-semibold text-slate-800 dark:text-slate-200 text-sm truncate">${device.name}</span>
+                    <span class="font-semibold text-zinc-800 dark:text-zinc-200 text-sm truncate">${device.name}</span>
                 </button>
                 <div class="flex items-center gap-1 shrink-0 pr-1">
-                    <button class="connect-trusted-btn hidden sm:flex items-center justify-center text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2 py-1.5 rounded-md hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors uppercase tracking-wider" data-id="${device.id}">Connect</button>
+                    <button class="connect-trusted-btn hidden sm:flex items-center justify-center text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-2 py-1.5 rounded-md hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors uppercase tracking-wider" data-id="${device.id}">Connect</button>
                     
-                    <button class="delete-trusted-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors" data-index="${index}" aria-label="Remove device">
+                    <button class="delete-trusted-btn text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors" data-index="${index}" aria-label="Remove device">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </div>
@@ -420,16 +420,14 @@ UI.navLinks.forEach(link => {
         UI.mobileMenu.classList.remove(
             'hidden',
             'opacity-0',
-            '-translate-y-3',
+            '-translate-y-4',
             'pointer-events-none'
         );
 
         requestAnimationFrame(() => {
-            UI.mobileMenu.classList.remove('scale-95');
             UI.mobileMenu.classList.add(
                 'opacity-100',
                 'translate-y-0',
-                'scale-100',
                 'pointer-events-auto'
             );
         });
@@ -439,14 +437,12 @@ UI.navLinks.forEach(link => {
         UI.mobileMenu.classList.remove(
             'opacity-100',
             'translate-y-0',
-            'scale-100',
             'pointer-events-auto'
         );
 
         UI.mobileMenu.classList.add(
             'opacity-0',
-            '-translate-y-3',
-            'scale-95',
+            '-translate-y-4',
             'pointer-events-none'
         );
 
@@ -576,21 +572,21 @@ UI.navLinks.forEach(link => {
         UI.cloudSettings.classList.add('hidden');
 
         if (mode === 'p2p') {
-            UI.modeP2P.classList.add('text-indigo-600', 'dark:text-indigo-300');
-            UI.modeP2P.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.modeP2P.classList.add('text-teal-600', 'dark:text-teal-300');
+            UI.modeP2P.classList.remove('text-zinc-500', 'dark:text-zinc-400');
             UI.fileUploadInner.classList.remove('hidden');
             UI.fileUploadInner.classList.add('flex');
         } else if (mode === 'cloud') {
-            UI.modeCloud.classList.add('text-indigo-600', 'dark:text-indigo-300');
-            UI.modeCloud.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.modeCloud.classList.add('text-teal-600', 'dark:text-teal-300');
+            UI.modeCloud.classList.remove('text-zinc-500', 'dark:text-zinc-400');
             UI.fileUploadInner.classList.remove('hidden');
             UI.fileUploadInner.classList.add('flex');
             UI.cloudSettings.classList.remove('hidden');
             UI.cloudSettings.classList.add('flex');
         } else if (mode === 'clipboard') {
             startClipboardListener();
-            UI.modeClipboard.classList.add('text-violet-600', 'dark:text-violet-300');
-            UI.modeClipboard.classList.remove('text-slate-500', 'dark:text-slate-400');
+            UI.modeClipboard.classList.add('text-teal-600', 'dark:text-teal-300');
+            UI.modeClipboard.classList.remove('text-zinc-500', 'dark:text-zinc-400');
             UI.clipboardInitInner.classList.remove('hidden');
             UI.clipboardInitInner.classList.add('flex');
         }
@@ -635,12 +631,12 @@ UI.navLinks.forEach(link => {
     }
 
     async function loadCloudManager() {
-        UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">Fetching your files...</p>`;
+        UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">Fetching your files...</p>`;
         clearInterval(cloudTimerInterval);
 
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         if (myLinks.length === 0) {
-            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active shared links.</p>`;
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">You have no active shared links.</p>`;
             return;
         }
 
@@ -665,7 +661,7 @@ UI.navLinks.forEach(link => {
         }
 
         if (activeFiles.length === 0) {
-            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-slate-500 py-10">You have no active shared links.</p>`;
+            UI.cloudFilesList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">You have no active shared links.</p>`;
             return;
         }
 
@@ -704,7 +700,7 @@ UI.navLinks.forEach(link => {
             // Allow display block to apply before animating opacity
             requestAnimationFrame(() => {
                 UI.extendModal.classList.remove('opacity-0');
-                UI.extendModal.querySelector('div').classList.remove('scale-95');
+                UI.extendModal.querySelector('div').classList.remove('scale-[0.98]');
             });
 
             UI.extendMinsInput.value = "15";
@@ -712,7 +708,7 @@ UI.navLinks.forEach(link => {
 
             const cleanup = () => {
                 UI.extendModal.classList.add('opacity-0');
-                UI.extendModal.querySelector('div').classList.add('scale-95');
+                UI.extendModal.querySelector('div').classList.add('scale-[0.98]');
                 setTimeout(() => {
                     UI.extendModal.classList.add('hidden');
                     UI.extendModal.classList.remove('flex');
@@ -733,7 +729,7 @@ UI.navLinks.forEach(link => {
         UI.cloudFilesList.innerHTML = '';
         files.forEach(file => {
             const card = document.createElement('div');
-            card.className = "cloud-file-card bg-slate-50/80 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 flex flex-col";
+            card.className = "cloud-file-card bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl p-3.5 rounded-2xl border border-white/60 dark:border-zinc-700/50 flex flex-col shadow-sm transition-all hover:bg-white/60 dark:hover:bg-zinc-800/40 hover:shadow-md";
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
 
             // Determine what to show in the thumbnail box
@@ -743,17 +739,17 @@ UI.navLinks.forEach(link => {
 
             card.innerHTML = `
                 <div class="flex items-center gap-3 w-full mb-3">
-                    <div class="w-11 h-11 shrink-0 bg-white dark:bg-slate-900 rounded-[12px] overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="w-11 h-11 shrink-0 bg-white dark:bg-zinc-900 rounded-[12px] overflow-hidden flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-sm">
                         ${mediaPreview}
                     </div>
                     
                     <div class="flex flex-col min-w-0 flex-1">
                         <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-semibold text-slate-800 dark:text-white text-sm truncate pr-2">${file.name}</span>
-                            <span class="text-[10px] font-mono font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 px-1.5 py-0.5 rounded tracking-wider shrink-0">${file.id}</span>
+                            <span class="font-semibold text-zinc-800 dark:text-white text-sm truncate pr-2">${file.name}</span>
+                            <span class="text-[10px] font-mono font-bold bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 px-1.5 py-0.5 rounded tracking-wider shrink-0">${file.id}</span>
                         </div>
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-medium text-slate-500 dark:text-slate-400">${sizeText}</span>
+                            <span class="font-medium text-zinc-500 dark:text-zinc-400">${sizeText}</span>
                             <div class="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-md">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 <span id="timer-${file.id}">${formatTimeLeft(file.expiresAt - Date.now())}</span>
@@ -762,12 +758,12 @@ UI.navLinks.forEach(link => {
                     </div>
                 </div>
                 
-                <div class="grid ${!!navigator.share ? 'grid-cols-4' : 'grid-cols-3'} gap-2 border-t border-slate-200 dark:border-slate-700/50 pt-3">
+                <div class="grid ${!!navigator.share ? 'grid-cols-4' : 'grid-cols-3'} gap-2 border-t border-zinc-200 dark:border-zinc-700/50 pt-3">
                     <button class="copy-link-manager-btn flex items-center justify-center text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Copy</button>
                     
-                    ${!!navigator.share ? `<button class="share-link-manager-btn flex items-center justify-center text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Share</button>` : ''}
+                    ${!!navigator.share ? `<button class="share-link-manager-btn flex items-center justify-center text-[11px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Share</button>` : ''}
                     
-                    <button class="extend-btn flex items-center justify-center text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Extend</button>
+                    <button class="extend-btn flex items-center justify-center text-[11px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 py-2 rounded-xl transition-all" data-id="${file.id}">Extend</button>
                     <button class="delete-cloud-btn flex items-center justify-center text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 py-2 rounded-xl transition-all" data-id="${file.id}" data-path="${file.storagePath}">Delete</button>
                 </div>
             `;
@@ -864,7 +860,7 @@ UI.navLinks.forEach(link => {
 
         selectedFiles.forEach((file, index) => {
             const li = document.createElement('li');
-            li.className = "file-item-enter flex items-center justify-between bg-white/60 dark:bg-slate-800/50 backdrop-blur-md p-3 rounded-3xl border border-white/70 dark:border-slate-700/50 shadow-sm transition-all hover:bg-white/80 dark:hover:bg-slate-800/70 hover:shadow-md group";
+            li.className = "file-item-enter flex items-center justify-between bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl p-3 rounded-3xl border border-white/60 dark:border-zinc-700/50 shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all hover:bg-white/60 dark:hover:bg-zinc-800/40 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] group";
             li.style.setProperty('--stagger', index);
 
             let sizeText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
@@ -878,20 +874,20 @@ UI.navLinks.forEach(link => {
             } else if (file.type.startsWith('video/')) {
                 mediaPreview = `<video src="${objectUrl}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline></video>`;
             } else {
-                mediaPreview = `<svg class="w-6 h-6 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
+                mediaPreview = `<svg class="w-6 h-6 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>`;
             }
 
             li.innerHTML = `
                 <div class="flex items-center w-[85%]">
-                    <div class="w-11 h-11 shrink-0 rounded-[14px] overflow-hidden bg-white/60 dark:bg-slate-800/60 flex items-center justify-center mr-3 border border-white/40 dark:border-slate-700/40 shadow-inner">
+                    <div class="w-11 h-11 shrink-0 rounded-[14px] overflow-hidden bg-white/60 dark:bg-zinc-800/60 flex items-center justify-center mr-3 border border-white/40 dark:border-zinc-700/40 shadow-inner">
                         ${mediaPreview}
                     </div>
                     <div class="flex flex-col truncate pr-2 text-left w-full">
-                        <span class="text-slate-800 dark:text-slate-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
-                        <span class="text-[13px] text-slate-500 font-medium">${sizeText}</span>
+                        <span class="text-zinc-800 dark:text-zinc-200 font-semibold truncate tracking-tight text-[15px] leading-tight mb-0.5">${file.name}</span>
+                        <span class="text-[13px] text-zinc-500 font-medium">${sizeText}</span>
                     </div>
                 </div>
-                <button class="delete-file-btn text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2.5 rounded-2xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
+                <button class="delete-file-btn text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2.5 rounded-2xl shrink-0 opacity-80 group-hover:opacity-100" data-index="${index}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             `;
@@ -1486,7 +1482,64 @@ UI.navLinks.forEach(link => {
     }
 
     UI.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    
+    // --- NEW: Global Drag & Drop Overlay ---
+    let globalDragCounter = 0;
+    const globalDragOverlay = document.getElementById('global-drag-overlay');
+    
+    document.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer && e.dataTransfer.types && (e.dataTransfer.types.includes('Files') || e.dataTransfer.types.includes('application/x-moz-file'))) {
+            globalDragCounter++;
+            if (globalDragCounter === 1 && globalDragOverlay) {
+                globalDragOverlay.classList.remove('hidden');
+                globalDragOverlay.classList.add('flex');
+                requestAnimationFrame(() => {
+                    globalDragOverlay.classList.remove('opacity-0');
+                });
+            }
+        }
+    });
+
+    document.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    document.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer && e.dataTransfer.types && (e.dataTransfer.types.includes('Files') || e.dataTransfer.types.includes('application/x-moz-file'))) {
+            globalDragCounter--;
+            if (globalDragCounter === 0 && globalDragOverlay) {
+                globalDragOverlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    if (globalDragCounter === 0) {
+                        globalDragOverlay.classList.add('hidden');
+                        globalDragOverlay.classList.remove('flex');
+                    }
+                }, 300);
+            }
+        }
+    });
+
+    document.addEventListener('drop', (e) => {
+        e.preventDefault();
+        globalDragCounter = 0;
+        if (globalDragOverlay) {
+            globalDragOverlay.classList.add('opacity-0');
+            setTimeout(() => {
+                globalDragOverlay.classList.add('hidden');
+                globalDragOverlay.classList.remove('flex');
+            }, 300);
+        }
+
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setActiveScreen('create');
+            handleFiles(e.dataTransfer.files);
+        }
+    });
+
     UI.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); UI.dropZone.classList.add('drop-active'); });
+
     UI.dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); UI.dropZone.classList.remove('drop-active'); });
     UI.dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
@@ -1863,7 +1916,7 @@ UI.navLinks.forEach(link => {
         UI.fileName.innerText = fileName;
         UI.statusText.innerText = statusText;
         setResetButton("Cancel", false);
-        setStatusDot('blue');
+        setStatusDot('cyan');
     }
 
     let speedSamples = []; // Add this variable right above the function
@@ -1923,7 +1976,7 @@ UI.navLinks.forEach(link => {
     function updateTransferIcon(fileData) {
         if (!UI.transferIconContainer) return;
 
-        let mediaPreview = `<svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
+        let mediaPreview = `<svg class="w-5 h-5 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
 
         if (fileData) {
             const type = fileData.type || fileData.fileType || '';
@@ -2016,11 +2069,11 @@ UI.navLinks.forEach(link => {
         });
     }
     function getIconSvgForType(type) {
-        if (type.startsWith('image/')) return `<svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
-        if (type.startsWith('video/')) return `<svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
-        if (type.startsWith('audio/')) return `<svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>`;
-        if (type.includes('zip') || type.includes('compressed')) return `<svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>`;
-        return `<svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
+        if (type.startsWith('image/')) return `<svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+        if (type.startsWith('video/')) return `<svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+        if (type.startsWith('audio/')) return `<svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>`;
+        if (type.includes('zip') || type.includes('compressed')) return `<svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>`;
+        return `<svg class="w-5 h-5 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
     }
 
     let lastSavedUrl = null; // Holds the URL so the user can open it later
@@ -2044,35 +2097,7 @@ UI.navLinks.forEach(link => {
     function showSuccessPreview(meta, url) {
         const container = document.getElementById('success-preview-container');
         if (!container) return;
-        
-        // 1. Safely grab the file type (handles both P2P and Cloud metadata formats)
-        const type = meta.type || meta.fileType || '';
-        
-        // 2. Check if the browser can actually open this file in a new tab
-        const isViewable = type.startsWith('image/') || 
-                           type.startsWith('video/') || 
-                           type.startsWith('audio/') || 
-                           type.startsWith('text/') || 
-                           type === 'application/pdf';
-
-        // 3. If it's a ZIP or unknown file, do not show the open button (fixes the redownload bug)
-        if (!isViewable) {
-            container.innerHTML = `<span class="text-xs text-slate-500 dark:text-slate-400 mt-3 font-medium">Check your device's Downloads folder.</span>`;
-            return;
-        }
-
-        // 4. If it IS viewable, show a clean, simple "Open" button
-        container.innerHTML = `
-            <button id="open-downloaded-file-btn" class="btn-ripple mt-4 px-6 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-2">
-                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                Open File
-            </button>
-        `;
-        
-        // 5. Attach the click event
-        document.getElementById('open-downloaded-file-btn').onclick = () => {
-            window.open(url, '_blank');
-        };
+                container.innerHTML = `<span class="text-xs text-zinc-500 dark:text-zinc-400 mt-3 font-medium">Check your device's Downloads folder.</span>`;
     }
 
 
@@ -2360,9 +2385,9 @@ UI.navLinks.forEach(link => {
     function generateImageWrapper(base64Data) {
         return `
         <div class="relative group inline-block m-2 align-middle max-w-full" contenteditable="false">
-            <img src="${base64Data}" class="max-w-full rounded-xl border border-slate-200 dark:border-slate-600 shadow-sm block" />
+            <img src="${base64Data}" class="max-w-full rounded-xl border border-zinc-200 dark:border-zinc-600 shadow-sm block" />
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1.5 transition-opacity duration-200 z-10">
-                <button class="save-img-btn bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-lg backdrop-blur-md shadow-lg transition-transform hover:scale-105" title="Save Image">
+                <button class="save-img-btn bg-zinc-900/70 hover:bg-zinc-900 text-white p-2 rounded-lg backdrop-blur-md shadow-lg transition-transform hover:scale-105" title="Save Image">
                     <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
                 <button class="remove-img-btn bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-lg backdrop-blur-md shadow-lg transition-transform hover:scale-105" title="Remove">
@@ -2434,7 +2459,7 @@ UI.navLinks.forEach(link => {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const htmlText = pastedText
                     .replace(/</g, "&lt;").replace(/>/g, "&gt;") 
-                    .replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>')
+                    .replace(urlRegex, '<a href="$1" target="_blank" class="text-cyan-500 underline font-medium cursor-pointer">$1</a>')
                     .replace(/\n/g, "<br>"); 
                 safeInsertHTML(htmlText);
                 setTimeout(syncClipboardData, 50); 
@@ -2460,7 +2485,7 @@ UI.navLinks.forEach(link => {
             const text = e.dataTransfer.getData('text/plain');
             if(text) {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
-                const htmlText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-500 underline font-medium cursor-pointer">$1</a>').replace(/\n/g, "<br>");
+                const htmlText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(urlRegex, '<a href="$1" target="_blank" class="text-cyan-500 underline font-medium cursor-pointer">$1</a>').replace(/\n/g, "<br>");
                 safeInsertHTML(htmlText);
                 setTimeout(syncClipboardData, 50); 
             }
