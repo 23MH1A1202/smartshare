@@ -9,7 +9,7 @@ if ('serviceWorker' in navigator) {
                 reg.update();
             })
             .catch((err) => console.error('Service Worker registration failed:', err));
-    });
+    }); 
 }
 
 
