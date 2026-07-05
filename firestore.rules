@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Rules for shared links
+    match /links/{linkId} {
+      // Anyone can create, read, update, or delete a link since there is no user authentication in this app
+      allow read, write: if true;
+    }
+
+    // Rules for application styling/settings
+    match /settings/{settingId} {
+      // Anyone can read the global theme styles to render the app with your customizations
+      allow read: if true;
+      
+      // Permit writing to the 'style' document and validate its exact schema to ensure stability
+      allow write: if settingId == 'style' 
+                   && request.resource.data.keys().hasAll([
+                        'accentColor', 'panelOpacity', 'panelBlur', 
+                        'inputOpacity', 'inputBlur', 'dropOpacity', 
+                        'dropBlur', 'lightCardBase', 'darkCardBase'
+                      ])
+                   && request.resource.data.keys().size() == 9
+                   && request.resource.data.accentColor is string
+                   && request.resource.data.panelOpacity is int
+                   && request.resource.data.panelBlur is int
+                   && request.resource.data.inputOpacity is int
+                   && request.resource.data.inputBlur is int
+                   && request.resource.data.dropOpacity is int
+                   && request.resource.data.dropBlur is int
+                   && request.resource.data.lightCardBase is string
+                   && request.resource.data.darkCardBase is string;
+    }
+  }
+}
