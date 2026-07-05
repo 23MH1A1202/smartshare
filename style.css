@@ -755,3 +755,107 @@ details.group[open] summary * {
 .accent-teal-500 {
   accent-color: var(--theme-accent-color) !important;
 }
+
+/* 11. Extra Customizer Focus & Accent Refinements */
+input:focus, select:focus, textarea:focus, [contenteditable="true"]:focus {
+  border-color: var(--theme-accent-color) !important;
+  --tw-ring-color: var(--theme-accent-glow) !important;
+  box-shadow: 0 0 0 3px var(--theme-accent-glow) !important;
+}
+.custom-input-glass:focus {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 3px var(--theme-accent-glow) !important;
+}
+
+/* 12. Dynamic Theme Toggle Card Adaptations */
+#theme-toggle {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--theme-accent-color) !important;
+  transition: all 0.2s ease !important;
+}
+#theme-toggle:hover {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 1) !important;
+  color: var(--theme-accent-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+}
+html.dark #theme-toggle {
+  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--theme-accent-color) !important;
+}
+html.dark #theme-toggle:hover {
+  background-color: rgba(var(--dark-card-base, 27, 48, 34), 1) !important;
+  color: var(--theme-accent-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+}
+
+/* 13. Dynamic Info / Tip Box Overrides */
+#receive-tip-box {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.6) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+}
+html.dark #receive-tip-box {
+  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.4) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+}
+
+/* 14. Manage Active Links Refresh Button styling */
+#refresh-cloud-links {
+  border-color: var(--theme-accent-color) !important;
+  color: var(--theme-accent-color) !important;
+  background: transparent !important;
+  transition: all 0.22s ease !important;
+}
+#refresh-cloud-links:hover {
+  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
+  color: var(--theme-accent-color-hover) !important;
+  border-color: var(--theme-accent-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+}
+
+/* 15. Progress Bar Color Sync */
+#progress-bar {
+  background: linear-gradient(90deg, var(--theme-accent-color), var(--theme-accent-color-hover)) !important;
+  box-shadow: 0 0 12px var(--theme-accent-glow) !important;
+}
+
+/* 16. Generated Share Code Box */
+#pairing-code-card {
+  background-image: linear-gradient(to bottom, rgba(var(--light-card-base, 255, 255, 255), 0.6), rgba(var(--light-card-base, 255, 255, 255), 0.3)) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+}
+html.dark #pairing-code-card {
+  background-image: linear-gradient(to bottom, rgba(var(--dark-card-base, 27, 48, 34), 0.65), rgba(var(--dark-card-base, 27, 48, 34), 0.35)) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+}
+
+/* 17. Manage Links - Active Link File Box Background Color */
+.cloud-file-card {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.45) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
+  transition: all 0.22s ease !important;
+}
+html.dark .cloud-file-card {
+  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.3) !important;
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+}
+.cloud-file-card:hover {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.65) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+html.dark .cloud-file-card:hover {
+  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.45) !important;
+  border-color: var(--theme-accent-color) !important;
+}
+
+/* 18. Inline Dynamic Teal Class Adaptations */
+.bg-teal-50, .dark\:bg-teal-900\/20 {
+  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
+}
+.hover\:bg-teal-100:hover, .dark\:hover\:bg-teal-900\/40:hover {
+  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.18) !important;
+}
+.bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
+  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+}
