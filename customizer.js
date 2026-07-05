@@ -2,7 +2,8 @@
 import { db, doc, getDoc, setDoc } from './firebase.js';
 
 const DEFAULTS = {
-    accentColor: '#14b8a6',
+    accentColor: '#0d9488',
+    secondaryColor: '#2dd4bf',
     panelOpacity: 70, // 70%
     panelBlur: 40,    // 40px
     inputOpacity: 75, // 75%
@@ -10,11 +11,11 @@ const DEFAULTS = {
     dropOpacity: 65,  // 65%
     dropBlur: 15,     // 15px
     lightCardBase: '255, 255, 255', // White base
-    darkCardBase: '27, 48, 34',      // Deep emerald base
-    lightBgColor: '#F9F8F6',
-    darkBgColor: '#1B3022',
+    darkCardBase: '12, 45, 39',      // Deep jade base
+    lightBgColor: '#f0fdfa',
+    darkBgColor: '#041a16',
     lightCardColor: '#FFFFFF',
-    darkCardColor: '#1B3022'
+    darkCardColor: '#0c2d27'
 };
 
 let config = { ...DEFAULTS };
@@ -22,58 +23,84 @@ let config = { ...DEFAULTS };
 // 1. Core Preset Definitions with complete color palette customization
 export const PRESETS = {
     teal: {
-        accentColor: '#14b8a6',
+        accentColor: '#0f766e',
+        secondaryColor: '#2dd4bf',
         lightCardBase: '255, 255, 255',
-        darkCardBase: '27, 48, 34',
-        lightBgColor: '#F9F8F6',
-        darkBgColor: '#1B3022',
+        darkCardBase: '12, 45, 39',
+        lightBgColor: '#f0fdfa',
+        darkBgColor: '#041a16',
         lightCardColor: '#FFFFFF',
-        darkCardColor: '#1B3022'
+        darkCardColor: '#0c2d27'
     },
     emerald: {
-        accentColor: '#10b981',
-        lightCardBase: '240, 253, 250',
+        accentColor: '#064e3b',
+        secondaryColor: '#34d399',
+        lightCardBase: '255, 255, 255',
         darkCardBase: '6, 78, 59',
-        lightBgColor: '#F0FDF4',
-        darkBgColor: '#064E3B',
-        lightCardColor: '#F0FDF4',
-        darkCardColor: '#064E3B'
+        lightBgColor: '#f0fdf4',
+        darkBgColor: '#022c22',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#064e3b'
     },
-    indigo: {
-        accentColor: '#6366f1',
-        lightCardBase: '240, 244, 255',
+    nordic: {
+        accentColor: '#2f5233',
+        secondaryColor: '#f28482',
+        lightCardBase: '255, 255, 255',
+        darkCardBase: '28, 42, 30',
+        lightBgColor: '#F4F6F0',
+        darkBgColor: '#1C2A1E',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#1C2A1E'
+    },
+    royal: {
+        accentColor: '#312e81',
+        secondaryColor: '#f59e0b',
+        lightCardBase: '255, 255, 255',
         darkCardBase: '30, 41, 59',
-        lightBgColor: '#F5F7FF',
-        darkBgColor: '#0F172A',
+        lightBgColor: '#f5f3ff',
+        darkBgColor: '#0f172a',
         lightCardColor: '#FFFFFF',
-        darkCardColor: '#1E293B'
+        darkCardColor: '#1e293b'
     },
-    violet: {
-        accentColor: '#8b5cf6',
-        lightCardBase: '250, 245, 255',
+    orchid: {
+        accentColor: '#581c87',
+        secondaryColor: '#f472b6',
+        lightCardBase: '255, 255, 255',
         darkCardBase: '24, 24, 27',
-        lightBgColor: '#FAFAF9',
-        darkBgColor: '#09090B',
+        lightBgColor: '#faf5ff',
+        darkBgColor: '#0a0410',
         lightCardColor: '#FFFFFF',
-        darkCardColor: '#18181B'
+        darkCardColor: '#1c0d28'
     },
-    amber: {
-        accentColor: '#f59e0b',
-        lightCardBase: '255, 251, 235',
-        darkCardBase: '69, 26, 3',
-        lightBgColor: '#FFFBEB',
-        darkBgColor: '#451A03',
-        lightCardColor: '#FFFDF5',
-        darkCardColor: '#3D1400'
+    cyber: {
+        accentColor: '#8b5cf6',
+        secondaryColor: '#06b6d4',
+        lightCardBase: '255, 255, 255',
+        darkCardBase: '24, 24, 27',
+        lightBgColor: '#fafaf9',
+        darkBgColor: '#09090b',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#18181b'
     },
-    rose: {
-        accentColor: '#f43f5e',
-        lightCardBase: '255, 241, 242',
-        darkCardBase: '76, 5, 25',
-        lightBgColor: '#FFF1F2',
-        darkBgColor: '#4C0519',
-        lightCardColor: '#FFF5F5',
-        darkCardColor: '#3C000C'
+    sunset: {
+        accentColor: '#3f3f46',
+        secondaryColor: '#f43f5e',
+        lightCardBase: '255, 255, 255',
+        darkCardBase: '30, 30, 36',
+        lightBgColor: '#fbfaf7',
+        darkBgColor: '#121214',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#1e1e24'
+    },
+    sapphire: {
+        accentColor: '#1e3a8a',
+        secondaryColor: '#38bdf8',
+        lightCardBase: '255, 255, 255',
+        darkCardBase: '17, 24, 39',
+        lightBgColor: '#f0f9ff',
+        darkBgColor: '#030712',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#111827'
     }
 };
 
@@ -164,7 +191,7 @@ function applyStylesToRoot() {
     const root = document.documentElement;
     const accent = config.accentColor;
     const hoverColor = adjustColorBrightness(accent, -25);
-    const rgbAccent = hexToRgb(accent) || { r: 20, g: 184, b: 166 };
+    const rgbAccent = hexToRgb(accent) || { r: 13, g: 148, b: 136 };
 
     // Accent Properties
     root.style.setProperty('--theme-accent-color', accent);
@@ -172,20 +199,29 @@ function applyStylesToRoot() {
     root.style.setProperty('--theme-accent-rgb', `${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}`);
     root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
 
+    // Secondary Accent Properties
+    const secondary = config.secondaryColor || '#2dd4bf';
+    const secondaryHover = adjustColorBrightness(secondary, -25);
+    const rgbSecondary = hexToRgb(secondary) || { r: 45, g: 212, b: 191 };
+    root.style.setProperty('--theme-secondary-color', secondary);
+    root.style.setProperty('--theme-secondary-color-hover', secondaryHover);
+    root.style.setProperty('--theme-secondary-rgb', `${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}`);
+    root.style.setProperty('--theme-secondary-glow', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.25)`);
+
     // Dynamic background and card base colors
-    const lBg = config.lightBgColor || '#F9F8F6';
-    const dBg = config.darkBgColor || '#1B3022';
+    const lBg = config.lightBgColor || '#f0fdfa';
+    const dBg = config.darkBgColor || '#041a16';
     
     root.style.setProperty('--app-bg-light', lBg);
     root.style.setProperty('--app-bg-dark', dBg);
     
-    // Ambient background blob gradients mapped to accent and bg colors
-    root.style.setProperty('--theme-grad-1-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.08)`);
-    root.style.setProperty('--theme-grad-2-light', lBg);
+    // Ambient background blob gradients mapped to primary and secondary accent colors (dual color ambient glow!)
+    root.style.setProperty('--theme-grad-1-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.06)`);
+    root.style.setProperty('--theme-grad-2-light', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.06)`);
     root.style.setProperty('--theme-grad-3-light', lBg);
 
-    root.style.setProperty('--theme-grad-1-dark', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.15)`);
-    root.style.setProperty('--theme-grad-2-dark', adjustColorBrightness(dBg, -12));
+    root.style.setProperty('--theme-grad-1-dark', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.1)`);
+    root.style.setProperty('--theme-grad-2-dark', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.1)`);
     root.style.setProperty('--theme-grad-3-dark', dBg);
 
     // Glass base color (supports backwards-compatible comma-separated format OR computes from color picker hex keys!)
@@ -274,12 +310,13 @@ export function initAdminStyleControls() {
         if (!preset) return;
 
         config.accentColor = preset.accentColor;
+        config.secondaryColor = preset.secondaryColor || preset.accentColor;
         config.lightCardBase = preset.lightCardBase || '255, 255, 255';
-        config.darkCardBase = preset.darkCardBase || '27, 48, 34';
-        config.lightBgColor = preset.lightBgColor || '#F9F8F6';
-        config.darkBgColor = preset.darkBgColor || '#1B3022';
+        config.darkCardBase = preset.darkCardBase || '12, 45, 39';
+        config.lightBgColor = preset.lightBgColor || '#f0fdfa';
+        config.darkBgColor = preset.darkBgColor || '#041a16';
         config.lightCardColor = preset.lightCardColor || '#FFFFFF';
-        config.darkCardColor = preset.darkCardColor || '#1B3022';
+        config.darkCardColor = preset.darkCardColor || '#0c2d27';
 
         // Sync inputs UI
         setupSlidersAndPickersFromConfig();
@@ -344,6 +381,7 @@ export function initAdminStyleControls() {
 
     // Connect color customizers
     setupColorPair('custom-color-picker', 'custom-color-text', 'accentColor');
+    setupColorPair('custom-secondary-picker', 'custom-secondary-text', 'secondaryColor');
     setupColorPair('custom-light-bg-picker', 'custom-light-bg-text', 'lightBgColor');
     setupColorPair('custom-dark-bg-picker', 'custom-dark-bg-text', 'darkBgColor');
     setupColorPair('custom-light-card-picker', 'custom-light-card-text', 'lightCardColor', (hex) => {
@@ -529,10 +567,11 @@ function setupSlidersAndPickersFromConfig() {
     };
 
     syncColorInput('custom-color-picker', 'custom-color-text', config.accentColor);
-    syncColorInput('custom-light-bg-picker', 'custom-light-bg-text', config.lightBgColor || '#F9F8F6');
-    syncColorInput('custom-dark-bg-picker', 'custom-dark-bg-text', config.darkBgColor || '#1B3022');
+    syncColorInput('custom-secondary-picker', 'custom-secondary-text', config.secondaryColor || '#2dd4bf');
+    syncColorInput('custom-light-bg-picker', 'custom-light-bg-text', config.lightBgColor || '#f0fdfa');
+    syncColorInput('custom-dark-bg-picker', 'custom-dark-bg-text', config.darkBgColor || '#041a16');
     syncColorInput('custom-light-card-picker', 'custom-light-card-text', config.lightCardColor || '#FFFFFF');
-    syncColorInput('custom-dark-card-picker', 'custom-dark-card-text', config.darkCardColor || '#1B3022');
+    syncColorInput('custom-dark-card-picker', 'custom-dark-card-text', config.darkCardColor || '#0c2d27');
 
     const setSliderVal = (sliderId, labelId, val, suffix = '') => {
         const slider = document.getElementById(sliderId);
@@ -591,11 +630,12 @@ function updateDemoPreview() {
 
     // Determine values matching preview light/dark states
     const accent = config.accentColor;
-    const lBg = config.lightBgColor || '#F9F8F6';
-    const dBg = config.darkBgColor || '#1B3022';
+    const secondary = config.secondaryColor || '#2dd4bf';
+    const lBg = config.lightBgColor || '#f0fdfa';
+    const dBg = config.darkBgColor || '#041a16';
     
     const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
-    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '27, 48, 34');
+    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '12, 45, 39');
 
     // Toggle Preview Mode buttons visual state
     const prevToggleLight = document.getElementById('preview-toggle-light');
@@ -677,7 +717,7 @@ function updateDemoPreview() {
         accBlob.style.backgroundColor = accent;
     }
     if (dropIcon) {
-        dropIcon.style.color = accent;
-        dropIcon.style.backgroundColor = `rgba(${hexToRgb(accent)?.r || 20}, ${hexToRgb(accent)?.g || 184}, ${hexToRgb(accent)?.b || 166}, 0.12)`;
+        dropIcon.style.color = secondary;
+        dropIcon.style.backgroundColor = `rgba(${hexToRgb(secondary)?.r || 45}, ${hexToRgb(secondary)?.g || 212}, ${hexToRgb(secondary)?.b || 191}, 0.12)`;
     }
 }
