@@ -4,7 +4,7 @@ import { db, doc, getDoc, setDoc } from './firebase.js';
 const DEFAULTS = {
     accentColor: '#14b8a6',
     panelOpacity: 70, // 70%
-    panelBlur: 40,    // 40px 
+    panelBlur: 40,    // 40px
     inputOpacity: 75, // 75%
     inputBlur: 20,    // 20px
     dropOpacity: 65,  // 65%
