@@ -699,7 +699,7 @@ function updateDemoPreview() {
             drop.style.borderColor = 'rgba(0, 0, 0, 0.08)';
         }
     }
-
+ 
     // Main Card Styling
     card.style.backgroundColor = `rgba(${cardBase}, ${config.panelOpacity / 100})`;
     card.style.backdropFilter = `blur(${config.panelBlur}px)`;
