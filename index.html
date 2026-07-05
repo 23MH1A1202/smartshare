@@ -18,21 +18,21 @@
         worker-src 'self' blob:;
     ">
     
-    <link rel="icon" type="image/png" sizes="192x192" href="./favicon.png">
-    <link rel="apple-touch-icon" href="./favicon.png">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="apple-touch-icon" href="./icon.svg">
     <meta name="description" content="SmartShare is a fast, secure, and account-free peer-to-peer file sharing and live clipboard web application built by B.Tech IT student Ambati Lalitha Sagar." />
     <meta name="author" content="Ambati Lalitha Sagar" />
     <link rel="canonical" href="https://smartshare.alsagar.tech/" />
 
     <meta property="og:title" content="SmartShare | Secure P2P File Sharing" />
     <meta property="og:description" content="A fast, account-free file sharing web app with Direct P2P transfer and Cloud Vault. Built by Ambati Lalitha Sagar." />
-        <meta property="og:image" content="https://smartshare.alsagar.tech/icon.png">
-    <meta property="og:image:secure_url" content="https://smartshare.alsagar.tech/icon.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://smartshare.alsagar.tech/icon.png">
+        <meta property="og:image" content="https://smartshare.alsagar.tech/icon.png" />
+    <meta property="og:image:secure_url" content="https://smartshare.alsagar.tech/icon.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://smartshare.alsagar.tech/icon.png" />
 
 
     <meta property="og:url" content="https://smartshare.alsagar.tech/" />
@@ -114,7 +114,7 @@
     <header class="sticky top-0 z-50 w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-sm transition-all">
         <div class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
             <div class="flex items-center gap-3">
-                <img src="./icon.png" alt="SmartShare Logo" class="w-11 h-11 object-cover rounded-[14px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
+                <img src="./icon.svg" alt="SmartShare Logo" class="w-11 h-11 object-cover rounded-[14px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
                 
                 <div class="flex flex-col">
                     <span class="text-base font-bold tracking-tight">SmartShare</span>
@@ -160,6 +160,13 @@
         <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="about">
             About
             <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-install-btn hidden items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors text-teal-600 dark:text-teal-400 font-semibold text-[15px]">
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Install App
+            </span>
+            <svg class="w-4 h-4 text-teal-400 dark:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
     </div>
 </div>
@@ -494,7 +501,7 @@
                 
         <section data-screen="about" id="screen-about" class="screen-panel hidden">
             <div class="max-w-4xl mx-auto mb-16 text-center">
-                <h2 class="text-4xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-4 font-display">Enterprise-grade sharing, zero friction.</h2>
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-4 font-display">Instant sharing, zero friction.</h2>
                 <p class="text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto">SmartShare is designed for speed, security, and precision. No clutter, no sign-ups, just your content moving exactly where it needs to go.</p>
             </div>
 
@@ -755,7 +762,7 @@
         <div class="mx-auto max-w-5xl px-4 py-8 grid gap-8 md:grid-cols-3 lg:grid-cols-4">
             <div class="space-y-3">
                 <div class="flex items-center gap-2">
-                    <img src="./icon.png" alt="SmartShare Logo" class="w-8 h-8 object-cover rounded-[10px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
+                    <img src="./icon.svg" alt="SmartShare Logo" class="w-8 h-8 object-cover rounded-[10px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
                     <span class="font-bold text-lg text-zinc-900 dark:text-white">SmartShare</span>
                 </div>
                 <p class="text-sm text-zinc-600 dark:text-zinc-400">Fast, secure file sharing with Direct, Link, and Clipboard modes.</p>
