@@ -112,7 +112,7 @@
     <div id="toast-container" class="fixed top-24 sm:top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
 
     <header class="sticky top-0 z-50 w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-sm transition-all">
-        <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
+        <div class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
             <div class="flex items-center gap-3">
                 <img src="./icon.png" alt="SmartShare Logo" class="w-11 h-11 object-cover rounded-[14px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
                 
@@ -165,11 +165,11 @@
 </div>
     </header>
 
-    <main class="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-20 pt-0">
+    <main class="mx-auto flex w-full max-w-5xl flex-col gap-16 px-4 pb-20 pt-0">
 
 
         <section data-screen="share" id="screen-share" class="screen-panel min-h-[calc(100vh-120px)] flex items-center">
-            <div class="grid gap-14 lg:gap-20 lg:grid-cols-2 items-center">
+            <div class="grid gap-12 md:gap-14 lg:gap-16 md:grid-cols-2 items-center">
                 <div class="pt-8 sm:pt-0">
     <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-3 sm:mb-8 lg:mb-10">
         Trusted, secure, Fast
@@ -183,7 +183,7 @@
         <button class="btn-ripple rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800" data-screen-link="about">Learn More</button>
     </div>
 </div>
-                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
+                <div class="glass-panel w-full max-w-lg md:max-w-none mx-auto p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
                     <div class="flex items-center gap-2 text-zinc-900 dark:text-white">
                         <div class="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-500/15 flex items-center justify-center">
                             <svg class="w-5 h-5 text-teal-600 dark:text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -238,7 +238,7 @@
                 <p class="text-zinc-600 dark:text-zinc-300 mt-2">Choose Direct, Link, or Clipboard, then add files or create a sync code to start sharing.</p>
             </div>
             <div class="flex justify-center">
-               <div id="drop-zone" class="glass-panel w-[95%] sm:w-full max-w-2xl p-5 sm:p-8 rounded-[2rem] transition-all duration-300 relative shadow-[0_20px_50px_rgba(27,48,34,0.08)] flex flex-col justify-center mx-auto">
+               <div id="drop-zone" class="glass-panel w-[95%] sm:w-full max-w-xl p-5 sm:p-8 rounded-[2rem] transition-all duration-300 relative shadow-[0_20px_50px_rgba(27,48,34,0.08)] flex flex-col justify-center mx-auto">
                     <div id="initial-state" class="flex flex-col items-center text-center w-full">
                         <div class="mode-tabs flex bg-zinc-200/70 dark:bg-zinc-800/60 p-1.5 rounded-2xl mb-6 w-full max-w-md mx-auto shadow-inner border border-zinc-200/80 dark:border-zinc-700/60 relative z-20" data-active="p2p">
                             <div class="tab-slider"></div>
@@ -475,7 +475,7 @@
         </section>
 
         <section data-screen="manage" id="screen-manage" class="screen-panel hidden">
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-3xl mx-auto">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Links</h2>
@@ -498,7 +498,7 @@
                 <p class="text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto">SmartShare is designed for speed, security, and precision. No clutter, no sign-ups, just your content moving exactly where it needs to go.</p>
             </div>
 
-            <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
                     <div>
@@ -752,7 +752,7 @@
     </main>
 
     <footer class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white mt-auto border-t border-zinc-200 dark:border-zinc-800">
-        <div class="mx-auto max-w-6xl px-4 py-8 grid gap-8 md:grid-cols-3 lg:grid-cols-4">
+        <div class="mx-auto max-w-5xl px-4 py-8 grid gap-8 md:grid-cols-3 lg:grid-cols-4">
             <div class="space-y-3">
                 <div class="flex items-center gap-2">
                     <img src="./icon.png" alt="SmartShare Logo" class="w-8 h-8 object-cover rounded-[10px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
