@@ -29,9 +29,10 @@ service cloud.firestore {
                    && request.resource.data.keys().hasAll([
                         'accentColor', 'panelOpacity', 'panelBlur', 
                         'inputOpacity', 'inputBlur', 'dropOpacity', 
-                        'dropBlur', 'lightCardBase', 'darkCardBase'
+                        'dropBlur', 'lightCardBase', 'darkCardBase',
+                        'lightBgColor', 'darkBgColor', 'lightCardColor', 'darkCardColor'
                       ])
-                   && request.resource.data.keys().size() == 9
+                   && request.resource.data.keys().size() == 13
                    && request.resource.data.accentColor is string
                    && request.resource.data.panelOpacity is int
                    && request.resource.data.panelBlur is int
@@ -40,7 +41,11 @@ service cloud.firestore {
                    && request.resource.data.dropOpacity is int
                    && request.resource.data.dropBlur is int
                    && request.resource.data.lightCardBase is string
-                   && request.resource.data.darkCardBase is string;
+                   && request.resource.data.darkCardBase is string
+                   && request.resource.data.lightBgColor is string
+                   && request.resource.data.darkBgColor is string
+                   && request.resource.data.lightCardColor is string
+                   && request.resource.data.darkCardColor is string;
     }
     
     // 🔒 SECURE: Protects your Docukeep App Data from hackers (UNCHANGED)
