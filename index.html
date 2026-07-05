@@ -3,7 +3,7 @@
 <head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     
+    
     <title>SmartShare | Secure P2P File Sharing</title>
 <meta name="google-adsense-account" content="ca-pub-2828267500094266">
     
@@ -127,6 +127,7 @@
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="manage">Manage Active Links</button>
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="faq">FAQ</button>
     <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="about">About</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-teal-600 dark:text-teal-400 font-semibold" data-screen-link="admin-style">Admin Style</button>
     <button class="nav-install-btn hidden px-4 py-2 rounded-xl text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-all items-center gap-2 ml-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
         Install App
@@ -160,6 +161,10 @@
         <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="about">
             About
             <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-teal-600 dark:text-teal-400 font-semibold text-[15px]" data-screen-link="admin-style">
+            Admin Style
+            <svg class="w-4 h-4 text-teal-500/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
         <button class="nav-install-btn hidden items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors text-teal-600 dark:text-teal-400 font-semibold text-[15px]">
             <span class="flex items-center gap-2">
@@ -201,7 +206,7 @@
                     <div id="receive-section" class="mt-5 flex flex-col gap-3">
                         <label class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Code or Link ID</label>
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="text" id="receive-code-input" placeholder="Enter code or ID" class="w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-zinc-400 shadow-inner">
+                            <input type="text" id="receive-code-input" placeholder="Enter code or ID" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-zinc-400 shadow-inner">
                             
                             <div class="flex gap-2 sm:gap-3 shrink-0 w-full sm:w-auto">
                                 <button id="scan-qr-btn" class="btn-ripple flex items-center justify-center px-4 py-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-white rounded-xl font-semibold shadow-inner active:scale-[0.97] transition-all shrink-0" aria-label="Scan QR Code">
@@ -255,7 +260,7 @@
                         </div>
 
                         <div id="file-upload-inner" class="w-full flex flex-col items-center transition-all duration-250">
-                            <div class="drop-zone-inner w-full border border-dashed border-zinc-300/80 dark:border-zinc-700/70 hover:border-teal-400/70 dark:hover:border-teal-500/50 bg-white/30 dark:bg-zinc-900/20 backdrop-blur-sm rounded-[24px] p-8 mb-4 transition-all duration-250 flex flex-col items-center">
+                            <div class="drop-zone-inner custom-drop-zone-glass w-full border border-dashed border-zinc-300/80 dark:border-zinc-700/70 hover:border-teal-400/70 dark:hover:border-teal-500/50 bg-white/30 dark:bg-zinc-900/20 backdrop-blur-sm rounded-[24px] p-8 mb-4 transition-all duration-250 flex flex-col items-center">
                                 <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-teal-100 to-white dark:from-teal-500/15 dark:to-teal-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-teal-400/30 dark:ring-teal-500/25 shadow-sm">
                                     <svg class="w-10 h-10 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                                 </div>
@@ -342,7 +347,7 @@
                                     <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
                                 </div>
                                 <div class="flex gap-2 h-14">
-                                    <input type="text" id="clipboard-receive-code" placeholder="ENTER SYNC CODE" class="w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 uppercase shadow-inner">
+                                    <input type="text" id="clipboard-receive-code" placeholder="ENTER SYNC CODE" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 uppercase shadow-inner">
                                     <button id="clipboard-receive-btn" class="btn-ripple px-5 bg-gradient-to-br from-teal-600 to-teal-500 text-white rounded-xl font-medium shadow-[0_4px_16px_rgba(139,92,246,0.35)] active:scale-[0.97] flex items-center justify-center">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                     </button>
@@ -722,6 +727,219 @@
             </div>
         </section>
 
+        <section data-screen="admin-style" id="screen-admin-style" class="screen-panel hidden">
+            <!-- 1. Password Protection Authentication Card -->
+            <div id="admin-auth-container" class="max-w-md mx-auto py-12">
+                <div class="glass-panel p-8 rounded-[2rem] shadow-xl text-center space-y-6 border border-zinc-200/50 dark:border-zinc-800/40">
+                    <div class="w-16 h-16 mx-auto bg-teal-100 dark:bg-teal-500/10 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-zinc-900 dark:text-white font-display">Admin Authentication</h3>
+                        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">Enter your secure credentials to modify the global application styles. Once unlocked, your adjustments will immediately publish to all users.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="password" id="admin-password-input" placeholder="••••••••••••" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3.5 text-center text-zinc-800 dark:text-white tracking-widest focus:ring-2 focus:ring-teal-500 outline-none text-lg">
+                        <button id="admin-login-btn" class="btn-ripple w-full py-3.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm flex items-center justify-center gap-2">
+                            Unlock Customizer
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Authorized actions only. Settings are securely stored in the cloud database.</p>
+                </div>
+            </div>
+
+            <!-- 2. Main Visual Customizer Interface (Hidden by Default) -->
+            <div id="admin-customizer-controls" class="hidden max-w-5xl mx-auto space-y-8">
+                <div class="text-center space-y-3">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-2">
+                        Control Center
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white font-display">App Style Customizer</h2>
+                    <p class="text-zinc-600 dark:text-zinc-300 text-sm max-w-xl mx-auto">Visually adjust color schemes, transparency, and background blurs of UI components with dynamic real-time live preview.</p>
+                </div>
+
+                <div class="grid gap-8 lg:grid-cols-12">
+                    <!-- Left Panel: Controls (7 cols) -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <!-- Color Theme Panel -->
+                        <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-4 font-display flex items-center gap-2.5">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                                1. Designer Color Presets
+                            </h3>
+                            
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="color-presets-container">
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="teal">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-teal-500 shrink-0"></span>
+                                    Teal Forest
+                                </button>
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="emerald">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                    Emerald Mint
+                                </button>
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="indigo">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-indigo-500 shrink-0"></span>
+                                    Indigo Ocean
+                                </button>
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="violet">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-violet-500 shrink-0"></span>
+                                    Cosmic Charcoal
+                                </button>
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="amber">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0"></span>
+                                    Sunset Gold
+                                </button>
+                                <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="rose">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0"></span>
+                                    Rosewood Sweet
+                                </button>
+                            </div>
+
+                            <!-- Custom Hex Color Picker -->
+                            <div class="mt-5 border-t border-zinc-100 dark:border-zinc-800/80 pt-4 space-y-3">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Custom Accent Color Hex Code</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="custom-color-picker" value="#14b8a6" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                    <div class="flex-grow">
+                                        <input type="text" id="custom-color-text" value="#14b8a6" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opacity Controls Panel -->
+                        <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm space-y-5">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white font-display flex items-center gap-2.5">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                2. Transparency Controls
+                            </h3>
+
+                            <!-- Glass Panel Opacity -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Main Cards Opacity</span>
+                                    <span id="label-panel-opacity" class="font-mono text-teal-600 dark:text-teal-400">70%</span>
+                                </div>
+                                <input type="range" id="slider-panel-opacity" min="10" max="95" value="70" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Controls general panel backgrounds across the app</p>
+                            </div>
+
+                            <!-- Input Opacity -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>"Receive Code" Input Opacity</span>
+                                    <span id="label-input-opacity" class="font-mono text-teal-600 dark:text-teal-400">75%</span>
+                                </div>
+                                <input type="range" id="slider-input-opacity" min="15" max="98" value="75" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Finer control of input box opacity to ensure crisp text visibility</p>
+                            </div>
+
+                            <!-- Drop Zone Opacity -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>"Select Files" Drag Box Opacity</span>
+                                    <span id="label-drop-opacity" class="font-mono text-teal-600 dark:text-teal-400">65%</span>
+                                </div>
+                                <input type="range" id="slider-drop-opacity" min="10" max="95" value="65" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Adjust the transparency of the file drop area box</p>
+                            </div>
+                        </div>
+
+                        <!-- Blur Controls Panel -->
+                        <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm space-y-5">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white font-display flex items-center gap-2.5">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                3. Backdrop Blur Strength
+                            </h3>
+
+                            <!-- Glass Panel Blur -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Main Cards Blur</span>
+                                    <span id="label-panel-blur" class="font-mono text-teal-600 dark:text-teal-400">40px</span>
+                                </div>
+                                <input type="range" id="slider-panel-blur" min="0" max="80" value="40" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+
+                            <!-- Input Blur -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Input Fields Blur</span>
+                                    <span id="label-input-blur" class="font-mono text-teal-600 dark:text-teal-400">20px</span>
+                                </div>
+                                <input type="range" id="slider-input-blur" min="0" max="60" value="20" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+
+                            <!-- Drop Zone Blur -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Drag Box Blur</span>
+                                    <span id="label-drop-blur" class="font-mono text-teal-600 dark:text-teal-400">15px</span>
+                                </div>
+                                <input type="range" id="slider-drop-blur" min="0" max="40" value="15" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                            <button id="btn-reset-style" class="btn-ripple flex-1 py-3.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white rounded-xl font-bold transition-all text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Restore Defaults
+                            </button>
+                            <button id="btn-save-style" class="btn-ripple flex-1 py-3.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Save Configuration
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Live Preview sandbox (5 cols) -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="sticky top-24 space-y-4">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 text-center lg:text-left">Live Preview Simulator</p>
+                            
+                            <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-lg space-y-6 relative overflow-hidden border border-white/40 dark:border-zinc-800/60" id="demo-card-preview">
+                                <!-- Mock floating orb in preview card bg -->
+                                <div id="demo-accent-blob" class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-teal-500/15 blur-2xl pointer-events-none transition-all duration-300"></div>
+
+                                <div class="flex items-center gap-3 relative z-10">
+                                    <div id="demo-accent-icon" class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 transition-colors duration-300">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1zm14 0a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1zM4 19a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-sm text-zinc-900 dark:text-white font-display">Simulated Glass Card</h4>
+                                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Live reflection of customized presets</p>
+                                    </div>
+                                </div>
+
+                                <!-- 1. Input Box Preview -->
+                                <div class="space-y-1.5 relative z-10">
+                                    <label class="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Mock Text Field</label>
+                                    <input type="text" readonly value="G-7A9X" id="demo-input-preview" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-sm text-zinc-800 dark:text-white focus:outline-none cursor-default select-none shadow-inner transition-all duration-300">
+                                </div>
+
+                                <!-- 2. Drop Zone File Box Preview -->
+                                <div id="demo-drop-preview" class="custom-drop-zone-glass border border-dashed border-zinc-300 dark:border-zinc-700 bg-white/30 dark:bg-zinc-900/20 rounded-[20px] p-6 text-center flex flex-col items-center relative z-10 transition-all duration-300">
+                                    <div id="demo-drop-icon" class="w-10 h-10 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center mb-3 transition-all duration-300">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-display">Mock Drag &amp; Drop Box</span>
+                                    <span class="text-[9px] text-zinc-400 dark:text-zinc-500 mt-0.5">Drag files to share</span>
+                                </div>
+
+                                <!-- 3. Button Preview -->
+                                <button class="w-full py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-teal-500/10 transition-all duration-300" id="demo-btn-preview">
+                                    Accent Button Action
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section data-screen="terms" id="screen-terms" class="screen-panel hidden">
             <div class="max-w-4xl mx-auto space-y-8">
                 <div class="text-center space-y-3">
@@ -774,6 +992,7 @@
     <button class="footer-link" data-screen-link="manage">Manage Active Links</button>
     <button class="footer-link" data-screen-link="faq">FAQs</button>
     <button class="footer-link" data-screen-link="about">About</button>
+    <button class="footer-link font-semibold text-teal-600 dark:text-teal-400" data-screen-link="admin-style">Admin Style</button>
 </div>
             </div>
 
