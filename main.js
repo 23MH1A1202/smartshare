@@ -1,7 +1,7 @@
 import { db, doc, setDoc, getDoc, updateDoc, deleteDoc } from './firebase.js';
 import { UI, initializeTheme, showToast, setStatusDot, setResetButton } from './ui.js';
 import { loadAndApplyStyles, initAdminStyleControls } from './customizer.js';
-
+ 
 // Apply stored customizations immediately during parsing to prevent flashes of unstyled theme
 loadAndApplyStyles();
 // Register Service Worker
