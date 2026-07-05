@@ -1,7 +1,7 @@
 import { db, doc, setDoc, getDoc, updateDoc, deleteDoc } from './firebase.js';
 import { UI, initializeTheme, showToast, setStatusDot, setResetButton } from './ui.js';
 import { loadAndApplyStyles, initAdminStyleControls } from './customizer.js';
- 
+
 // Apply stored customizations immediately during parsing to prevent flashes of unstyled theme
 loadAndApplyStyles();
 // Register Service Worker
@@ -513,7 +513,17 @@ UI.navLinks.forEach(link => {
         UI.refreshCloudLinks.addEventListener('click', loadCloudManager);
     }
 
-    setActiveScreen('share', { scroll: false });
+    // Check for confidential admin route via query parameter (?admin) or hash (#admin)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAdminQuery = urlParams.has('admin') || window.location.hash === '#admin';
+    if (hasAdminQuery) {
+        document.getElementById('nav-admin-style')?.classList.remove('hidden');
+        document.getElementById('mobile-nav-admin-style')?.classList.remove('hidden');
+        document.getElementById('footer-admin-style')?.classList.remove('hidden');
+        setActiveScreen('admin-style', { scroll: false });
+    } else {
+        setActiveScreen('share', { scroll: false });
+    }
     setResetButton('Cancel', false);
 
     window.addEventListener('beforeunload', (e) => {
