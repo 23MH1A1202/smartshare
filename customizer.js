@@ -3,49 +3,77 @@ import { db, doc, getDoc, setDoc } from './firebase.js';
 
 const DEFAULTS = {
     accentColor: '#14b8a6',
-    panelOpacity: 70, // 70% (reduced transparency as requested)
+    panelOpacity: 70, // 70%
     panelBlur: 40,    // 40px
-    inputOpacity: 75, // 75% (reduced transparency as requested)
+    inputOpacity: 75, // 75%
     inputBlur: 20,    // 20px
-    dropOpacity: 65,  // 65% (reduced transparency as requested)
+    dropOpacity: 65,  // 65%
     dropBlur: 15,     // 15px
     lightCardBase: '255, 255, 255', // White base
-    darkCardBase: '27, 48, 34'      // Deep emerald base
+    darkCardBase: '27, 48, 34',      // Deep emerald base
+    lightBgColor: '#F9F8F6',
+    darkBgColor: '#1B3022',
+    lightCardColor: '#FFFFFF',
+    darkCardColor: '#1B3022'
 };
 
 let config = { ...DEFAULTS };
 
-// 1. Core Preset Definitions
+// 1. Core Preset Definitions with complete color palette customization
 export const PRESETS = {
     teal: {
         accentColor: '#14b8a6',
         lightCardBase: '255, 255, 255',
-        darkCardBase: '27, 48, 34'
+        darkCardBase: '27, 48, 34',
+        lightBgColor: '#F9F8F6',
+        darkBgColor: '#1B3022',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#1B3022'
     },
     emerald: {
         accentColor: '#10b981',
         lightCardBase: '240, 253, 250',
-        darkCardBase: '6, 78, 59'
+        darkCardBase: '6, 78, 59',
+        lightBgColor: '#F0FDF4',
+        darkBgColor: '#064E3B',
+        lightCardColor: '#F0FDF4',
+        darkCardColor: '#064E3B'
     },
     indigo: {
         accentColor: '#6366f1',
         lightCardBase: '240, 244, 255',
-        darkCardBase: '30, 41, 59'
+        darkCardBase: '30, 41, 59',
+        lightBgColor: '#F5F7FF',
+        darkBgColor: '#0F172A',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#1E293B'
     },
     violet: {
         accentColor: '#8b5cf6',
         lightCardBase: '250, 245, 255',
-        darkCardBase: '24, 24, 27'
+        darkCardBase: '24, 24, 27',
+        lightBgColor: '#FAFAF9',
+        darkBgColor: '#09090B',
+        lightCardColor: '#FFFFFF',
+        darkCardColor: '#18181B'
     },
     amber: {
         accentColor: '#f59e0b',
         lightCardBase: '255, 251, 235',
-        darkCardBase: '69, 26, 3'
+        darkCardBase: '69, 26, 3',
+        lightBgColor: '#FFFBEB',
+        darkBgColor: '#451A03',
+        lightCardColor: '#FFFDF5',
+        darkCardColor: '#3D1400'
     },
     rose: {
         accentColor: '#f43f5e',
         lightCardBase: '255, 241, 242',
-        darkCardBase: '76, 5, 25'
+        darkCardBase: '76, 5, 25',
+        lightBgColor: '#FFF1F2',
+        darkBgColor: '#4C0519',
+        lightCardColor: '#FFF5F5',
+        darkCardColor: '#3C000C'
     }
 };
 
@@ -57,6 +85,12 @@ function hexToRgb(hex) {
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
     } : null;
+}
+
+// Helper: Convert hex to comma separated RGB
+function hexToRgbComma(hex) {
+    const rgb = hexToRgb(hex);
+    return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '0, 0, 0';
 }
 
 // Helper: Adjust Brightness
@@ -137,40 +171,117 @@ function applyStylesToRoot() {
     root.style.setProperty('--theme-accent-color-hover', hoverColor);
     root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
 
+    // Dynamic background and card base colors
+    const lBg = config.lightBgColor || '#F9F8F6';
+    const dBg = config.darkBgColor || '#1B3022';
+    
+    root.style.setProperty('--app-bg-light', lBg);
+    root.style.setProperty('--app-bg-dark', dBg);
+    
+    // Ambient background blob gradients mapped to accent and bg colors
+    root.style.setProperty('--theme-grad-1-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.08)`);
+    root.style.setProperty('--theme-grad-2-light', lBg);
+    root.style.setProperty('--theme-grad-3-light', lBg);
+
+    root.style.setProperty('--theme-grad-1-dark', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.15)`);
+    root.style.setProperty('--theme-grad-2-dark', adjustColorBrightness(dBg, -12));
+    root.style.setProperty('--theme-grad-3-dark', dBg);
+
+    // Glass base color (supports backwards-compatible comma-separated format OR computes from color picker hex keys!)
+    const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
+    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '27, 48, 34');
+
+    root.style.setProperty('--light-card-base', lightCardBase);
+    root.style.setProperty('--dark-card-base', darkCardBase);
+
     // Glass Panels
-    root.style.setProperty('--panel-bg-light', `rgba(${config.lightCardBase}, ${config.panelOpacity / 100})`);
+    root.style.setProperty('--panel-bg-light', `rgba(${lightCardBase}, ${config.panelOpacity / 100})`);
     root.style.setProperty('--panel-blur-light', `${config.panelBlur}px`);
-    root.style.setProperty('--panel-bg-dark', `rgba(${config.darkCardBase}, ${config.panelOpacity / 100})`);
+    root.style.setProperty('--panel-bg-dark', `rgba(${darkCardBase}, ${config.panelOpacity / 100})`);
     root.style.setProperty('--panel-blur-dark', `${config.panelBlur}px`);
 
     // Inputs
-    root.style.setProperty('--input-bg-light', `rgba(${config.lightCardBase}, ${config.inputOpacity / 100})`);
+    root.style.setProperty('--input-bg-light', `rgba(${lightCardBase}, ${config.inputOpacity / 100})`);
     root.style.setProperty('--input-blur-light', `${config.inputBlur}px`);
-    root.style.setProperty('--input-bg-dark', `rgba(${config.darkCardBase}, ${config.inputOpacity / 100})`);
+    root.style.setProperty('--input-bg-dark', `rgba(${darkCardBase}, ${config.inputOpacity / 100})`);
     root.style.setProperty('--input-blur-dark', `${config.inputBlur}px`);
 
     // Drop Zone
-    root.style.setProperty('--drop-bg-light', `rgba(${config.lightCardBase}, ${config.dropOpacity / 100})`);
+    root.style.setProperty('--drop-bg-light', `rgba(${lightCardBase}, ${config.dropOpacity / 100})`);
     root.style.setProperty('--drop-blur-light', `${config.dropBlur}px`);
-    root.style.setProperty('--drop-bg-dark', `rgba(${config.darkCardBase}, ${config.dropOpacity / 100})`);
+    root.style.setProperty('--drop-bg-dark', `rgba(${darkCardBase}, ${config.dropOpacity / 100})`);
     root.style.setProperty('--drop-blur-dark', `${config.dropBlur}px`);
 }
 
 // 4. Initialize Admin Controls panel events
 export function initAdminStyleControls() {
+    // Tab Navigation Switcher
+    const tabs = document.querySelectorAll('.customizer-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const activeTab = tab.dataset.tab;
+            tabs.forEach(t => {
+                if (t.dataset.tab === activeTab) {
+                    t.classList.add('bg-white', 'dark:bg-zinc-900', 'text-teal-600', 'dark:text-teal-300', 'shadow-sm');
+                    t.classList.remove('text-zinc-500', 'dark:text-zinc-400');
+                } else {
+                    t.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-teal-600', 'dark:text-teal-300', 'shadow-sm');
+                    t.classList.add('text-zinc-500', 'dark:text-zinc-400');
+                }
+            });
+
+            // Toggle panels
+            ['colors', 'transparency', 'blurs'].forEach(panelName => {
+                const p = document.getElementById(`customizer-panel-${panelName}`);
+                if (p) {
+                    if (panelName === activeTab) {
+                        p.classList.remove('hidden');
+                    } else {
+                        p.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    });
+
+    // Preview Mode Toggle (Light/Dark mode sandbox)
+    let previewIsDark = true;
+    const prevToggleLight = document.getElementById('preview-toggle-light');
+    const prevToggleDark = document.getElementById('preview-toggle-dark');
+
+    const setPreviewDarkState = (isDark) => {
+        previewIsDark = isDark;
+        if (isDark) {
+            prevToggleDark?.classList.add('bg-teal-500', 'text-white', 'font-semibold');
+            prevToggleDark?.classList.remove('text-zinc-400', 'hover:text-zinc-600');
+            prevToggleLight?.classList.remove('bg-white', 'dark:bg-zinc-900', 'text-zinc-800', 'dark:text-white', 'shadow-sm', 'font-semibold');
+            prevToggleLight?.classList.add('text-zinc-400', 'hover:text-zinc-600');
+        } else {
+            prevToggleLight?.classList.add('bg-white', 'dark:bg-zinc-900', 'text-zinc-800', 'dark:text-white', 'shadow-sm', 'font-semibold');
+            prevToggleLight?.classList.remove('text-zinc-400', 'hover:text-zinc-600');
+            prevToggleDark?.classList.remove('bg-teal-500', 'text-white', 'font-semibold');
+            prevToggleDark?.classList.add('text-zinc-400', 'hover:text-zinc-600');
+        }
+        updateDemoPreview();
+    };
+
+    prevToggleLight?.addEventListener('click', () => setPreviewDarkState(false));
+    prevToggleDark?.addEventListener('click', () => setPreviewDarkState(true));
+
     const selectPreset = (presetName) => {
         const preset = PRESETS[presetName];
         if (!preset) return;
 
         config.accentColor = preset.accentColor;
-        config.lightCardBase = preset.lightCardBase;
-        config.darkCardBase = preset.darkCardBase;
+        config.lightCardBase = preset.lightCardBase || '255, 255, 255';
+        config.darkCardBase = preset.darkCardBase || '27, 48, 34';
+        config.lightBgColor = preset.lightBgColor || '#F9F8F6';
+        config.darkBgColor = preset.darkBgColor || '#1B3022';
+        config.lightCardColor = preset.lightCardColor || '#FFFFFF';
+        config.darkCardColor = preset.darkCardColor || '#1B3022';
 
-        // Sync inputs
-        const colorPicker = document.getElementById('custom-color-picker');
-        const colorText = document.getElementById('custom-color-text');
-        if (colorPicker) colorPicker.value = preset.accentColor;
-        if (colorText) colorText.value = preset.accentColor;
+        // Sync inputs UI
+        setupSlidersAndPickersFromConfig();
 
         // Update active class on preset buttons
         document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -192,17 +303,19 @@ export function initAdminStyleControls() {
         });
     });
 
-    // Color picker events
-    const picker = document.getElementById('custom-color-picker');
-    const colorText = document.getElementById('custom-color-text');
+    // Helper: Connect custom color picker + text box sync pair
+    const setupColorPair = (pickerId, textId, configKey, onUpdate) => {
+        const pInput = document.getElementById(pickerId);
+        const tInput = document.getElementById(textId);
+        if (!pInput || !tInput) return;
 
-    if (picker) {
-        picker.addEventListener('input', (e) => {
+        pInput.addEventListener('input', (e) => {
             const hex = e.target.value;
-            config.accentColor = hex;
-            if (colorText) colorText.value = hex;
+            config[configKey] = hex;
+            tInput.value = hex;
+            if (onUpdate) onUpdate(hex);
             
-            // Remove preset active classes since custom is chosen
+            // Remove preset active classes since custom color chosen
             document.querySelectorAll('.preset-btn').forEach(b => {
                 b.classList.remove('border-teal-500', 'bg-teal-500/10', 'scale-[1.02]');
             });
@@ -210,19 +323,34 @@ export function initAdminStyleControls() {
             applyStylesToRoot();
             updateDemoPreview();
         });
-    }
 
-    if (colorText) {
-        colorText.addEventListener('input', (e) => {
-            let val = e.target.value.trim();
+        tInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
             if (val.length === 7 && val.startsWith('#')) {
-                config.accentColor = val;
-                if (picker) picker.value = val;
+                config[configKey] = val;
+                pInput.value = val;
+                if (onUpdate) onUpdate(val);
+                
+                document.querySelectorAll('.preset-btn').forEach(b => {
+                    b.classList.remove('border-teal-500', 'bg-teal-500/10', 'scale-[1.02]');
+                });
+
                 applyStylesToRoot();
                 updateDemoPreview();
             }
         });
-    }
+    };
+
+    // Connect color customizers
+    setupColorPair('custom-color-picker', 'custom-color-text', 'accentColor');
+    setupColorPair('custom-light-bg-picker', 'custom-light-bg-text', 'lightBgColor');
+    setupColorPair('custom-dark-bg-picker', 'custom-dark-bg-text', 'darkBgColor');
+    setupColorPair('custom-light-card-picker', 'custom-light-card-text', 'lightCardColor', (hex) => {
+        config.lightCardBase = hexToRgbComma(hex);
+    });
+    setupColorPair('custom-dark-card-picker', 'custom-dark-card-text', 'darkCardColor', (hex) => {
+        config.darkCardBase = hexToRgbComma(hex);
+    });
 
     // Slider Event Helper
     const setupSlider = (sliderId, configKey, labelId, suffix = '') => {
@@ -386,13 +514,24 @@ export function initAdminStyleControls() {
 
     // Set initial UI state matching loaded config
     setupSlidersAndPickersFromConfig();
+    
+    // Set initial preview selector state based on body class dark mode
+    setPreviewDarkState(document.documentElement.classList.contains('dark'));
 }
 
 function setupSlidersAndPickersFromConfig() {
-    const picker = document.getElementById('custom-color-picker');
-    const colorText = document.getElementById('custom-color-text');
-    if (picker) picker.value = config.accentColor;
-    if (colorText) colorText.value = config.accentColor;
+    const syncColorInput = (pickerId, textId, val) => {
+        const picker = document.getElementById(pickerId);
+        const text = document.getElementById(textId);
+        if (picker) picker.value = val;
+        if (text) text.value = val;
+    };
+
+    syncColorInput('custom-color-picker', 'custom-color-text', config.accentColor);
+    syncColorInput('custom-light-bg-picker', 'custom-light-bg-text', config.lightBgColor || '#F9F8F6');
+    syncColorInput('custom-dark-bg-picker', 'custom-dark-bg-text', config.darkBgColor || '#1B3022');
+    syncColorInput('custom-light-card-picker', 'custom-light-card-text', config.lightCardColor || '#FFFFFF');
+    syncColorInput('custom-dark-card-picker', 'custom-dark-card-text', config.darkCardColor || '#1B3022');
 
     const setSliderVal = (sliderId, labelId, val, suffix = '') => {
         const slider = document.getElementById(sliderId);
@@ -431,6 +570,7 @@ function setupSlidersAndPickersFromConfig() {
 
 // 5. Update Sandbox demo elements visually to show precise feedback
 function updateDemoPreview() {
+    const container = document.getElementById('demo-preview-container');
     const card = document.getElementById('demo-card-preview');
     const input = document.getElementById('demo-input-preview');
     const drop = document.getElementById('demo-drop-preview');
@@ -439,26 +579,104 @@ function updateDemoPreview() {
     const accBlob = document.getElementById('demo-accent-blob');
     const dropIcon = document.getElementById('demo-drop-icon');
 
+    // Text label elements for light/dark mode high contrast adjustments inside preview
+    const title = document.getElementById('demo-title');
+    const subtitle = document.getElementById('demo-subtitle');
+    const inputLabel = document.getElementById('demo-input-label');
+    const dropText = document.getElementById('demo-drop-text');
+    const dropSubtext = document.getElementById('demo-drop-subtext');
+
     if (!card) return;
 
-    // Apply color accent to buttons & preview items
+    // Determine values matching preview light/dark states
     const accent = config.accentColor;
-    const hoverAccent = adjustColorBrightness(accent, -25);
+    const lBg = config.lightBgColor || '#F9F8F6';
+    const dBg = config.darkBgColor || '#1B3022';
+    
+    const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
+    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '27, 48, 34');
 
+    // Toggle Preview Mode buttons visual state
+    const prevToggleLight = document.getElementById('preview-toggle-light');
+    const prevToggleDark = document.getElementById('preview-toggle-dark');
+    const isDarkNow = prevToggleDark?.classList.contains('bg-teal-500');
+    const previewIsDark = isDarkNow === undefined ? true : isDarkNow;
+
+    const cardBase = previewIsDark ? darkCardBase : lightCardBase;
+
+    // Apply Page Background simulation to container
+    if (container) {
+        container.style.backgroundColor = previewIsDark ? dBg : lBg;
+        if (previewIsDark) {
+            container.classList.add('dark');
+        } else {
+            container.classList.remove('dark');
+        }
+    }
+
+    // Toggle Text Colors for high-contrast visibility
+    if (previewIsDark) {
+        if (title) { title.style.color = '#ffffff'; }
+        if (subtitle) { subtitle.style.color = '#a1a1aa'; }
+        if (inputLabel) { inputLabel.style.color = '#a1a1aa'; }
+        if (dropText) { dropText.style.color = '#d4d4d8'; }
+        if (dropSubtext) { dropSubtext.style.color = '#71717a'; }
+
+        // Input Styling
+        if (input) {
+            input.style.backgroundColor = `rgba(${cardBase}, ${config.inputOpacity / 100})`;
+            input.style.backdropFilter = `blur(${config.inputBlur}px)`;
+            input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            input.style.color = '#ffffff';
+        }
+
+        // Drop Area Styling
+        if (drop) {
+            drop.style.backgroundColor = `rgba(${cardBase}, ${config.dropOpacity / 100})`;
+            drop.style.backdropFilter = `blur(${config.dropBlur}px)`;
+            drop.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        }
+    } else {
+        if (title) { title.style.color = '#18181b'; }
+        if (subtitle) { subtitle.style.color = '#71717a'; }
+        if (inputLabel) { inputLabel.style.color = '#71717a'; }
+        if (dropText) { dropText.style.color = '#27272a'; }
+        if (dropSubtext) { dropSubtext.style.color = '#a1a1aa'; }
+
+        // Input Styling
+        if (input) {
+            input.style.backgroundColor = `rgba(${cardBase}, ${config.inputOpacity / 100})`;
+            input.style.backdropFilter = `blur(${config.inputBlur}px)`;
+            input.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+            input.style.color = '#18181b';
+        }
+
+        // Drop Area Styling
+        if (drop) {
+            drop.style.backgroundColor = `rgba(${cardBase}, ${config.dropOpacity / 100})`;
+            drop.style.backdropFilter = `blur(${config.dropBlur}px)`;
+            drop.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+        }
+    }
+
+    // Main Card Styling
+    card.style.backgroundColor = `rgba(${cardBase}, ${config.panelOpacity / 100})`;
+    card.style.backdropFilter = `blur(${config.panelBlur}px)`;
+
+    // Apply Accent Theme Styling
     if (btn) {
         btn.style.backgroundColor = accent;
-        btn.style.boxShadow = `0 4px 12px rgba(${hexToRgb(accent)?.r || 20}, ${hexToRgb(accent)?.g || 184}, ${hexToRgb(accent)?.b || 166}, 0.2)`;
+        btn.style.boxShadow = `0 4px 12px rgba(${hexToRgb(accent)?.r || 20}, ${hexToRgb(accent)?.g || 184}, ${hexToRgb(accent)?.b || 166}, 0.25)`;
     }
-
     if (accIcon) {
         accIcon.style.color = accent;
+        accIcon.style.backgroundColor = `rgba(${hexToRgb(accent)?.r || 20}, ${hexToRgb(accent)?.g || 184}, ${hexToRgb(accent)?.b || 166}, 0.12)`;
     }
-
     if (accBlob) {
         accBlob.style.backgroundColor = accent;
     }
-
     if (dropIcon) {
         dropIcon.style.color = accent;
+        dropIcon.style.backgroundColor = `rgba(${hexToRgb(accent)?.r || 20}, ${hexToRgb(accent)?.g || 184}, ${hexToRgb(accent)?.b || 166}, 0.12)`;
     }
 }
