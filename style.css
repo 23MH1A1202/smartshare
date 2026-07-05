@@ -665,15 +665,15 @@ label[for="file-input"]:active,
 
 /* 6. Outline & Sub Action Buttons (e.g., "Learn More" / "Scan QR") */
 button[data-screen-link="about"]:not(.footer-link):not(.nav-link) {
-  border-color: var(--theme-accent-color) !important;
-  color: var(--theme-accent-color) !important;
+  border-color: var(--theme-secondary-color) !important;
+  color: var(--theme-secondary-color) !important;
   background: transparent !important;
   transition: all 0.22s ease !important;
 }
 button[data-screen-link="about"]:not(.footer-link):not(.nav-link):hover {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
-  color: var(--theme-accent-color-hover) !important;
-  border-color: var(--theme-accent-color-hover) !important;
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  border-color: var(--theme-secondary-color-hover) !important;
 }
 
 /* 7. Drop Zone Interior Icon & Border Overrides */
@@ -681,15 +681,17 @@ button[data-screen-link="about"]:not(.footer-link):not(.nav-link):hover {
   transition: border-color 0.25s ease, background-color 0.25s ease, backdrop-filter 0.25s ease !important;
 }
 .drop-zone-inner.custom-drop-zone-glass:hover {
-  border-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-secondary-color) !important;
 }
 .upload-icon-wrap {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
 }
 html.dark .upload-icon-wrap {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
-  box-shadow: inset 0 0 0 1px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.3) !important;
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.15) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.3) !important;
+  color: var(--theme-secondary-color) !important;
 }
 
 /* 8. QR Scanner Laser & Elements */
@@ -705,7 +707,7 @@ details.group {
   transition: all 0.22s ease !important;
 }
 html.dark details.group {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.5) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.5) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 details.group summary {
@@ -713,11 +715,11 @@ details.group summary {
 }
 details.group summary:hover,
 details.group summary:hover * {
-  color: var(--theme-accent-color) !important;
+  color: var(--theme-secondary-color) !important;
 }
 details.group[open] summary,
 details.group[open] summary * {
-  color: var(--theme-accent-color) !important;
+  color: var(--theme-secondary-color) !important;
 }
 
 /* 10. General Tailwind Utility Class Replacements */
@@ -771,82 +773,86 @@ input:focus, select:focus, textarea:focus, [contenteditable="true"]:focus {
 #theme-toggle {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 0.9) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
-  color: var(--theme-accent-color) !important;
+  color: var(--theme-secondary-color) !important;
   transition: all 0.2s ease !important;
 }
 #theme-toggle:hover {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 1) !important;
-  color: var(--theme-accent-color-hover) !important;
-  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
 html.dark #theme-toggle {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.9) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.9) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--theme-accent-color) !important;
+  color: var(--theme-secondary-color) !important;
 }
 html.dark #theme-toggle:hover {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 1) !important;
-  color: var(--theme-accent-color-hover) !important;
-  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 1) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
 
 /* 13. Dynamic Info / Tip Box Overrides */
 #receive-tip-box {
-  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.6) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
 }
 html.dark #receive-tip-box {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.4) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.12) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
 }
 
 /* 14. Manage Active Links Refresh Button styling */
 #refresh-cloud-links {
-  border-color: var(--theme-accent-color) !important;
-  color: var(--theme-accent-color) !important;
+  border-color: var(--theme-secondary-color) !important;
+  color: var(--theme-secondary-color) !important;
   background: transparent !important;
   transition: all 0.22s ease !important;
 }
 #refresh-cloud-links:hover {
-  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
-  color: var(--theme-accent-color-hover) !important;
-  border-color: var(--theme-accent-color-hover) !important;
-  box-shadow: 0 4px 12px var(--theme-accent-glow) !important;
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  border-color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
 
 /* 15. Progress Bar Color Sync */
 #progress-bar {
-  background: linear-gradient(90deg, var(--theme-accent-color), var(--theme-accent-color-hover)) !important;
+  background: linear-gradient(90deg, var(--theme-accent-color), var(--theme-secondary-color)) !important;
   box-shadow: 0 0 12px var(--theme-accent-glow) !important;
 }
 
 /* 16. Generated Share Code Box */
 #pairing-code-card {
   background-image: linear-gradient(to bottom, rgba(var(--light-card-base, 255, 255, 255), 0.6), rgba(var(--light-card-base, 255, 255, 255), 0.3)) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
 }
 html.dark #pairing-code-card {
-  background-image: linear-gradient(to bottom, rgba(var(--dark-card-base, 27, 48, 34), 0.65), rgba(var(--dark-card-base, 27, 48, 34), 0.35)) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+  background-image: linear-gradient(to bottom, rgba(var(--dark-card-base, 12, 45, 39), 0.65), rgba(var(--dark-card-base, 12, 45, 39), 0.35)) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
 }
 
 /* 17. Manage Links - Active Link File Box Background Color */
 .cloud-file-card {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 0.45) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.15) !important;
   transition: all 0.22s ease !important;
 }
 html.dark .cloud-file-card {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.3) !important;
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.3) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.2) !important;
 }
 .cloud-file-card:hover {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 0.65) !important;
-  border-color: var(--theme-accent-color) !important;
+  border-color: var(--theme-secondary-color) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
 html.dark .cloud-file-card:hover {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.45) !important;
-  border-color: var(--theme-accent-color) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.45) !important;
+  border-color: var(--theme-secondary-color) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
 
 /* 18. Inline Dynamic Teal Class Adaptations */
