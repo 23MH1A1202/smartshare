@@ -1,0 +1,6 @@
+{
+  "name": "SmartShare",
+  "description": "Secure, instant peer-to-peer and cloud-based file sharing platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
