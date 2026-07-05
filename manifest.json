@@ -25,7 +25,7 @@
     "enctype": "multipart/form-data",
     "params": {
       "files": [
-        {
+        { 
           "name": "file",
           "accept": ["*/*", "image/*", "video/*", "audio/*", "application/*", "text/*"]
         }
