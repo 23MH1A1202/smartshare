@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 🔒 SECURE: SmartShare Link Validation
+    // 🔒 SECURE: SmartShare Link Validation 
     match /links/{linkId} {
       // Anyone can read a link to download a file
       allow read: if true;
