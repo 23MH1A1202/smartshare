@@ -3,14 +3,14 @@
   "short_name": "SmartShare App", 
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#3b82f6",
+  "background_color": "#0b1311",
+  "theme_color": "#090d0c",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "192x192 512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "share_target": {
