@@ -226,8 +226,8 @@ input, button, label {
 
 /* --- DROP ZONE STATES --- */
 #drop-zone.drop-active {
-  border-color: rgba(212, 175, 55, 0.7) !important;
-  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 4px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
   transform: scale(1.01);
 }
 
@@ -236,7 +236,7 @@ input, button, label {
 }
 
 #drop-zone.drop-active .drop-zone-inner {
-  background: rgba(212, 175, 55, 0.08) !important;
+  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
 }
 
 /* Drop zone upload icon bounce */
@@ -259,8 +259,8 @@ input, button, label {
   color: #0f172a;
 }
 .nav-link.is-active {
-  background: rgba(212, 175, 55, 0.15);
-  color: #9C7E24;
+  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+  color: var(--theme-accent-color) !important;
 }
 html.dark .nav-link {
   color: rgba(226, 232, 240, 0.85);
@@ -270,8 +270,8 @@ html.dark .nav-link:hover {
   color: #fff;
 }
 html.dark .nav-link.is-active {
-  background: rgba(212, 175, 55, 0.25);
-  color: #F0E3B0;
+  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+  color: var(--theme-accent-color) !important;
 }
 
 #mobile-menu {
@@ -373,7 +373,7 @@ html.dark .file-list-box::-webkit-scrollbar-thumb {
 
 /* --- PROGRESS BAR SHIMMER & GLOW --- */
 #progress-bar {
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.45);
+  box-shadow: 0 0 12px var(--theme-accent-glow);
   transition: width 0.2s ease-out;
 }
 
@@ -399,13 +399,13 @@ html.dark .file-list-box::-webkit-scrollbar-thumb {
   flex-shrink: 0;
 }
 
-.status-dot.dot-cyan  { color: rgb(212, 175, 55); animation: pulseDotBlue  1.8s ease-in-out infinite; }
+.status-dot.dot-cyan  { color: var(--theme-accent-color); animation: pulseDotBlue  1.8s ease-in-out infinite; }
 .status-dot.dot-green { color: rgb(16, 185, 129); animation: pulseDotGreen 1.8s ease-in-out infinite; }
 .status-dot.dot-amber { color: rgb(245, 158, 11); animation: pulseDotAmber 1.8s ease-in-out infinite; }
 
 @keyframes pulseDotBlue {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55,0.45); }
-  50%       { box-shadow: 0 0 0 5px rgba(212, 175, 55,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--theme-accent-rgb, 20, 184, 166), 0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(var(--theme-accent-rgb, 20, 184, 166), 0); }
 }
 @keyframes pulseDotGreen {
   0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); }
@@ -426,7 +426,7 @@ html.dark .file-list-box::-webkit-scrollbar-thumb {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgb(212, 175, 55);
+  background: var(--theme-accent-color);
   animation: dotBounce 1.2s ease-in-out infinite;
 }
 .connecting-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -576,4 +576,79 @@ html.dark .cloud-file-card:hover {
   50%  { transform: translateY(95%); opacity: 1; }
   85%  { opacity: 1; }
   100% { transform: translateY(5%); opacity: 0; }
+}
+
+/* --- DYNAMIC CUSTOMIZER STYLING OVERRIDES --- */
+
+/* Select Files Button Gradient & Glow Overrides */
+label[for="file-input"], #cta-create, #receive-btn, #admin-login-btn, #btn-save-style, #confirm-extend-btn, #confirm-install-btn {
+  background: var(--theme-accent-color) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px var(--theme-accent-glow) !important;
+  transition: all 0.22s ease !important;
+}
+
+label[for="file-input"]:hover, #cta-create:hover, #receive-btn:hover, #admin-login-btn:hover, #btn-save-style:hover, #confirm-extend-btn:hover, #confirm-install-btn:hover {
+  background: var(--theme-accent-color-hover) !important;
+  box-shadow: 0 6px 20px var(--theme-accent-glow) !important;
+  transform: translateY(-1px) scale(1.01);
+}
+
+label[for="file-input"]:active, #cta-create:active, #receive-btn:active, #admin-login-btn:active, #btn-save-style:active, #confirm-extend-btn:active, #confirm-install-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Drop Zone Interior Icon & Border Overrides */
+.drop-zone-inner.custom-drop-zone-glass {
+  transition: border-color 0.25s ease, background-color 0.25s ease, backdrop-filter 0.25s ease !important;
+}
+
+.drop-zone-inner.custom-drop-zone-glass:hover {
+  border-color: var(--theme-accent-color) !important;
+}
+
+.upload-icon-wrap {
+  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+}
+
+html.dark .upload-icon-wrap {
+  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.3) !important;
+}
+
+/* General Tailwind Utility Overrides to guarantee 100% coverage of dynamic theme accents */
+.bg-teal-500, .bg-teal-600 {
+  background-color: var(--theme-accent-color) !important;
+}
+.hover\:bg-teal-600:hover, .hover\:bg-teal-500:hover {
+  background-color: var(--theme-accent-color-hover) !important;
+}
+.text-teal-500, .text-teal-600, .text-teal-700, .dark\:text-teal-400, .dark\:text-teal-300 {
+  color: var(--theme-accent-color) !important;
+}
+.border-teal-500, .border-teal-600, .dark\:border-teal-400 {
+  border-color: var(--theme-accent-color) !important;
+}
+.focus\:ring-teal-500:focus, .focus\:border-teal-500:focus, .focus\:ring-teal-600:focus, .focus\:border-teal-600:focus {
+  border-color: var(--theme-accent-color) !important;
+  --tw-ring-color: var(--theme-accent-glow) !important;
+}
+.hover\:border-teal-400\/70:hover, .dark\:hover\:border-teal-500\/50:hover {
+  border-color: var(--theme-accent-color) !important;
+}
+.border-teal-500\/20, .dark\:border-teal-500\/40, .border-teal-200\/50, .dark\:border-teal-500\/30 {
+  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+}
+.bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
+  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+}
+.dark\:from-teal-500\/15 {
+  --tw-gradient-from: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
+}
+.shadow-teal-500\/20, .shadow-teal-500\/30, .shadow-teal-500\/10 {
+  box-shadow: 0 4px 14px var(--theme-accent-glow) !important;
+}
+.accent-teal-500 {
+  accent-color: var(--theme-accent-color) !important;
 }
