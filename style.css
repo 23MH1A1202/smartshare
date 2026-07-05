@@ -35,6 +35,32 @@
     --theme-accent-color: #14b8a6;
     --theme-accent-color-hover: #0d9488;
     --theme-accent-glow: rgba(20, 184, 166, 0.25);
+    
+    /* Dynamic background support values */
+    --app-bg-light: #F9F8F6;
+    --app-bg-dark: #1B3022;
+}
+
+body {
+    background-color: var(--app-bg-light, #F9F8F6);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+    background-color: var(--app-bg-dark, #1B3022);
+}
+
+/* Dynamic ambient backgrounds mapping background and accent colors */
+.fixed.inset-0.-z-10 {
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-light, rgba(20, 184, 166, 0.08)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-light, #F9F8F6), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-light, #F9F8F6), transparent 50%) !important;
+}
+
+html.dark .fixed.inset-0.-z-10 {
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-dark, rgba(20, 184, 166, 0.15)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-dark, #122117), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-dark, #1B3022), transparent 50%) !important;
 }
 
 main {
