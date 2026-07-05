@@ -2,6 +2,39 @@
 /* Keep header height available for scroll offsets */
 :root {
     --header-height: 4rem;
+    
+    /* Panel Settings - Light Mode */
+    --panel-bg-light: rgba(255, 255, 255, 0.7);
+    --panel-blur-light: 40px;
+    --panel-border-light: rgba(255, 255, 255, 0.7);
+    
+    /* Panel Settings - Dark Mode */
+    --panel-bg-dark: rgba(27, 48, 34, 0.45);
+    --panel-blur-dark: 40px;
+    --panel-border-dark: rgba(255, 255, 255, 0.08);
+
+    /* Input Settings - Light Mode */
+    --input-bg-light: rgba(255, 255, 255, 0.75);
+    --input-blur-light: 20px;
+    --input-border-light: rgba(255, 255, 255, 0.6);
+
+    /* Input Settings - Dark Mode */
+    --input-bg-dark: rgba(27, 48, 34, 0.5);
+    --input-blur-dark: 20px;
+    --input-border-dark: rgba(255, 255, 255, 0.1);
+
+    /* Drop Zone Settings - Light Mode */
+    --drop-bg-light: rgba(255, 255, 255, 0.65);
+    --drop-blur-light: 15px;
+    
+    /* Drop Zone Settings - Dark Mode */
+    --drop-bg-dark: rgba(27, 48, 34, 0.45);
+    --drop-blur-dark: 15px;
+
+    /* Theme Primary Accent Colors */
+    --theme-accent-color: #14b8a6;
+    --theme-accent-color-hover: #0d9488;
+    --theme-accent-glow: rgba(20, 184, 166, 0.25);
 }
 
 main {
@@ -21,10 +54,10 @@ main.has-nav-gap {
 
 /* --- GLASS PANEL (Enhanced) --- */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: var(--panel-bg-light);
+  backdrop-filter: blur(var(--panel-blur-light)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--panel-blur-light)) saturate(180%);
+  border: 1px solid var(--panel-border-light);
   border-radius: 2rem !important;
   box-shadow: 
     0 30px 60px -10px rgba(0, 0, 0, 0.05),
@@ -32,14 +65,83 @@ main.has-nav-gap {
 }
 
 html.dark .glass-panel {
-  background: rgba(27, 48, 34, 0.25);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--panel-bg-dark);
+  backdrop-filter: blur(var(--panel-blur-dark)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--panel-blur-dark)) saturate(180%);
+  border: 1px solid var(--panel-border-dark);
   box-shadow: 
     0 30px 60px -10px rgba(0, 0, 0, 0.3),
     0 1px 0 rgba(255, 255, 255, 0.05) inset;
 }
+
+/* --- CUSTOM GLASS CONTROLS FOR INPUTS & SELECT FILES BOX --- */
+.custom-input-glass {
+  background: var(--input-bg-light) !important;
+  backdrop-filter: blur(var(--input-input-blur-light, var(--input-blur-light))) !important;
+  -webkit-backdrop-filter: blur(var(--input-input-blur-light, var(--input-blur-light))) !important;
+  border-color: var(--input-border-light) !important;
+}
+
+html.dark .custom-input-glass {
+  background: var(--input-bg-dark) !important;
+  backdrop-filter: blur(var(--input-input-blur-dark, var(--input-blur-dark))) !important;
+  -webkit-backdrop-filter: blur(var(--input-input-blur-dark, var(--input-blur-dark))) !important;
+  border-color: var(--input-border-dark) !important;
+}
+
+.custom-drop-zone-glass {
+  background: var(--drop-bg-light) !important;
+  backdrop-filter: blur(var(--drop-blur-light)) !important;
+  -webkit-backdrop-filter: blur(var(--drop-blur-light)) !important;
+}
+
+html.dark .custom-drop-zone-glass {
+  background: var(--drop-bg-dark) !important;
+  backdrop-filter: blur(var(--drop-blur-dark)) !important;
+  -webkit-backdrop-filter: blur(var(--drop-blur-dark)) !important;
+}
+
+/* Accent Color overrides dynamically hooked up */
+.text-teal-600 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-400 {
+  color: var(--theme-accent-color) !important;
+}
+.bg-teal-500 {
+  background-color: var(--theme-accent-color) !important;
+}
+.hover\:bg-teal-600:hover {
+  background-color: var(--theme-accent-color-hover) !important;
+}
+.shadow-teal-500\/20 {
+  box-shadow: 0 10px 15px -3px var(--theme-accent-glow), 0 4px 6px -4px var(--theme-accent-glow) !important;
+}
+.border-teal-500 {
+  border-color: var(--theme-accent-color) !important;
+}
+.dark .border-teal-500\/40 {
+  border-color: var(--theme-accent-glow) !important;
+}
+.bg-teal-500\/10 {
+  background-color: var(--theme-accent-glow) !important;
+}
+.text-teal-500 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-300 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-400 {
+  color: var(--theme-accent-color) !important;
+}
+.bg-teal-100 {
+  background-color: var(--theme-accent-glow) !important;
+}
+.accent-teal-500 {
+  accent-color: var(--theme-accent-color) !important;
+}
+
 
 /* --- ANIMATED BACKGROUND BLOBS --- */
 .bg-blob {
