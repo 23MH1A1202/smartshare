@@ -169,6 +169,7 @@ function applyStylesToRoot() {
     // Accent Properties
     root.style.setProperty('--theme-accent-color', accent);
     root.style.setProperty('--theme-accent-color-hover', hoverColor);
+    root.style.setProperty('--theme-accent-rgb', `${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}`);
     root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
 
     // Dynamic background and card base colors
