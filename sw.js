@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const PRECACHE_NAME = `instant-share-precache-${CACHE_VERSION}`;
 const RUNTIME_NAME = `instant-share-runtime-${CACHE_VERSION}`;
 const SHARED_FILE_CACHE = 'shared-file-cache';
@@ -9,8 +9,8 @@ const STATIC_ASSETS = [
     './style.css',
     './main.js',
     './manifest.json',
-    './icon-192.png',
-    './icon-512.png',
+    './appicon.png',
+    './favicon.png',
     './icon.png'
 ];
 const NETWORK_FIRST_DESTINATIONS = new Set(['document', 'script', 'style', 'manifest']);
