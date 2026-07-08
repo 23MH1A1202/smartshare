@@ -134,6 +134,21 @@ function adjustColorBrightness(hex, percent) {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+function relativeLuminance(rgb) {
+    const toLinear = (v) => {
+        const channel = v / 255;
+        return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+    };
+    const r = toLinear(rgb.r);
+    const g = toLinear(rgb.g);
+    const b = toLinear(rgb.b);
+    return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+}
+
+function isDarkColor(rgb) {
+    return relativeLuminance(rgb) < 0.42;
+}
+
 // 2. Load stored theme configuration (Immediate from local storage, then fetch remote from Firestore)
 export function loadAndApplyStyles() {
     const stored = localStorage.getItem('smartshare_custom_style');
@@ -227,9 +242,24 @@ function applyStylesToRoot() {
     // Glass base color (supports backwards-compatible comma-separated format OR computes from color picker hex keys!)
     const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
     const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '27, 48, 34');
+    const lightCardRgb = hexToRgb(config.lightCardColor || '#ffffff') || { r: 255, g: 255, b: 255 };
+    const darkCardRgb = hexToRgb(config.darkCardColor || '#0c2d27') || { r: 12, g: 45, b: 39 };
+    const lightBgRgb = hexToRgb(lBg) || { r: 240, g: 253, b: 250 };
+    const darkBgRgb = hexToRgb(dBg) || { r: 4, g: 26, b: 22 };
+
+    const lightSurfaceIsDark = isDarkColor(lightCardRgb) || isDarkColor(lightBgRgb);
+    const darkSurfaceIsDark = isDarkColor(darkCardRgb) || isDarkColor(darkBgRgb);
 
     root.style.setProperty('--light-card-base', lightCardBase);
     root.style.setProperty('--dark-card-base', darkCardBase);
+
+    root.style.setProperty('--theme-text-primary-light', lightSurfaceIsDark ? '#f8fafc' : '#18181b');
+    root.style.setProperty('--theme-text-secondary-light', lightSurfaceIsDark ? '#d4d4d8' : '#3f3f46');
+    root.style.setProperty('--theme-text-muted-light', lightSurfaceIsDark ? '#a1a1aa' : '#52525b');
+
+    root.style.setProperty('--theme-text-primary-dark', darkSurfaceIsDark ? '#f8fafc' : '#18181b');
+    root.style.setProperty('--theme-text-secondary-dark', darkSurfaceIsDark ? '#d4d4d8' : '#3f3f46');
+    root.style.setProperty('--theme-text-muted-dark', darkSurfaceIsDark ? '#a1a1aa' : '#52525b');
 
     // Glass Panels
     root.style.setProperty('--panel-bg-light', `rgba(${lightCardBase}, ${config.panelOpacity / 100})`);

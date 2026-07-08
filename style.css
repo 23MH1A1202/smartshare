@@ -39,6 +39,14 @@
     /* Dynamic background support values */
     --app-bg-light: #F9F8F6;
     --app-bg-dark: #1B3022;
+
+    /* Adaptive readable text tokens */
+    --theme-text-primary-light: #18181b;
+    --theme-text-secondary-light: #3f3f46;
+    --theme-text-muted-light: #52525b;
+    --theme-text-primary-dark: #f8fafc;
+    --theme-text-secondary-dark: #d4d4d8;
+    --theme-text-muted-dark: #a1a1aa;
 }
 
 body {
@@ -48,6 +56,52 @@ body {
 
 html.dark body {
     background-color: var(--app-bg-dark, #1B3022);
+}
+
+/* --- READABILITY NORMALIZATION ACROSS THEMES --- */
+.text-zinc-900, .text-zinc-800, .text-zinc-700 {
+  color: var(--theme-text-primary-light) !important;
+}
+.text-zinc-600, .text-zinc-500 {
+  color: var(--theme-text-secondary-light) !important;
+}
+.text-zinc-400, .text-zinc-300 {
+  color: var(--theme-text-muted-light) !important;
+}
+
+html.dark .text-zinc-900, html.dark .text-zinc-800, html.dark .text-zinc-700 {
+  color: var(--theme-text-primary-dark) !important;
+}
+html.dark .text-zinc-600, html.dark .text-zinc-500 {
+  color: var(--theme-text-secondary-dark) !important;
+}
+html.dark .text-zinc-400, html.dark .text-zinc-300 {
+  color: var(--theme-text-muted-dark) !important;
+}
+
+html.dark .dark\:text-white,
+html.dark .dark\:text-zinc-100,
+html.dark .dark\:text-zinc-200 {
+  color: var(--theme-text-primary-dark) !important;
+}
+html.dark .dark\:text-zinc-300,
+html.dark .dark\:text-zinc-400 {
+  color: var(--theme-text-secondary-dark) !important;
+}
+html.dark .dark\:text-zinc-500 {
+  color: var(--theme-text-muted-dark) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--theme-text-muted-light) !important;
+  opacity: 0.85;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--theme-text-muted-dark) !important;
+  opacity: 0.9;
 }
 
 /* Dynamic ambient backgrounds mapping background and accent colors */
