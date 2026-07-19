@@ -9,7 +9,7 @@
     --panel-border-light: rgba(255, 255, 255, 0.7);
     
     /* Panel Settings - Dark Mode */
-    --panel-bg-dark: rgba(27, 48, 34, 0.45);
+    --panel-bg-dark: rgba(12, 45, 39, 0.45);
     --panel-blur-dark: 40px;
     --panel-border-dark: rgba(255, 255, 255, 0.08);
 
@@ -19,7 +19,7 @@
     --input-border-light: rgba(255, 255, 255, 0.6);
 
     /* Input Settings - Dark Mode */
-    --input-bg-dark: rgba(27, 48, 34, 0.5);
+    --input-bg-dark: rgba(12, 45, 39, 0.5);
     --input-blur-dark: 20px;
     --input-border-dark: rgba(255, 255, 255, 0.1);
 
@@ -28,39 +28,46 @@
     --drop-blur-light: 15px;
     
     /* Drop Zone Settings - Dark Mode */
-    --drop-bg-dark: rgba(27, 48, 34, 0.45);
+    --drop-bg-dark: rgba(12, 45, 39, 0.45);
     --drop-blur-dark: 15px;
 
     /* Theme Primary Accent Colors */
-    --theme-accent-color: #14b8a6;
+    --theme-accent-color: #0f766e;
     --theme-accent-color-hover: #0d9488;
-    --theme-accent-glow: rgba(20, 184, 166, 0.25);
+    --theme-accent-glow: rgba(15, 118, 110, 0.25);
+    --theme-accent-rgb: 15, 118, 110;
+    
+    /* Theme Secondary Accent Colors */
+    --theme-secondary-color: #2dd4bf;
+    --theme-secondary-color-hover: #14b8a6;
+    --theme-secondary-glow: rgba(45, 212, 191, 0.25);
+    --theme-secondary-rgb: 45, 212, 191;
     
     /* Dynamic background support values */
-    --app-bg-light: #F9F8F6;
-    --app-bg-dark: #1B3022;
+    --app-bg-light: #f0fdfa;
+    --app-bg-dark: #041a16;
 }
 
 body {
-    background-color: var(--app-bg-light, #F9F8F6);
+    background-color: var(--app-bg-light, #f0fdfa);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 html.dark body {
-    background-color: var(--app-bg-dark, #1B3022);
+    background-color: var(--app-bg-dark, #041a16);
 }
 
 /* Dynamic ambient backgrounds mapping background and accent colors */
 .fixed.inset-0.-z-10 {
-    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-light, rgba(20, 184, 166, 0.08)), transparent 55%),
-                radial-gradient(circle at 80% 0%, var(--theme-grad-2-light, #F9F8F6), transparent 45%),
-                radial-gradient(circle at 50% 80%, var(--theme-grad-3-light, #F9F8F6), transparent 50%) !important;
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-light, rgba(15, 118, 110, 0.08)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-light, #f0fdfa), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-light, #f0fdfa), transparent 50%) !important;
 }
 
 html.dark .fixed.inset-0.-z-10 {
-    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-dark, rgba(20, 184, 166, 0.15)), transparent 55%),
-                radial-gradient(circle at 80% 0%, var(--theme-grad-2-dark, #122117), transparent 45%),
-                radial-gradient(circle at 50% 80%, var(--theme-grad-3-dark, #1B3022), transparent 50%) !important;
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-dark, rgba(15, 118, 110, 0.15)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-dark, rgba(45, 212, 191, 0.1)), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-dark, #041a16), transparent 50%) !important;
 }
 
 main {
@@ -227,7 +234,7 @@ input, button, label {
 /* --- DROP ZONE STATES --- */
 #drop-zone.drop-active {
   border-color: var(--theme-accent-color) !important;
-  box-shadow: 0 0 0 4px rgba(var(--theme-accent-rgb, 20, 184, 166), 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
+  box-shadow: 0 0 0 4px rgba(var(--theme-accent-rgb, 15, 118, 110), 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
   transform: scale(1.01);
 }
 
@@ -236,7 +243,7 @@ input, button, label {
 }
 
 #drop-zone.drop-active .drop-zone-inner {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.08) !important;
 }
 
 /* Drop zone upload icon bounce */
@@ -259,7 +266,7 @@ input, button, label {
   color: #0f172a;
 }
 .nav-link.is-active {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
   color: var(--theme-accent-color) !important;
 }
 html.dark .nav-link {
@@ -270,7 +277,7 @@ html.dark .nav-link:hover {
   color: #fff;
 }
 html.dark .nav-link.is-active {
-  background: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.2) !important;
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.2) !important;
   color: var(--theme-accent-color) !important;
 }
 
@@ -404,8 +411,8 @@ html.dark .file-list-box::-webkit-scrollbar-thumb {
 .status-dot.dot-amber { color: rgb(245, 158, 11); animation: pulseDotAmber 1.8s ease-in-out infinite; }
 
 @keyframes pulseDotBlue {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--theme-accent-rgb, 20, 184, 166), 0.45); }
-  50%       { box-shadow: 0 0 0 5px rgba(var(--theme-accent-rgb, 20, 184, 166), 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--theme-accent-rgb, 15, 118, 110), 0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(var(--theme-accent-rgb, 15, 118, 110), 0); }
 }
 @keyframes pulseDotGreen {
   0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); }
@@ -582,10 +589,10 @@ html.dark .cloud-file-card:hover {
 
 /* 1. Global Background Overrides */
 body {
-  background-color: var(--app-bg-light, #F9F8F6) !important;
+  background-color: var(--app-bg-light, #f0fdfa) !important;
 }
 html.dark body {
-  background-color: var(--app-bg-dark, #1B3022) !important;
+  background-color: var(--app-bg-dark, #041a16) !important;
 }
 
 /* 2. Header / Navigation Bar Overrides */
@@ -594,7 +601,7 @@ header {
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 html.dark header {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.8) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.8) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -604,7 +611,7 @@ html.dark header {
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 html.dark #mobile-menu {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.98) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.98) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -614,7 +621,7 @@ footer {
   border-color: rgba(0, 0, 0, 0.06) !important;
 }
 html.dark footer {
-  background-color: rgba(var(--dark-card-base, 27, 48, 34), 0.4) !important;
+  background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.4) !important;
   border-color: rgba(255, 255, 255, 0.06) !important;
 }
 .footer-link:hover, html.dark .footer-link:hover {
@@ -743,13 +750,13 @@ details.group[open] summary * {
   border-color: var(--theme-accent-color) !important;
 }
 .border-teal-500\/20, .dark\:border-teal-500\/40, .border-teal-200\/50, .dark\:border-teal-500\/30 {
-  border-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.25) !important;
+  border-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.25) !important;
 }
 .bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
-  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
 }
 .dark\:from-teal-500\/15 {
-  --tw-gradient-from: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.15) !important;
+  --tw-gradient-from: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.15) !important;
 }
 .shadow-teal-500\/20, .shadow-teal-500\/30, .shadow-teal-500\/10 {
   box-shadow: 0 4px 14px var(--theme-accent-glow) !important;
@@ -769,24 +776,24 @@ input:focus, select:focus, textarea:focus, [contenteditable="true"]:focus {
   box-shadow: 0 0 0 3px var(--theme-accent-glow) !important;
 }
 
-/* 12. Dynamic Theme Toggle Card Adaptations */
-#theme-toggle {
+/* 12. Dynamic Theme Toggle & Mobile Menu Adaptations */
+#theme-toggle, #mobile-menu-btn {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 0.9) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
   color: var(--theme-secondary-color) !important;
   transition: all 0.2s ease !important;
 }
-#theme-toggle:hover {
+#theme-toggle:hover, #mobile-menu-btn:hover {
   background-color: rgba(var(--light-card-base, 255, 255, 255), 1) !important;
   color: var(--theme-secondary-color-hover) !important;
   box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
 }
-html.dark #theme-toggle {
+html.dark #theme-toggle, html.dark #mobile-menu-btn {
   background-color: rgba(var(--dark-card-base, 12, 45, 39), 0.9) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: var(--theme-secondary-color) !important;
 }
-html.dark #theme-toggle:hover {
+html.dark #theme-toggle:hover, html.dark #mobile-menu-btn:hover {
   background-color: rgba(var(--dark-card-base, 12, 45, 39), 1) !important;
   color: var(--theme-secondary-color-hover) !important;
   box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
@@ -857,11 +864,11 @@ html.dark .cloud-file-card:hover {
 
 /* 18. Inline Dynamic Teal Class Adaptations */
 .bg-teal-50, .dark\:bg-teal-900\/20 {
-  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.08) !important;
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.08) !important;
 }
 .hover\:bg-teal-100:hover, .dark\:hover\:bg-teal-900\/40:hover {
-  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.18) !important;
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.18) !important;
 }
 .bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
-  background-color: rgba(var(--theme-accent-rgb, 20, 184, 166), 0.12) !important;
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
 }
