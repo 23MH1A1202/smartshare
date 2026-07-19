@@ -53,7 +53,7 @@
                     },
                     colors: {
                         zinc: {
-                            50: '#F9F8F6',
+                            50: '#f0fdfa',
                             100: '#FFFFFF',
                             200: '#E6E2DE',
                             300: '#DCD7D1',
@@ -62,8 +62,8 @@
                             600: '#6B6661',
                             700: '#2C2C2C',
                             800: '#2C2C2C',
-                            900: '#1B3022',
-                            950: '#1B3022',
+                            900: '#041a16',
+                            950: '#041a16',
                         },
                         teal: {
                             50: '#FDFBF4',
@@ -91,6 +91,96 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js" integrity="sha384-3HPB1XT51W3gGRxAmZ+qbZwRpRlFQL632y8x+adAqCr4Wp3TaWwCLSTAJJKbyWEK" crossorigin="anonymous"></script>
     
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Apply theme immediately to prevent FOUC
+        if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Apply custom style immediately to prevent FOUC
+        const storedStyle = localStorage.getItem('smartshare_custom_style');
+        if (storedStyle) {
+            try {
+                const config = JSON.parse(storedStyle);
+                const root = document.documentElement;
+                
+                function hexToRgb(hex) {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+                }
+                function hexToRgbComma(hex) {
+                    const rgb = hexToRgb(hex);
+                    return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '0, 0, 0';
+                }
+                function adjustColorBrightness(hex, percent) {
+                    const rgb = hexToRgb(hex);
+                    if (!rgb) return hex;
+                    const r = Math.min(255, Math.max(0, rgb.r + percent));
+                    const g = Math.min(255, Math.max(0, rgb.g + percent));
+                    const b = Math.min(255, Math.max(0, rgb.b + percent));
+                    const toHex = (n) => { const hex = n.toString(16); return hex.length === 1 ? "0" + hex : hex; };
+                    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+                }
+
+                if (config.accentColor) {
+                    const accent = config.accentColor;
+                    const hoverColor = adjustColorBrightness(accent, -25);
+                    const rgbAccent = hexToRgb(accent) || { r: 13, g: 148, b: 136 };
+                    root.style.setProperty('--theme-accent-color', accent);
+                    root.style.setProperty('--theme-accent-color-hover', hoverColor);
+                    root.style.setProperty('--theme-accent-rgb', `${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}`);
+                    root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
+                    
+                    const lBg = config.lightBgColor || '#f0fdfa';
+                    const dBg = config.darkBgColor || '#041a16';
+                    root.style.setProperty('--app-bg-light', lBg);
+                    root.style.setProperty('--app-bg-dark', dBg);
+                    
+                    root.style.setProperty('--theme-grad-1-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.06)`);
+                    root.style.setProperty('--theme-grad-3-light', lBg);
+                    root.style.setProperty('--theme-grad-1-dark', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.1)`);
+                    root.style.setProperty('--theme-grad-3-dark', dBg);
+                }
+
+                if (config.secondaryColor) {
+                    const secondary = config.secondaryColor;
+                    const secondaryHover = adjustColorBrightness(secondary, -25);
+                    const rgbSecondary = hexToRgb(secondary) || { r: 45, g: 212, b: 191 };
+                    root.style.setProperty('--theme-secondary-color', secondary);
+                    root.style.setProperty('--theme-secondary-color-hover', secondaryHover);
+                    root.style.setProperty('--theme-secondary-rgb', `${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}`);
+                    root.style.setProperty('--theme-secondary-glow', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.25)`);
+                    
+                    root.style.setProperty('--theme-grad-2-light', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.06)`);
+                    root.style.setProperty('--theme-grad-2-dark', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.1)`);
+                }
+
+                const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
+                const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '12, 45, 39');
+                root.style.setProperty('--light-card-base', lightCardBase);
+                root.style.setProperty('--dark-card-base', darkCardBase);
+                root.style.setProperty('--panel-bg-light', `rgba(${lightCardBase}, ${(config.panelOpacity || 70) / 100})`);
+                root.style.setProperty('--panel-blur-light', `${config.panelBlur || 40}px`);
+                root.style.setProperty('--panel-bg-dark', `rgba(${darkCardBase}, ${(config.panelOpacity || 70) / 100})`);
+                root.style.setProperty('--panel-blur-dark', `${config.panelBlur || 40}px`);
+                
+                root.style.setProperty('--input-bg-light', `rgba(${lightCardBase}, ${(config.inputOpacity || 75) / 100})`);
+                root.style.setProperty('--input-blur-light', `${config.inputBlur || 20}px`);
+                root.style.setProperty('--input-bg-dark', `rgba(${darkCardBase}, ${(config.inputOpacity || 75) / 100})`);
+                root.style.setProperty('--input-blur-dark', `${config.inputBlur || 20}px`);
+
+                root.style.setProperty('--drop-bg-light', `rgba(${lightCardBase}, ${(config.dropOpacity || 65) / 100})`);
+                root.style.setProperty('--drop-blur-light', `${config.dropBlur || 15}px`);
+                root.style.setProperty('--drop-bg-dark', `rgba(${darkCardBase}, ${(config.dropOpacity || 65) / 100})`);
+                root.style.setProperty('--drop-blur-dark', `${config.dropBlur || 15}px`);
+
+            } catch (e) {
+                console.error("FOUC prevention failed:", e);
+            }
+        }
+    </script>
 </head>
 <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans overflow-x-hidden overflow-y-scroll transition-colors duration-300">
     <!-- Global Drag Overlay -->
@@ -848,9 +938,9 @@
                                     <span>✨</span> Custom Brand Primary Accent
                                 </h3>
                                 <div class="flex items-center gap-3">
-                                    <input type="color" id="custom-color-picker" value="#14b8a6" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                    <input type="color" id="custom-color-picker" value="#0f766e" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
                                     <div class="flex-grow">
-                                        <input type="text" id="custom-color-text" value="#14b8a6" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
+                                        <input type="text" id="custom-color-text" value="#0f766e" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
                                     </div>
                                 </div>
                             </div>
@@ -861,9 +951,9 @@
                                     <span>🌟</span> Custom Brand Secondary Accent
                                 </h3>
                                 <div class="flex items-center gap-3">
-                                    <input type="color" id="custom-secondary-picker" value="#f97316" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                    <input type="color" id="custom-secondary-picker" value="#2dd4bf" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
                                     <div class="flex-grow">
-                                        <input type="text" id="custom-secondary-text" value="#f97316" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
+                                        <input type="text" id="custom-secondary-text" value="#2dd4bf" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
                                     </div>
                                 </div>
                             </div>
@@ -878,16 +968,16 @@
                                     <div class="space-y-1.5">
                                         <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Light Mode Background</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="color" id="custom-light-bg-picker" value="#F9F8F6" class="w-10 h-10 rounded-xl border border-zinc-200 bg-transparent cursor-pointer p-0.5 shrink-0">
-                                            <input type="text" id="custom-light-bg-text" value="#F9F8F6" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                            <input type="color" id="custom-light-bg-picker" value="#f0fdfa" class="w-10 h-10 rounded-xl border border-zinc-200 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-light-bg-text" value="#f0fdfa" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
                                         </div>
                                     </div>
                                     <!-- Dark BG -->
                                     <div class="space-y-1.5">
                                         <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dark Mode Background</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="color" id="custom-dark-bg-picker" value="#1B3022" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
-                                            <input type="text" id="custom-dark-bg-text" value="#1B3022" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                            <input type="color" id="custom-dark-bg-picker" value="#041a16" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-dark-bg-text" value="#041a16" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
                                         </div>
                                     </div>
                                 </div>
@@ -911,8 +1001,8 @@
                                     <div class="space-y-1.5">
                                         <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dark Mode Card Base</label>
                                         <div class="flex items-center gap-2">
-                                            <input type="color" id="custom-dark-card-picker" value="#1B3022" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
-                                            <input type="text" id="custom-dark-card-text" value="#1B3022" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                            <input type="color" id="custom-dark-card-picker" value="#041a16" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-dark-card-text" value="#041a16" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
                                         </div>
                                     </div>
                                 </div>
