@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBXBbEt_OEwOuHtiM3ERDcLwUZpXyNVtzM",
@@ -15,4 +15,4 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Export the database instance and the Firestore functions so other files can use them
-export { db, doc, setDoc, getDoc, updateDoc, deleteDoc };
+export { db, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot };

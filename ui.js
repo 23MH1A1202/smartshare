@@ -52,6 +52,11 @@ export const UI = {
     mobileMenu: document.getElementById('mobile-menu'),
     refreshCloudLinks: document.getElementById('refresh-cloud-links'),
     myDeviceName: document.getElementById('my-device-name'),
+    onlineClipId: document.getElementById('online-clip-id'),
+    onlineClipExpire: document.getElementById('online-clip-expire'),
+    createOnlineClipBtn: document.getElementById('create-online-clip-btn'),
+    openOnlineClipId: document.getElementById('open-online-clip-id'),
+    openOnlineClipBtn: document.getElementById('open-online-clip-btn'),
     trustedDevicesContainer: document.getElementById('trusted-devices-container'),
     trustedDevicesList: document.getElementById('trusted-devices-list'),
     saveDevicePrompt: document.getElementById('save-device-prompt'),
@@ -77,7 +82,8 @@ export const UI = {
     confirmInstallBtn: document.getElementById('confirm-install-btn'),
     dontShowInstallCheck: document.getElementById('dont-show-install-check'),
     navInstallBtns: document.querySelectorAll('.nav-install-btn'),
-    clipboardSyncBtn: document.getElementById('clipboard-sync-btn')
+    clipboardSyncBtn: document.getElementById('clipboard-sync-btn'),
+    onlineClipsList: document.getElementById('online-clips-list')
 };
 
 // 2. Export Theme Initializer

@@ -425,6 +425,45 @@
                                 <div id="trusted-devices-list" class="flex flex-col gap-2"></div>
                             </div>
 
+                            <div class="w-full max-w-md border border-cyan-200/70 dark:border-cyan-800/60 rounded-2xl p-4.5 mb-6 bg-gradient-to-br from-cyan-50/80 to-white/70 dark:from-cyan-900/20 dark:to-zinc-900/40 backdrop-blur-xl shadow-sm">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div>
+                                        <p class="text-[11px] font-semibold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider">Internet Online Clipboard</p>
+                                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">Cloud-based clip with live sync and expiry.</p>
+                                    </div>
+                                    <span class="text-[10px] px-2 py-1 rounded-full font-bold bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">BETA</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Custom Clip ID</label>
+                                        <input type="text" id="online-clip-id" placeholder="optional" class="w-full bg-white/80 dark:bg-zinc-800/50 border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 outline-none placeholder:text-zinc-400 font-mono uppercase">
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Available For</label>
+                                        <select id="online-clip-expire" class="w-full bg-white/80 dark:bg-zinc-800/50 border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none font-medium">
+                                            <option value="single-use">Single Use</option>
+                                            <option value="1h" selected>1 Hour</option>
+                                            <option value="4h">4 Hours</option>
+                                            <option value="1d">1 Day</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button id="create-online-clip-btn" class="btn-ripple w-full py-2.5 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-md shadow-cyan-500/20 active:scale-[0.97]">Create Online Clip</button>
+
+                                <div class="relative flex items-center py-2 my-1">
+                                    <div class="flex-grow border-t border-cyan-200/70 dark:border-cyan-800/50"></div>
+                                    <span class="flex-shrink-0 mx-3 text-zinc-400 dark:text-zinc-500 text-[10px] font-bold tracking-[0.18em] uppercase">or open existing</span>
+                                    <div class="flex-grow border-t border-cyan-200/70 dark:border-cyan-800/50"></div>
+                                </div>
+
+                                <div class="flex gap-2 h-11">
+                                    <input type="text" id="open-online-clip-id" placeholder="ENTER ONLINE CLIP ID" class="custom-input-glass w-full bg-white/80 dark:bg-zinc-900/30 backdrop-blur-xl border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-4 text-center tracking-[0.1em] font-mono text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 uppercase shadow-inner">
+                                    <button id="open-online-clip-btn" class="btn-ripple px-4 bg-gradient-to-br from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-xl font-semibold shadow-sm active:scale-[0.97]">Open</button>
+                                </div>
+                            </div>
+
                             <button id="start-clipboard-btn" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                 Create Sync Code
@@ -580,14 +619,23 @@
             <div class="max-w-3xl mx-auto">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Links</h2>
-                        <p class="text-zinc-600 dark:text-zinc-300 mt-2">Track your active Link shares, extend time, or remove them anytime.</p>
+                        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Shares</h2>
+                        <p class="text-zinc-600 dark:text-zinc-300 mt-2">Track your Link shares and Online Clipboards, then edit, extend, or remove them anytime.</p>
                     </div>
                     <button id="refresh-cloud-links" class="btn-ripple w-fit self-start sm:self-auto rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">     Refresh </button>
                 </div>
-                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
-                    <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[420px]">
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)] space-y-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-3">Link Shares</h3>
+                        <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[280px]">
+                            <p class="text-center text-sm text-zinc-500 py-10">Loading your files...</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-3">Online Clipboards</h3>
+                        <div id="online-clips-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[280px]">
                         <p class="text-center text-sm text-zinc-500 py-10">Loading your files...</p>
+                        </div>
                     </div>
                 </div>
             </div>
