@@ -50,9 +50,11 @@ let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: nul
 let reconnectTimer = null; 
 let activeOnlineClipId = null;
 let activeOnlineClipOwnerId = null;
+let activeOnlineClipSource = 'online_clips';
 let onlineClipSnapshotUnsub = null;
 let onlineClipWriteTimer = null;
 let lastOnlineClipContent = '';
+const ONLINE_CLIP_KIND = 'online-clipboard';
 
 let lastSpeedBytes = 0;
 let lastSpeedTime = Date.now();
