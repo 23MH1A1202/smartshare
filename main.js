@@ -678,6 +678,15 @@ UI.navLinks.forEach(link => {
         });
     }
 
+    function escapeHtml(text) {
+        return (text || '').toString()
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function setSharedTextpadContent(content) {
         const cleanHTML = sanitizeClipboardHtml(content);
         if (UI.sharedTextpad.tagName === 'TEXTAREA') {
@@ -967,16 +976,18 @@ UI.navLinks.forEach(link => {
         clips.forEach((clip) => {
             const card = document.createElement('div');
             card.className = "bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl p-3.5 rounded-2xl border border-white/60 dark:border-zinc-700/50 flex flex-col shadow-sm transition-all hover:bg-white/60 dark:hover:bg-zinc-800/40 hover:shadow-md";
+            const safeClipId = escapeHtml(clip.id);
+            const safeExpiryType = escapeHtml(clip.expiryType || '1h');
             const preview = (() => {
                 const temp = document.createElement('div');
                 temp.innerHTML = clip.content || '';
-                return temp.textContent?.trim() || 'Empty clipboard';
+                return escapeHtml(temp.textContent?.trim() || 'Empty clipboard');
             })();
             card.innerHTML = `
                 <div class="flex flex-col gap-1.5 mb-3">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="font-semibold text-zinc-800 dark:text-white text-sm truncate">Clip ID: ${clip.id}</span>
-                        <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">${clip.expiryType || '1h'}</span>
+                        <span class="font-semibold text-zinc-800 dark:text-white text-sm truncate">Clip ID: ${safeClipId}</span>
+                        <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">${safeExpiryType}</span>
                     </div>
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">${preview}</p>
                     <div class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Expires in <span id="online-timer-${clip.id}">${formatTimeLeft(clip.expiresAt - Date.now())}</span></div>
