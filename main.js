@@ -1,4 +1,4 @@
-import { db, doc, setDoc, getDoc, updateDoc, deleteDoc } from './firebase.js';
+import { db, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot } from './firebase.js';
 import { UI, initializeTheme, showToast, setStatusDot, setResetButton } from './ui.js';
 import { loadAndApplyStyles, initAdminStyleControls } from './customizer.js';
 
@@ -42,11 +42,17 @@ window.onerror = function(message) {
 
 let transferMode = 'p2p'; 
 let cloudTimerInterval = null;
+let onlineClipTimerInterval = null;
 let isCancelled = false; 
 let isTransferComplete = false;
 let p2pSessionInterval = null; // Add this
 let p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 let reconnectTimer = null; 
+let activeOnlineClipId = null;
+let activeOnlineClipOwnerId = null;
+let onlineClipSnapshotUnsub = null;
+let onlineClipWriteTimer = null;
+let lastOnlineClipContent = '';
 
 let lastSpeedBytes = 0;
 let lastSpeedTime = Date.now();
@@ -250,8 +256,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (UI.mobileMenu) UI.mobileMenu.classList.add('hidden');
         if (screenId === 'manage') {
             loadCloudManager();
+            loadOnlineClipboardManager();
         } else {
             clearInterval(cloudTimerInterval);
+            clearInterval(onlineClipTimerInterval);
         }
         if (updateHistory) {
             const currentScreen = window.history.state?.screen;
@@ -510,7 +518,10 @@ UI.navLinks.forEach(link => {
 }
 
     if (UI.refreshCloudLinks) {
-        UI.refreshCloudLinks.addEventListener('click', loadCloudManager);
+        UI.refreshCloudLinks.addEventListener('click', () => {
+            loadCloudManager();
+            loadOnlineClipboardManager();
+        });
     }
 
     // Check for confidential admin route via query parameter (?admin) or hash (#admin)
@@ -585,6 +596,9 @@ UI.navLinks.forEach(link => {
             UI.clipboardInitInner.classList.remove('flex');
         }
         UI.cloudSettings.classList.add('hidden');
+        if (mode !== 'clipboard') {
+            closeOnlineClipboardSession();
+        }
 
         if (mode === 'p2p') {
             UI.modeP2P.classList.add('text-teal-600', 'dark:text-teal-300');
@@ -637,6 +651,202 @@ UI.navLinks.forEach(link => {
         let myLinks = JSON.parse(localStorage.getItem('smartshare_my_links') || '[]');
         myLinks = myLinks.filter(id => id !== fileId);
         localStorage.setItem('smartshare_my_links', JSON.stringify(myLinks));
+    }
+
+    function saveOnlineClipToLocalLedger(clipId) {
+        let myClips = JSON.parse(localStorage.getItem('smartshare_my_online_clips') || '[]');
+        if (!myClips.includes(clipId)) {
+            myClips.push(clipId);
+            localStorage.setItem('smartshare_my_online_clips', JSON.stringify(myClips));
+        }
+    }
+
+    function removeOnlineClipFromLocalLedger(clipId) {
+        let myClips = JSON.parse(localStorage.getItem('smartshare_my_online_clips') || '[]');
+        myClips = myClips.filter(id => id !== clipId);
+        localStorage.setItem('smartshare_my_online_clips', JSON.stringify(myClips));
+    }
+
+    function normalizeCode(value) {
+        return (value || '').trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
+    }
+
+    function sanitizeClipboardHtml(content) {
+        return DOMPurify.sanitize(content || '', {
+            ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+            ADD_ATTR: ['target']
+        });
+    }
+
+    function setSharedTextpadContent(content) {
+        const cleanHTML = sanitizeClipboardHtml(content);
+        if (UI.sharedTextpad.tagName === 'TEXTAREA') {
+            UI.sharedTextpad.value = cleanHTML;
+        } else {
+            UI.sharedTextpad.innerHTML = cleanHTML;
+        }
+    }
+
+    function getOnlineClipboardLifetime() {
+        switch (UI.onlineClipExpire?.value) {
+            case 'single-use': return { type: 'single-use', ms: 24 * 60 * 60 * 1000, isSingleUse: true };
+            case '4h': return { type: '4h', ms: 4 * 60 * 60 * 1000, isSingleUse: false };
+            case '1d': return { type: '1d', ms: 24 * 60 * 60 * 1000, isSingleUse: false };
+            default: return { type: '1h', ms: 60 * 60 * 1000, isSingleUse: false };
+        }
+    }
+
+    function closeOnlineClipboardSession() {
+        if (onlineClipSnapshotUnsub) {
+            onlineClipSnapshotUnsub();
+            onlineClipSnapshotUnsub = null;
+        }
+        if (onlineClipWriteTimer) {
+            clearTimeout(onlineClipWriteTimer);
+            onlineClipWriteTimer = null;
+        }
+        activeOnlineClipId = null;
+        activeOnlineClipOwnerId = null;
+        lastOnlineClipContent = '';
+    }
+
+    function showClipboardEditorState() {
+        UI.transfer.classList.add('hidden');
+        UI.transfer.classList.remove('flex');
+        UI.initial.classList.add('hidden');
+        UI.clipboardActiveState.classList.remove('hidden');
+        UI.clipboardActiveState.classList.add('flex', 'transfer-enter');
+        UI.saveDevicePrompt.classList.add('hidden');
+        UI.saveDevicePrompt.classList.remove('flex');
+        setStatusDot('green');
+    }
+
+    async function createOnlineClipboard() {
+        const preferredId = normalizeCode(UI.onlineClipId?.value);
+        const clipId = preferredId || generateShortCode();
+        const lifetime = getOnlineClipboardLifetime();
+        const clipRef = doc(db, "online_clips", clipId);
+
+        try {
+            const existing = await getDoc(clipRef);
+            if (existing.exists()) {
+                showToast("That online clip ID is already taken.", "error");
+                return;
+            }
+
+            await setDoc(clipRef, {
+                ownerId: myOwnerId,
+                ownerName: myClipName,
+                content: "",
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                expiresAt: Date.now() + lifetime.ms,
+                expiryType: lifetime.type,
+                isSingleUse: lifetime.isSingleUse,
+                accessCount: 0
+            });
+
+            saveOnlineClipToLocalLedger(clipId);
+            if (UI.openOnlineClipId) UI.openOnlineClipId.value = clipId;
+            const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+            navigator.clipboard.writeText(`${cleanUrl}?oc=${clipId}`);
+            showToast("Online clipboard created. Link copied!", "success");
+            await openOnlineClipboard(clipId, true);
+        } catch (err) {
+            showToast("Could not create online clipboard.", "error");
+        }
+    }
+
+    async function openOnlineClipboard(rawId, isOwnerFlow = false) {
+        const clipId = normalizeCode(rawId);
+        if (!clipId) {
+            showToast("Enter a valid online clip ID.", "error");
+            return;
+        }
+
+        try {
+            const clipRef = doc(db, "online_clips", clipId);
+            const clipSnap = await getDoc(clipRef);
+            if (!clipSnap.exists()) {
+                showToast("Online clipboard not found.", "error");
+                return;
+            }
+
+            const data = clipSnap.data();
+            if (Date.now() > data.expiresAt) {
+                await deleteDoc(clipRef);
+                removeOnlineClipFromLocalLedger(clipId);
+                showToast("This online clipboard has expired.", "error");
+                return;
+            }
+
+            const isOwner = data.ownerId === myOwnerId;
+            if (data.isSingleUse && !isOwner && data.accessCount >= 1) {
+                showToast("This single-use clipboard is already used.", "error");
+                return;
+            }
+
+            if (data.isSingleUse && !isOwner) {
+                await updateDoc(clipRef, { accessCount: (data.accessCount || 0) + 1, updatedAt: Date.now() });
+            }
+
+            closeOnlineClipboardSession();
+            activeOnlineClipId = clipId;
+            activeOnlineClipOwnerId = data.ownerId;
+            lastOnlineClipContent = data.content || '';
+            setSharedTextpadContent(lastOnlineClipContent);
+            showClipboardEditorState();
+
+            onlineClipSnapshotUnsub = onSnapshot(clipRef, async (snap) => {
+                if (!snap.exists()) {
+                    closeOnlineClipboardSession();
+                    showToast("Online clipboard closed.", "info");
+                    resetApp();
+                    return;
+                }
+                const latest = snap.data();
+                if (Date.now() > latest.expiresAt) {
+                    if (latest.ownerId === myOwnerId) {
+                        await deleteDoc(clipRef);
+                        removeOnlineClipFromLocalLedger(clipId);
+                    }
+                    closeOnlineClipboardSession();
+                    showToast("Online clipboard expired.", "info");
+                    resetApp();
+                    return;
+                }
+
+                const incoming = latest.content || '';
+                if (incoming !== lastOnlineClipContent) {
+                    lastOnlineClipContent = incoming;
+                    setSharedTextpadContent(incoming);
+                }
+            });
+
+            if (!isOwnerFlow) showToast("Online clipboard opened.", "success");
+        } catch (err) {
+            showToast("Could not open online clipboard.", "error");
+        }
+    }
+
+    function queueOnlineClipboardSync() {
+        if (!activeOnlineClipId) return;
+        if (onlineClipWriteTimer) clearTimeout(onlineClipWriteTimer);
+        onlineClipWriteTimer = setTimeout(async () => {
+            const currentData = UI.sharedTextpad.tagName === 'TEXTAREA' ? UI.sharedTextpad.value : UI.sharedTextpad.innerHTML;
+            const cleanData = sanitizeClipboardHtml(currentData);
+            if (cleanData === lastOnlineClipContent) return;
+
+            lastOnlineClipContent = cleanData;
+            try {
+                await updateDoc(doc(db, "online_clips", activeOnlineClipId), {
+                    content: cleanData,
+                    updatedAt: Date.now()
+                });
+            } catch (err) {
+                showToast("Online clipboard sync failed.", "error");
+            }
+        }, 180);
     }
 
     async function purgeCloudFile(fileId, storagePath) {
@@ -697,6 +907,163 @@ UI.navLinks.forEach(link => {
                 }
             });
         }, 1000);
+    }
+
+    async function loadOnlineClipboardManager() {
+        if (!UI.onlineClipsList) return;
+        UI.onlineClipsList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">Fetching online clipboards...</p>`;
+        clearInterval(onlineClipTimerInterval);
+
+        let myClips = JSON.parse(localStorage.getItem('smartshare_my_online_clips') || '[]');
+        if (myClips.length === 0) {
+            UI.onlineClipsList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">You have no active online clipboards.</p>`;
+            return;
+        }
+
+        const activeClips = [];
+        for (let i = 0; i < myClips.length; i++) {
+            const clipId = myClips[i];
+            try {
+                const clipSnap = await getDoc(doc(db, "online_clips", clipId));
+                if (!clipSnap.exists()) {
+                    removeOnlineClipFromLocalLedger(clipId);
+                    continue;
+                }
+                const clipData = clipSnap.data();
+                if (Date.now() > clipData.expiresAt) {
+                    await deleteDoc(doc(db, "online_clips", clipId));
+                    removeOnlineClipFromLocalLedger(clipId);
+                    continue;
+                }
+                clipData.id = clipId;
+                activeClips.push(clipData);
+            } catch (err) {}
+        }
+
+        if (activeClips.length === 0) {
+            UI.onlineClipsList.innerHTML = `<p class="text-center text-sm text-zinc-500 py-10">You have no active online clipboards.</p>`;
+            return;
+        }
+
+        renderOnlineClipboardManagerUI(activeClips);
+        onlineClipTimerInterval = setInterval(() => {
+            activeClips.forEach((clip) => {
+                const timerEl = document.getElementById(`online-timer-${clip.id}`);
+                if (!timerEl) return;
+                const timeLeft = clip.expiresAt - Date.now();
+                if (timeLeft <= 0) {
+                    timerEl.innerText = "Expired";
+                    timerEl.classList.add("text-red-500");
+                    loadOnlineClipboardManager();
+                } else {
+                    timerEl.innerText = formatTimeLeft(timeLeft);
+                }
+            });
+        }, 1000);
+    }
+
+    function renderOnlineClipboardManagerUI(clips) {
+        UI.onlineClipsList.innerHTML = '';
+        clips.forEach((clip) => {
+            const card = document.createElement('div');
+            card.className = "bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl p-3.5 rounded-2xl border border-white/60 dark:border-zinc-700/50 flex flex-col shadow-sm transition-all hover:bg-white/60 dark:hover:bg-zinc-800/40 hover:shadow-md";
+            const preview = (() => {
+                const temp = document.createElement('div');
+                temp.innerHTML = clip.content || '';
+                return temp.textContent?.trim() || 'Empty clipboard';
+            })();
+            card.innerHTML = `
+                <div class="flex flex-col gap-1.5 mb-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-semibold text-zinc-800 dark:text-white text-sm truncate">Clip ID: ${clip.id}</span>
+                        <span class="text-[10px] font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 rounded">${clip.expiryType || '1h'}</span>
+                    </div>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">${preview}</p>
+                    <div class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Expires in <span id="online-timer-${clip.id}">${formatTimeLeft(clip.expiresAt - Date.now())}</span></div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 border-t border-zinc-200 dark:border-zinc-700/50 pt-3">
+                    <button class="copy-online-clip-btn text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 py-2 rounded-xl transition-all" data-id="${clip.id}">Copy</button>
+                    <button class="open-online-clip-btn text-[11px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/40 py-2 rounded-xl transition-all" data-id="${clip.id}">Open</button>
+                    <button class="edit-online-clip-btn text-[11px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 py-2 rounded-xl transition-all" data-id="${clip.id}">Edit</button>
+                    <button class="delete-online-clip-btn text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 py-2 rounded-xl transition-all" data-id="${clip.id}">Delete</button>
+                </div>
+                <button class="extend-online-clip-btn mt-2 text-[11px] font-semibold text-zinc-600 dark:text-zinc-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors" data-id="${clip.id}">Extend (+1h / +4h / +1d)</button>
+            `;
+            UI.onlineClipsList.appendChild(card);
+        });
+
+        document.querySelectorAll('.copy-online-clip-btn').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+                navigator.clipboard.writeText(`${cleanUrl}?oc=${id}`);
+                showToast("Online clip link copied!", "success");
+            });
+        });
+
+        document.querySelectorAll('.open-online-clip-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                setActiveScreen('create');
+                switchMode('clipboard');
+                await openOnlineClipboard(id, true);
+            });
+        });
+
+        document.querySelectorAll('.edit-online-clip-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                const nextText = window.prompt('Edit online clipboard text:', '');
+                if (nextText === null) return;
+                try {
+                    await updateDoc(doc(db, "online_clips", id), {
+                        content: sanitizeClipboardHtml(nextText),
+                        updatedAt: Date.now()
+                    });
+                    showToast("Online clipboard updated.", "success");
+                    loadOnlineClipboardManager();
+                } catch (err) {
+                    showToast("Could not edit online clipboard.", "error");
+                }
+            });
+        });
+
+        document.querySelectorAll('.extend-online-clip-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                const extension = (window.prompt('Extend by: 1h, 4h, or 1d', '1h') || '').trim().toLowerCase();
+                const extendMs = extension === '4h' ? 4 * 60 * 60 * 1000 : extension === '1d' ? 24 * 60 * 60 * 1000 : extension === '1h' ? 60 * 60 * 1000 : 0;
+                if (!extendMs) return showToast("Use 1h, 4h, or 1d.", "error");
+                try {
+                    const clipRef = doc(db, "online_clips", id);
+                    const snap = await getDoc(clipRef);
+                    if (!snap.exists()) return showToast("Clipboard not found.", "error");
+                    await updateDoc(clipRef, {
+                        expiresAt: (snap.data().expiresAt || Date.now()) + extendMs,
+                        updatedAt: Date.now()
+                    });
+                    showToast("Online clipboard extended.", "success");
+                    loadOnlineClipboardManager();
+                } catch (err) {
+                    showToast("Could not extend online clipboard.", "error");
+                }
+            });
+        });
+
+        document.querySelectorAll('.delete-online-clip-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                try {
+                    await deleteDoc(doc(db, "online_clips", id));
+                    removeOnlineClipFromLocalLedger(id);
+                    if (activeOnlineClipId === id) closeOnlineClipboardSession();
+                    showToast("Online clipboard deleted.", "info");
+                    loadOnlineClipboardManager();
+                } catch (err) {
+                    showToast("Could not delete online clipboard.", "error");
+                }
+            });
+        });
     }
 
     function formatTimeLeft(ms) {
@@ -923,6 +1290,7 @@ UI.navLinks.forEach(link => {
 
     function resetApp() {
         isCancelled = true;
+        closeOnlineClipboardSession();
         clearTimeout(connectionTimeout);
         clearTimeout(reconnectTimer);
         clearInterval(p2pSessionInterval); // ADD THIS
@@ -962,11 +1330,13 @@ UI.navLinks.forEach(link => {
         UI.cloudCustomCode.value = '';
 
         if(UI.clipboardReceiveCode) UI.clipboardReceiveCode.value = '';
+        if(UI.onlineClipId) UI.onlineClipId.value = '';
+        if(UI.openOnlineClipId) UI.openOnlineClipId.value = '';
         if(UI.clipboardActiveState) {
             UI.clipboardActiveState.classList.add('hidden');
             UI.clipboardActiveState.classList.remove('flex');
         }
-        if(UI.sharedTextpad) UI.sharedTextpad.value = '';
+        if(UI.sharedTextpad) UI.sharedTextpad.innerHTML = '';
 
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
@@ -1572,6 +1942,15 @@ UI.navLinks.forEach(link => {
         }
     }
 
+    if (window.location.search.includes('?oc=')) {
+        const onlineClipId = new URLSearchParams(window.location.search).get('oc');
+        if (onlineClipId) {
+            window.history.replaceState(null, null, window.location.pathname);
+            switchMode('clipboard');
+            openOnlineClipboard(onlineClipId);
+        }
+    }
+
     UI.receiveBtn.addEventListener('click', () => {
         const targetId = UI.receiveCodeInput.value.trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase();
         if (!targetId) {
@@ -1674,6 +2053,16 @@ UI.navLinks.forEach(link => {
                 return;
             }
         } catch(e) { }
+
+        try {
+            const clipRef = doc(db, "online_clips", targetId);
+            const clipSnap = await getDoc(clipRef);
+            if (clipSnap.exists()) {
+                switchMode('clipboard');
+                await openOnlineClipboard(targetId);
+                return;
+            }
+        } catch (e) {}
 
         startP2PReceive(targetId);
     }
@@ -2129,7 +2518,25 @@ UI.navLinks.forEach(link => {
         startP2PClipboardReceive(targetId);
     });
 
+    if (UI.createOnlineClipBtn) {
+        UI.createOnlineClipBtn.addEventListener('click', createOnlineClipboard);
+    }
+
+    if (UI.openOnlineClipBtn) {
+        UI.openOnlineClipBtn.addEventListener('click', () => openOnlineClipboard(UI.openOnlineClipId?.value));
+    }
+
+    if (UI.openOnlineClipId) {
+        UI.openOnlineClipId.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                openOnlineClipboard(UI.openOnlineClipId.value);
+            }
+        });
+    }
+
     function startP2PClipboard() {
+        closeOnlineClipboardSession();
         isCancelled = false;
         showTransferScreen("Clipboard Sync", "Waiting for the other device to connect...");
         const roomCode = generateShortCode();
@@ -2177,6 +2584,7 @@ UI.navLinks.forEach(link => {
     }
 
     function startP2PClipboardReceive(targetId, isTrusted = false) {
+        closeOnlineClipboardSession();
         isCancelled = false;
         showTransferScreen("Clipboard Sync", `Connecting to ${isTrusted ? 'Trusted Device' : targetId}...`);
        // --- NEW: 8-Second Timeout ---
@@ -2317,18 +2725,7 @@ UI.navLinks.forEach(link => {
 
             if (payload.type === 'clipboard-sync') {
                 const incomingData = payload.html !== undefined ? payload.html : payload.text;
-
-                // CRITICAL FIX: Sanitize the incoming payload before rendering
-                const cleanHTML = DOMPurify.sanitize(incomingData, {
-                    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-                    ADD_ATTR: ['target'] // Allows links to open in a new tab safely
-                });
-
-                if (UI.sharedTextpad.tagName === 'TEXTAREA') {
-                    UI.sharedTextpad.value = cleanHTML;
-                } else {
-                    UI.sharedTextpad.innerHTML = cleanHTML;
-                }
+                setSharedTextpadContent(incomingData);
             } else if (payload.type === 'transfer-cancelled') {
                 clearInterval(clipboardHeartbeat);
                 showToast("The other device disconnected.", "info");
@@ -2354,6 +2751,7 @@ UI.navLinks.forEach(link => {
             // Send both formats to prevent version clashing
             currentConnection.send({ type: 'clipboard-sync', html: currentData, text: currentData });
         }
+        queueOnlineClipboardSync();
     }
 
     // 1. Sync on typing

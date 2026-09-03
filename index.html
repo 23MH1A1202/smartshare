@@ -425,6 +425,29 @@
                                 <div id="trusted-devices-list" class="flex flex-col gap-2"></div>
                             </div>
 
+                            <div class="w-full max-w-sm border border-zinc-200/70 dark:border-zinc-700/60 rounded-2xl p-4 mb-6 bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl">
+                                <p class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Internet Online Clipboard</p>
+                                <div class="flex flex-col gap-3">
+                                    <input type="text" id="online-clip-id" placeholder="Custom Clip ID (optional)" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none placeholder:text-zinc-400 font-mono uppercase">
+                                    <select id="online-clip-expire" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none appearance-none font-medium">
+                                        <option value="single-use">Single Use</option>
+                                        <option value="1h" selected>1 Hour</option>
+                                        <option value="4h">4 Hours</option>
+                                        <option value="1d">1 Day</option>
+                                    </select>
+                                    <button id="create-online-clip-btn" class="btn-ripple w-full py-2.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-xl font-semibold transition-all shadow-sm active:scale-[0.97]">Create Online Clip</button>
+                                    <div class="relative flex items-center py-1">
+                                        <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
+                                        <span class="flex-shrink-0 mx-3 text-zinc-400 dark:text-zinc-500 text-[10px] font-bold tracking-[0.18em] uppercase">Open</span>
+                                        <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
+                                    </div>
+                                    <div class="flex gap-2 h-11">
+                                        <input type="text" id="open-online-clip-id" placeholder="ENTER ONLINE CLIP ID" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 text-center tracking-[0.1em] font-mono text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 uppercase shadow-inner">
+                                        <button id="open-online-clip-btn" class="btn-ripple px-4 bg-gradient-to-br from-cyan-600 to-cyan-500 text-white rounded-xl font-medium shadow-sm active:scale-[0.97]">Open</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <button id="start-clipboard-btn" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                                 Create Sync Code
@@ -580,14 +603,23 @@
             <div class="max-w-3xl mx-auto">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Links</h2>
-                        <p class="text-zinc-600 dark:text-zinc-300 mt-2">Track your active Link shares, extend time, or remove them anytime.</p>
+                        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Shares</h2>
+                        <p class="text-zinc-600 dark:text-zinc-300 mt-2">Track your Link shares and Online Clipboards, then edit, extend, or remove them anytime.</p>
                     </div>
                     <button id="refresh-cloud-links" class="btn-ripple w-fit self-start sm:self-auto rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">     Refresh </button>
                 </div>
-                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
-                    <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[420px]">
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)] space-y-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-3">Link Shares</h3>
+                        <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[280px]">
+                            <p class="text-center text-sm text-zinc-500 py-10">Loading your files...</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-3">Online Clipboards</h3>
+                        <div id="online-clips-list" class="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[280px]">
                         <p class="text-center text-sm text-zinc-500 py-10">Loading your files...</p>
+                        </div>
                     </div>
                 </div>
             </div>
