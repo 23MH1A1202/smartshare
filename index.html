@@ -425,26 +425,42 @@
                                 <div id="trusted-devices-list" class="flex flex-col gap-2"></div>
                             </div>
 
-                            <div class="w-full max-w-sm border border-zinc-200/70 dark:border-zinc-700/60 rounded-2xl p-4 mb-6 bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl">
-                                <p class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-3">Internet Online Clipboard</p>
-                                <div class="flex flex-col gap-3">
-                                    <input type="text" id="online-clip-id" placeholder="Custom Clip ID (optional)" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none placeholder:text-zinc-400 font-mono uppercase">
-                                    <select id="online-clip-expire" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none appearance-none font-medium">
-                                        <option value="single-use">Single Use</option>
-                                        <option value="1h" selected>1 Hour</option>
-                                        <option value="4h">4 Hours</option>
-                                        <option value="1d">1 Day</option>
-                                    </select>
-                                    <button id="create-online-clip-btn" class="btn-ripple w-full py-2.5 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-xl font-semibold transition-all shadow-sm active:scale-[0.97]">Create Online Clip</button>
-                                    <div class="relative flex items-center py-1">
-                                        <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
-                                        <span class="flex-shrink-0 mx-3 text-zinc-400 dark:text-zinc-500 text-[10px] font-bold tracking-[0.18em] uppercase">Open</span>
-                                        <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
+                            <div class="w-full max-w-md border border-cyan-200/70 dark:border-cyan-800/60 rounded-2xl p-4.5 mb-6 bg-gradient-to-br from-cyan-50/80 to-white/70 dark:from-cyan-900/20 dark:to-zinc-900/40 backdrop-blur-xl shadow-sm">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div>
+                                        <p class="text-[11px] font-semibold text-cyan-700 dark:text-cyan-300 uppercase tracking-wider">Internet Online Clipboard</p>
+                                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">Cloud-based clip with live sync and expiry.</p>
                                     </div>
-                                    <div class="flex gap-2 h-11">
-                                        <input type="text" id="open-online-clip-id" placeholder="ENTER ONLINE CLIP ID" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 text-center tracking-[0.1em] font-mono text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 uppercase shadow-inner">
-                                        <button id="open-online-clip-btn" class="btn-ripple px-4 bg-gradient-to-br from-cyan-600 to-cyan-500 text-white rounded-xl font-medium shadow-sm active:scale-[0.97]">Open</button>
+                                    <span class="text-[10px] px-2 py-1 rounded-full font-bold bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">BETA</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Custom Clip ID</label>
+                                        <input type="text" id="online-clip-id" placeholder="optional" class="w-full bg-white/80 dark:bg-zinc-800/50 border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 outline-none placeholder:text-zinc-400 font-mono uppercase">
                                     </div>
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-1">Available For</label>
+                                        <select id="online-clip-expire" class="w-full bg-white/80 dark:bg-zinc-800/50 border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-cyan-500 outline-none appearance-none font-medium">
+                                            <option value="single-use">Single Use</option>
+                                            <option value="1h" selected>1 Hour</option>
+                                            <option value="4h">4 Hours</option>
+                                            <option value="1d">1 Day</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button id="create-online-clip-btn" class="btn-ripple w-full py-2.5 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-md shadow-cyan-500/20 active:scale-[0.97]">Create Online Clip</button>
+
+                                <div class="relative flex items-center py-2 my-1">
+                                    <div class="flex-grow border-t border-cyan-200/70 dark:border-cyan-800/50"></div>
+                                    <span class="flex-shrink-0 mx-3 text-zinc-400 dark:text-zinc-500 text-[10px] font-bold tracking-[0.18em] uppercase">or open existing</span>
+                                    <div class="flex-grow border-t border-cyan-200/70 dark:border-cyan-800/50"></div>
+                                </div>
+
+                                <div class="flex gap-2 h-11">
+                                    <input type="text" id="open-online-clip-id" placeholder="ENTER ONLINE CLIP ID" class="custom-input-glass w-full bg-white/80 dark:bg-zinc-900/30 backdrop-blur-xl border border-cyan-200/70 dark:border-cyan-800/50 rounded-xl px-4 text-center tracking-[0.1em] font-mono text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 uppercase shadow-inner">
+                                    <button id="open-online-clip-btn" class="btn-ripple px-4 bg-gradient-to-br from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white rounded-xl font-semibold shadow-sm active:scale-[0.97]">Open</button>
                                 </div>
                             </div>
 

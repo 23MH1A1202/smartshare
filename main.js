@@ -735,6 +735,11 @@ UI.navLinks.forEach(link => {
         const clipId = preferredId || generateShortCode();
         const lifetime = getOnlineClipboardLifetime();
         const clipRef = doc(db, "online_clips", clipId);
+        const createBtn = UI.createOnlineClipBtn;
+        if (createBtn) {
+            createBtn.disabled = true;
+            createBtn.innerText = "Creating...";
+        }
 
         try {
             const existing = await getDoc(clipRef);
@@ -758,11 +763,24 @@ UI.navLinks.forEach(link => {
             saveOnlineClipToLocalLedger(clipId);
             if (UI.openOnlineClipId) UI.openOnlineClipId.value = clipId;
             const cleanUrl = window.location.href.split('?')[0].split('#')[0];
-            navigator.clipboard.writeText(`${cleanUrl}?oc=${clipId}`);
-            showToast("Online clipboard created. Link copied!", "success");
+            const clipUrl = `${cleanUrl}?oc=${clipId}`;
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(clipUrl);
+                    copied = true;
+                } catch (copyErr) {}
+            }
+            showToast(copied ? "Online clipboard created. Link copied!" : "Online clipboard created successfully.", "success");
             await openOnlineClipboard(clipId, true);
         } catch (err) {
+            console.error("Online clipboard create failed:", err);
             showToast("Could not create online clipboard.", "error");
+        } finally {
+            if (createBtn) {
+                createBtn.disabled = false;
+                createBtn.innerText = "Create Online Clip";
+            }
         }
     }
 
@@ -2534,14 +2552,24 @@ UI.navLinks.forEach(link => {
     }
 
     if (UI.openOnlineClipBtn) {
-        UI.openOnlineClipBtn.addEventListener('click', () => openOnlineClipboard(UI.openOnlineClipId?.value));
+        UI.openOnlineClipBtn.addEventListener('click', async () => {
+            UI.openOnlineClipBtn.disabled = true;
+            const oldText = UI.openOnlineClipBtn.innerText;
+            UI.openOnlineClipBtn.innerText = "Opening...";
+            try {
+                await openOnlineClipboard(UI.openOnlineClipId?.value);
+            } finally {
+                UI.openOnlineClipBtn.disabled = false;
+                UI.openOnlineClipBtn.innerText = oldText || "Open";
+            }
+        });
     }
 
     if (UI.openOnlineClipId) {
         UI.openOnlineClipId.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                openOnlineClipboard(UI.openOnlineClipId.value);
+                UI.openOnlineClipBtn?.click();
             }
         });
     }
