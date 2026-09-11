@@ -65,6 +65,10 @@ export const UI = {
     extendMinsInput: document.getElementById('extend-mins-input'),
     cancelExtendBtn: document.getElementById('cancel-extend-btn'),
     confirmExtendBtn: document.getElementById('confirm-extend-btn'),
+    renameDeviceModal: document.getElementById('rename-device-modal'),
+    renameDeviceInput: document.getElementById('rename-device-input'),
+    cancelRenameBtn: document.getElementById('cancel-rename-btn'),
+    confirmRenameBtn: document.getElementById('confirm-rename-btn'),
     scanQrBtn: document.getElementById('scan-qr-btn'),
     qrScannerContainer: document.getElementById('qr-scanner-container'),
     qrVideo: document.getElementById('qr-video'),
@@ -72,10 +76,6 @@ export const UI = {
     transferIconContainer: document.getElementById('transfer-icon-container'),
     transferEta: document.getElementById('transfer-eta'),
     nativeShareBtn: document.getElementById('native-share-btn'),
-    installModal: document.getElementById('install-modal'),
-    cancelInstallBtn: document.getElementById('cancel-install-btn'),
-    confirmInstallBtn: document.getElementById('confirm-install-btn'),
-    dontShowInstallCheck: document.getElementById('dont-show-install-check'),
     navInstallBtns: document.querySelectorAll('.nav-install-btn'),
     clipboardSyncBtn: document.getElementById('clipboard-sync-btn')
 };

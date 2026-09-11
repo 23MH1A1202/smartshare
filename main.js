@@ -120,13 +120,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.classList.add('flex');
             });
         }
-
-        // Auto-show the educational modal (if they haven't opted out)
-        const hideInstall = localStorage.getItem('smartshare_hide_install');
-        if (hideInstall !== 'true') {
-            // Add a 2-second delay so it doesn't interrupt the initial page load instantly
-            setTimeout(showInstallModal, 2000); 
-        }
     });
 
     // 2. Hide buttons if the app gets installed successfully
@@ -141,67 +134,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast("SmartShare installed successfully!", "success");
     });
 
-    // 3. Modal Functions
-    function showInstallModal() {
-        if (!UI.installModal) return;
-        UI.installModal.classList.remove('hidden');
-        UI.installModal.classList.add('flex');
-
-        requestAnimationFrame(() => {
-            UI.installModal.classList.remove('opacity-0');
-            UI.installModal.querySelector('div').classList.remove('scale-[0.98]');
-        });
-    }
-
-    function hideInstallModal() {
-        if (!UI.installModal) return;
-
-        // Save user preference if they checked the box
-        if (UI.dontShowInstallCheck && UI.dontShowInstallCheck.checked) {
-            localStorage.setItem('smartshare_hide_install', 'true');
-        }
-
-        UI.installModal.classList.add('opacity-0');
-        UI.installModal.querySelector('div').classList.add('scale-[0.98]');
-
-        setTimeout(() => {
-            UI.installModal.classList.add('hidden');
-            UI.installModal.classList.remove('flex');
-        }, 200);
-    }
-
-    // 4. Attach Event Listeners
-    if (UI.cancelInstallBtn) {
-        UI.cancelInstallBtn.addEventListener('click', hideInstallModal);
-    }
-
-    if (UI.confirmInstallBtn) {
-        UI.confirmInstallBtn.addEventListener('click', async () => {
-            hideInstallModal(); // Close our custom modal
-
-            if (deferredPrompt) {
-                deferredPrompt.prompt(); // Show the native OS install prompt
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    localStorage.setItem('smartshare_hide_install', 'true'); // Hide forever if installed
-                }
-                deferredPrompt = null;
-            } else {
-                showToast("Your browser doesn't support direct installation or the app is already installed.", "info");
-            }
-        });
-    }
-
-    // 5. Connect the Nav Buttons to the Modal
+    // 5. Connect the Nav Buttons to prompt install
     if (UI.navInstallBtns) {
         UI.navInstallBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 // Close the mobile menu if it's open before showing the modal
                 if (UI.mobileMenu && !UI.mobileMenu.classList.contains('hidden')) {
                     document.getElementById('mobile-menu-btn').click(); 
                 }
-                showInstallModal();
+                
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                } else {
+                    showToast("Your browser doesn't support direct installation or the app is already installed.", "info");
+                }
             });
         });
     }
@@ -368,7 +317,9 @@ UI.myDeviceName.value = myClipName;
                 </button>
                 <div class="flex items-center gap-1 shrink-0 pr-1">
                     <button class="connect-trusted-btn hidden sm:flex items-center justify-center text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-2 py-1.5 rounded-md hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors uppercase tracking-wider" data-id="${device.id}">Connect</button>
-                    
+                    <button class="edit-trusted-btn text-zinc-400 hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20 p-2 rounded-lg transition-colors" data-index="${index}" aria-label="Rename device">
+                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>                    
                     <button class="delete-trusted-btn text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors" data-index="${index}" aria-label="Remove device">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
@@ -379,14 +330,72 @@ UI.myDeviceName.value = myClipName;
         });
 
         // Add event listeners separately so taps don't bleed into each other
+        document.querySelectorAll('.edit-trusted-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = e.currentTarget.getAttribute('data-index');
+                const device = trustedDevices[idx];
+                UI.renameDeviceInput.value = device.name;
+                UI.renameDeviceModal.classList.remove('hidden');
+                UI.renameDeviceModal.classList.add('flex');
+                
+                requestAnimationFrame(() => {
+                    UI.renameDeviceModal.classList.remove('opacity-0');
+                    UI.renameDeviceModal.querySelector('div').classList.remove('scale-95');
+                });
+                
+                UI.cancelRenameBtn.onclick = () => {
+                    UI.renameDeviceModal.classList.add('opacity-0');
+                    UI.renameDeviceModal.querySelector('div').classList.add('scale-95');
+                    setTimeout(() => {
+                        UI.renameDeviceModal.classList.add('hidden');
+                        UI.renameDeviceModal.classList.remove('flex');
+                    }, 200);
+                };
+                
+                UI.confirmRenameBtn.onclick = () => {
+                    const newName = UI.renameDeviceInput.value.trim();
+                    if (newName && newName !== device.name) {
+                        trustedDevices[idx].name = newName;
+                        localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                        renderTrustedDevices();
+                        showToast("Device renamed", "success");
+                        // We do not need to push the name change proactively unless connected,
+                        // as they auto-sync on next connect. But if currently connected, push it:
+                        if (currentConnection && currentConnection.open && currentConnection.peer === device.id) {
+                            currentConnection.send({ type: 'device-info', id: myClipId, name: myClipName });
+                        }
+                    }
+                    UI.renameDeviceModal.classList.add('opacity-0');
+                    UI.renameDeviceModal.querySelector('div').classList.add('scale-95');
+                    setTimeout(() => {
+                        UI.renameDeviceModal.classList.add('hidden');
+                        UI.renameDeviceModal.classList.remove('flex');
+                    }, 200);
+                };
+            });
+        });
+
         document.querySelectorAll('.delete-trusted-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const idx = e.currentTarget.getAttribute('data-index');
+                const targetId = trustedDevices[idx].id;
                 trustedDevices.splice(idx, 1);
                 localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
                 renderTrustedDevices();
                 showToast("Device removed", "info");
+                
+                // Tell the other device to delete us
+                if (currentConnection && currentConnection.open && currentConnection.peer === targetId) {
+                    currentConnection.send({ type: 'trusted-action', action: 'delete', targetId: myClipId });
+                } else if (backgroundPeer && !backgroundPeer.destroyed) {
+                    const tempConn = backgroundPeer.connect(targetId, { reliable: true, metadata: { backgroundPing: true } });
+                    tempConn.on('open', () => {
+                        tempConn.send({ type: 'trusted-action', action: 'delete', targetId: myClipId });
+                        setTimeout(() => tempConn.close(), 500);
+                    });
+                }
             });
         });
 
@@ -620,6 +629,20 @@ UI.navLinks.forEach(link => {
         });
 
         backgroundPeer.on('connection', (conn) => {
+            if (conn.metadata && conn.metadata.backgroundPing) {
+                conn.on('data', (payload) => {
+                    if (payload.type === 'trusted-action' && payload.action === 'delete') {
+                        const existingIndex = trustedDevices.findIndex(d => d.id === payload.targetId);
+                        if (existingIndex !== -1) {
+                            trustedDevices.splice(existingIndex, 1);
+                            localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                            renderTrustedDevices();
+                            showToast("A device removed itself from your trusted list.", "info");
+                        }
+                    }
+                });
+                return; // Do not call setupClipboardConnection
+            }
             setupClipboardConnection(conn); // Auto-accept incoming trusted connections
         });
     }
@@ -2305,12 +2328,43 @@ UI.navLinks.forEach(link => {
                         UI.saveDevicePrompt.classList.add('hidden');
                         UI.saveDevicePrompt.classList.remove('flex');
                         showToast("Device saved to Trusted List!", "success");
+                        if (currentConnection && currentConnection.open) {
+                            currentConnection.send({ type: 'trusted-action', action: 'save', id: myClipId, name: myClipName });
+                        }
                     };
 
                     UI.btnSaveDeviceNo.onclick = () => {
                         UI.saveDevicePrompt.classList.add('hidden');
                         UI.saveDevicePrompt.classList.remove('flex');
+                        if (currentConnection && currentConnection.open) {
+                            currentConnection.send({ type: 'trusted-action', action: 'skip' });
+                        }
                     };
+                }
+                return;
+            }
+
+            if (payload.type === 'trusted-action') {
+                if (payload.action === 'save') {
+                    const existingIndex = trustedDevices.findIndex(d => d.id === payload.id);
+                    if (existingIndex === -1) {
+                        trustedDevices.push({ id: payload.id, name: payload.name });
+                        localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                        renderTrustedDevices();
+                    }
+                    UI.saveDevicePrompt.classList.add('hidden');
+                    UI.saveDevicePrompt.classList.remove('flex');
+                } else if (payload.action === 'skip') {
+                    UI.saveDevicePrompt.classList.add('hidden');
+                    UI.saveDevicePrompt.classList.remove('flex');
+                } else if (payload.action === 'delete') {
+                    const existingIndex = trustedDevices.findIndex(d => d.id === payload.targetId);
+                    if (existingIndex !== -1) {
+                        trustedDevices.splice(existingIndex, 1);
+                        localStorage.setItem('smartshare_trusted_devices', JSON.stringify(trustedDevices));
+                        renderTrustedDevices();
+                        showToast("A device removed itself from your trusted list.", "info");
+                    }
                 }
                 return;
             }
@@ -2586,8 +2640,8 @@ UI.navLinks.forEach(link => {
             if (typeof jsQR !== 'undefined' && UI.qrVideo.readyState === UI.qrVideo.HAVE_ENOUGH_DATA) {
 
                 // BUG FIX: Downscale the HD video feed so jsQR doesn't choke on millions of pixels
-                const scanWidth = Math.min(UI.qrVideo.videoWidth, 600); // Cap width at 600px
-                const scanHeight = Math.min(UI.qrVideo.videoHeight, 600 * (UI.qrVideo.videoHeight / UI.qrVideo.videoWidth));
+                const scanWidth = Math.floor(Math.min(UI.qrVideo.videoWidth, 600)); // Cap width at 600px
+                const scanHeight = Math.floor(Math.min(UI.qrVideo.videoHeight, 600 * (UI.qrVideo.videoHeight / UI.qrVideo.videoWidth)));
 
                 if (scanWidth > 0 && scanHeight > 0) {
                     qrCanvas.width = scanWidth;

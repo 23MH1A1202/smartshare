@@ -2,8 +2,8 @@
 import { db, doc, getDoc, setDoc } from './firebase.js';
 
 const DEFAULTS = {
-    accentColor: '#0d9488',
-    secondaryColor: '#2dd4bf',
+    accentColor: '#8b5cf6',
+    secondaryColor: '#06b6d4',
     panelOpacity: 70, // 70%
     panelBlur: 40,    // 40px
     inputOpacity: 75, // 75%
@@ -11,11 +11,11 @@ const DEFAULTS = {
     dropOpacity: 65,  // 65%
     dropBlur: 15,     // 15px
     lightCardBase: '255, 255, 255', // White base
-    darkCardBase: '12, 45, 39',      // Deep jade base
-    lightBgColor: '#f0fdfa',
-    darkBgColor: '#041a16',
+    darkCardBase: '24, 24, 27',      
+    lightBgColor: '#fafaf9',
+    darkBgColor: '#09090b',
     lightCardColor: '#FFFFFF',
-    darkCardColor: '#0c2d27'
+    darkCardColor: '#18181b'
 };
 
 let config = { ...DEFAULTS };
@@ -191,7 +191,7 @@ function applyStylesToRoot() {
     const root = document.documentElement;
     const accent = config.accentColor;
     const hoverColor = adjustColorBrightness(accent, -25);
-    const rgbAccent = hexToRgb(accent) || { r: 13, g: 148, b: 136 };
+    const rgbAccent = hexToRgb(accent) || { r: 139, g: 92, b: 246 };
 
     // Accent Properties
     root.style.setProperty('--theme-accent-color', accent);
@@ -200,9 +200,9 @@ function applyStylesToRoot() {
     root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
 
     // Secondary Accent Properties
-    const secondary = config.secondaryColor || '#2dd4bf';
+    const secondary = config.secondaryColor || '#06b6d4';
     const secondaryHover = adjustColorBrightness(secondary, -25);
-    const rgbSecondary = hexToRgb(secondary) || { r: 45, g: 212, b: 191 };
+    const rgbSecondary = hexToRgb(secondary) || { r: 6, g: 182, b: 212 };
     root.style.setProperty('--theme-secondary-color', secondary);
     root.style.setProperty('--theme-secondary-color-hover', secondaryHover);
     root.style.setProperty('--theme-secondary-rgb', `${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}`);
@@ -226,7 +226,7 @@ function applyStylesToRoot() {
 
     // Glass base color (supports backwards-compatible comma-separated format OR computes from color picker hex keys!)
     const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
-    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '27, 48, 34');
+    const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '24, 24, 27');
 
     root.style.setProperty('--light-card-base', lightCardBase);
     root.style.setProperty('--dark-card-base', darkCardBase);
@@ -528,8 +528,8 @@ export function initAdminStyleControls() {
                         b.classList.remove('border-teal-500', 'bg-teal-500/10', 'scale-[1.02]');
                     });
                     
-                    // Select default teal
-                    selectPreset('teal');
+                    // Select default cyber
+                    selectPreset('cyber');
 
                     // Publish default back to Firestore
                     const docRef = doc(db, 'settings', 'style');
