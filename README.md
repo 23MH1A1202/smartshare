@@ -1,12 +1,11 @@
 # SmartShare
 
-**SmartShare** is a fast, account-free file sharing web app with three dedicated sharing modes:
+**SmartShare** is a blazing-fast, account-free file sharing web app providing three dedicated sharing modes to suit any workflow:
+- **Direct (Device-to-Device)**: Peer-to-peer file transfer using **WebRTC (PeerJS)** — files travel directly between devices, bypassing servers entirely.
+- **Link Share (Cloud Vault)**: Upload files to the cloud securely and share a short code or link with **custom expiry timers**, **download limits**, and link extension capabilities.
+- **Live Clipboard**: Instantly sync copied text, clickable links, and images between your devices in real-time.
 
-- **Direct (Device-to-Device)**: peer-to-peer transfer using **WebRTC (PeerJS)** — files don’t go to a server.
-- **Link Share (Cloud Vault)**: upload files to the cloud securely and share a short code/link with **expiry timers** and **download limits**.
-- **Live Clipboard**: instantly sync copied text, clickable links, and images between devices in real-time.
-
-Live here:
+**Live here:**
 - **Custom domain:** https://smartshare.alsagar.tech/
 - **GitHub Pages:** https://23mh1a1202.github.io/smartshare/
 
@@ -15,65 +14,63 @@ Live here:
 ## Features
 
 ### Direct Transfer (P2P)
-- Device-to-device sharing using **PeerJS + WebRTC**
-- Share via **code**, **QR**, or **link**
-- **Auto-resume / reconnect** behavior on unstable connections (best-effort)
+- Device-to-device sharing using **PeerJS + WebRTC**.
+- Share via **6-digit code**, **QR code**, or **direct URL link**.
+- **Auto-resume / reconnect** behavior on unstable connections (best-effort).
 
 ### Link Share (Cloud Vault)
-- Files uploaded securely to **Cloudinary** (ensuring 100% free-tier operation)
-- Link metadata and routing handled by **Firebase Firestore**
-- Share with:
-  - Expiration (10 minutes / 1 hour / 4 hours)
-  - Download limit (unlimited / one-time)
-  - Optional **custom code word**
-- Built-in **Active Links Manager** (manage/delete/extend links)
-- Smart file size limits (100MB for Video, 10MB for general files)
+- Files are uploaded securely to **Cloudinary** for fast and efficient delivery.
+- Link metadata and routing handled securely by **Firebase Firestore**.
+- **Advanced Sharing Controls:**
+  - Configurable expiration (10 minutes, 1 hour, or 4 hours).
+  - Download limit restrictions (unlimited or one-time).
+  - Optional **custom code word** (e.g., `apple`).
+- **Active Links Manager:** View and manage your active cloud links, manually delete them, or **dynamically extend link expiry times** on the fly.
+- Smart file size limits (100MB for Video, 10MB for general files).
 
-### Live Clipboard (Rich Text & Image Syncing)
-- Real-time WebRTC connection for instant text and image sharing
-- **Rich-Text Pad**: Supports drag-and-drop images, copy-pasting, and smart URL detection (auto-clickable links)
-- **Image Controls**: Inline "Save to Device" and "Remove" options for shared images
-- **One-Tap Copy**: Extract the synced clipboard directly to your system
-- **Trusted Devices Ecosystem:** Includes a local device-trust layer allowing users to remember and authenticate specific local hardware profiles, facilitating fast, zero-friction pairing for recurring cross-device workflows.
-- **Background Heartbeat**: Keeps the firewall connection alive indefinitely, preventing idle timeouts
-- Instant disconnection detection and reporting
+### Live Clipboard & Trusted Devices
+- Real-time WebRTC connection for instant rich-text and image sharing.
+- **Rich-Text Pad**: Supports drag-and-drop images, copy-pasting, and smart URL detection (auto-clickable links).
+- **Advanced Trusted Devices Ecosystem:**
+  - A local device-trust layer allowing you to remember specific hardware profiles for zero-friction, instant pairing.
+  - **Custom Device Naming**: Easily rename trusted devices. Names automatically sync across your connected devices.
+  - **Synchronized Deletions**: Removing a trusted device sends a silent background ping to the target device, ensuring your hardware profiles stay synchronized.
+- **Background Heartbeat**: Keeps the firewall connection alive indefinitely, preventing idle timeouts.
 
 ### Native OS Integration & UX
-- **Native Android Sharing (PWA):** Leverages the **Web Share Target API**. When installed as a Progressive Web App, SmartShare registers as a system-level share target. Users can share photos, videos, or documents directly from their native Android Gallery, Camera, or File Manager straight into the application.
-- **Quality-of-Life:** Drag & drop uploads, asynchronous multi-file bundling via **JSZip**, inline image controls ("Save to Device"), and a Light/Dark theme toggle.
+- **Native Android Sharing (PWA):** Leverages the **Web Share Target API**. When installed as a Progressive Web App, SmartShare registers as a system-level share target. Users can share photos, videos, or documents directly from their native OS Gallery or File Manager straight into the application.
+- **Streamlined PWA Installation**: Prompts native OS installation seamlessly from the navigation menu.
+- **Performance Optimized**: Carefully deferred script loading logic ensures instantaneous initial frame renders, even on older devices and low-bandwidth connections.
 
-### Quality-of-Life
-- Drag & drop uploads
-- Multi-file sending (zips using **JSZip**)
-- QR generation (QRCode.js)
-- Light/Dark theme toggle
-- Mobile-friendly UI
-- PWA manifest + service worker
+### Quality-of-Life & Customization
+- **Admin Style Customizer (Live Theme Editor):** A fully integrated, real-time theme customizer. Allows administrative tweaking of panel opacity, blur levels, base background colors (light & dark modes), and custom accent hues. Settings are persisted to Firestore to synchronize the experience globally.
+- **Drag & drop uploads** with seamless multi-file bundling (creates zips instantly via **JSZip**).
+- QR code generation via **QRCode.js**.
+- Light/Dark theme toggle.
 
 ---
 
 ## Tech Stack
-
 - **Frontend:** HTML, CSS, Vanilla JavaScript
-- **UI:** TailwindCSS (CDN)
+- **UI & Styling:** TailwindCSS (via CDN)
 - **P2P Engine:** PeerJS (WebRTC)
 - **Cloud Storage:** Cloudinary (Unsigned Uploads)
-- **Cloud Database:** Firebase Firestore (Metadata only)
-- **Utilities:** QRCode.js, JSZip
+- **Cloud Database:** Firebase Firestore (Metadata & Admin Styles)
+- **Utilities:** QRCode.js, JSZip, DOMPurify
 - **PWA:** `manifest.json`, service worker (`sw.js`)
 
 ---
 
 ## Project Structure
-
 ```text
 .
-├── index.html         # UI + layout
-├── main.js            # App logic (P2P, Cloud Vault, Live Clipboard)
-├── style.css          # Custom styles
-├── manifest.json      # PWA manifest
+├── index.html         # UI + layout structure
+├── main.js            # Core App logic (P2P, Cloud Vault, Live Clipboard)
+├── ui.js              # UI state and DOM element management
+├── customizer.js      # Admin style and live theme customizer logic
+├── firebase.js        # Firebase configuration and initialization
+├── style.css          # Custom animations and CSS overrides
+├── manifest.json      # PWA manifest (installation & Share Target config)
 ├── sw.js              # Service worker
-├── icon.svg
-├── icon-192.png
-├── icon-512.png
-└── CNAME              # Custom domain for GitHub Pages
+└── ...assets
+```
