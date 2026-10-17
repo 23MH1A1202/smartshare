@@ -102,6 +102,11 @@ let lastSpeedTime = Date.now();
             tx.objectStore(STORE_NAME).delete('currentFiles');
         } catch(e) {}
     }
+
+    function clearPersistedP2PSessionState() {
+        localStorage.removeItem('p2p_active_id');
+        clearFileCache();
+    }
 document.addEventListener('DOMContentLoaded', async () => {
     initializeTheme(); 
     initAdminStyleControls(); 
@@ -969,11 +974,10 @@ UI.navLinks.forEach(link => {
                 if (peer) peer.destroy();
             }
         } catch (e) { }
-        localStorage.removeItem('p2p_active_id'); // Clear the persisted ID
+        clearPersistedP2PSessionState();
         peer = null; currentConnection = null; fileToSend = null; isTransferring = false;
         isTransferComplete = false; // Reset the flag here
         selectedFiles = [];
-        clearFileCache();
         p2pTransferState = { buffer: [], bytesReceived: 0, meta: null, targetId: null, isReconnecting: false, reconnectAttempts: 0 };
 
         lastSpeedBytes = 0;
@@ -1390,6 +1394,7 @@ UI.navLinks.forEach(link => {
                 if (payload.type === 'transfer-complete') {
                     isTransferring = false;
                     isTransferComplete = true; 
+                    clearPersistedP2PSessionState();
                     // --- NEW: Hide the warning when done ---
                     if (UI.p2pWarningSender) {
                         UI.p2pWarningSender.classList.add('hidden');
