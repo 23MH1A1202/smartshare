@@ -6,7 +6,6 @@
 - **Live Clipboard**: Instantly sync copied text, clickable links, and images between your devices in real-time.
 
 **Live here:**
-- **Custom domain:** https://smartshare.alsagar.tech/
 - **GitHub Pages:** https://23mh1a1202.github.io/smartshare/
 
 ---
