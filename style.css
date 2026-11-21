@@ -1,0 +1,972 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+/* Keep header height available for scroll offsets */
+:root {
+    --header-height: 4rem;
+    
+    /* Panel Settings - Light Mode */
+    --panel-bg-light: rgba(255, 255, 255, 0.7);
+    --panel-blur-light: 40px;
+    --panel-border-light: rgba(255, 255, 255, 0.7);
+    
+    /* Panel Settings - Dark Mode */
+    --panel-bg-dark: rgba(24, 24, 27, 0.45);
+    --panel-blur-dark: 40px;
+    --panel-border-dark: rgba(255, 255, 255, 0.08);
+
+    /* Input Settings - Light Mode */
+    --input-bg-light: rgba(255, 255, 255, 0.75);
+    --input-blur-light: 20px;
+    --input-border-light: rgba(255, 255, 255, 0.6);
+
+    /* Input Settings - Dark Mode */
+    --input-bg-dark: rgba(24, 24, 27, 0.5);
+    --input-blur-dark: 20px;
+    --input-border-dark: rgba(255, 255, 255, 0.1);
+
+    /* Drop Zone Settings - Light Mode */
+    --drop-bg-light: rgba(255, 255, 255, 0.65);
+    --drop-blur-light: 15px;
+    
+    /* Drop Zone Settings - Dark Mode */
+    --drop-bg-dark: rgba(24, 24, 27, 0.45);
+    --drop-blur-dark: 15px;
+
+    /* Theme Primary Accent Colors */
+    --theme-accent-color: #8b5cf6;
+    --theme-accent-color-hover: #7c3aed;
+    --theme-accent-glow: rgba(139, 92, 246, 0.25);
+    --theme-accent-rgb: 139, 92, 246;
+    
+    /* Theme Secondary Accent Colors */
+    --theme-secondary-color: #06b6d4;
+    --theme-secondary-color-hover: #0891b2;
+    --theme-secondary-glow: rgba(6, 182, 212, 0.25);
+    --theme-secondary-rgb: 6, 182, 212;
+    
+    /* Dynamic background support values */
+    --app-bg-light: #fafaf9;
+    --app-bg-dark: #09090b;
+}
+
+body {
+    background-color: var(--app-bg-light, #fafaf9);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+    background-color: var(--app-bg-dark, #09090b);
+}
+
+/* Dynamic ambient backgrounds mapping background and accent colors */
+.fixed.inset-0.-z-10 {
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-light, rgba(139, 92, 246, 0.08)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-light, #fafaf9), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-light, #fafaf9), transparent 50%) !important;
+}
+
+html.dark .fixed.inset-0.-z-10 {
+    background: radial-gradient(circle at 20% 20%, var(--theme-grad-1-dark, rgba(139, 92, 246, 0.15)), transparent 55%),
+                radial-gradient(circle at 80% 0%, var(--theme-grad-2-dark, rgba(6, 182, 212, 0.1)), transparent 45%),
+                radial-gradient(circle at 50% 80%, var(--theme-grad-3-dark, #09090b), transparent 50%) !important;
+}
+
+main {
+    padding-top: 0 !important;
+}
+
+main.has-nav-gap {
+    padding-top: 1.5rem !important;
+}
+
+/* Remove or set to 0 the margin on your screen panels to prevent extra gaps */
+.screen-panel {
+    margin-top: 0px !important;
+}
+
+
+
+/* --- GLASS PANEL (Enhanced) --- */
+.glass-panel {
+  background: var(--panel-bg-light);
+  backdrop-filter: blur(var(--panel-blur-light)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--panel-blur-light)) saturate(180%);
+  border: 1px solid var(--panel-border-light);
+  border-radius: 2rem !important;
+  box-shadow: 
+    0 30px 60px -10px rgba(0, 0, 0, 0.05),
+    0 1px 0 rgba(255, 255, 255, 1) inset;
+}
+
+html.dark .glass-panel {
+  background: var(--panel-bg-dark);
+  backdrop-filter: blur(var(--panel-blur-dark)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--panel-blur-dark)) saturate(180%);
+  border: 1px solid var(--panel-border-dark);
+  box-shadow: 
+    0 30px 60px -10px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+/* --- CUSTOM GLASS CONTROLS FOR INPUTS & SELECT FILES BOX --- */
+.custom-input-glass, #scan-qr-btn {
+  background: var(--input-bg-light) !important;
+  backdrop-filter: blur(var(--input-input-blur-light, var(--input-blur-light))) !important;
+  -webkit-backdrop-filter: blur(var(--input-input-blur-light, var(--input-blur-light))) !important;
+  border-color: var(--input-border-light) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+html.dark .custom-input-glass, html.dark #scan-qr-btn {
+  background: var(--input-bg-dark) !important;
+  backdrop-filter: blur(var(--input-input-blur-dark, var(--input-blur-dark))) !important;
+  -webkit-backdrop-filter: blur(var(--input-input-blur-dark, var(--input-blur-dark))) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+.custom-drop-zone-glass {
+  background: var(--drop-bg-light) !important;
+  backdrop-filter: blur(var(--drop-blur-light)) !important;
+  -webkit-backdrop-filter: blur(var(--drop-blur-light)) !important;
+}
+
+html.dark .custom-drop-zone-glass {
+  background: var(--drop-bg-dark) !important;
+  backdrop-filter: blur(var(--drop-blur-dark)) !important;
+  -webkit-backdrop-filter: blur(var(--drop-blur-dark)) !important;
+}
+
+/* Accent Color overrides dynamically hooked up */
+.text-teal-600 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-400 {
+  color: var(--theme-accent-color) !important;
+}
+.bg-teal-500 {
+  background-color: var(--theme-accent-color) !important;
+}
+.hover\:bg-teal-600:hover {
+  background-color: var(--theme-accent-color-hover) !important;
+}
+.shadow-teal-500\/20 {
+  box-shadow: 0 10px 15px -3px var(--theme-accent-glow), 0 4px 6px -4px var(--theme-accent-glow) !important;
+}
+.border-teal-500 {
+  border-color: var(--theme-accent-color) !important;
+}
+.dark .border-teal-500\/40 {
+  border-color: var(--theme-accent-glow) !important;
+}
+.bg-teal-500\/10 {
+  background-color: var(--theme-accent-glow) !important;
+}
+.text-teal-500 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-300 {
+  color: var(--theme-accent-color) !important;
+}
+.dark .text-teal-400 {
+  color: var(--theme-accent-color) !important;
+}
+.bg-teal-100 {
+  background-color: var(--theme-accent-glow) !important;
+}
+.accent-teal-500 {
+  accent-color: var(--theme-accent-color) !important;
+}
+
+
+/* --- ANIMATED BACKGROUND BLOBS --- */
+.bg-blob {
+  animation: blobFloat 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.bg-blob-2 {
+  animation: blobFloat 15s ease-in-out infinite reverse;
+  animation-delay: -4s;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
+  33%       { transform: translate(30px, -20px) scale(1.08); opacity: 1; }
+  66%       { transform: translate(-20px, 15px) scale(0.94); opacity: 0.7; }
+}
+
+/* --- MODE TAB SLIDER --- */
+.mode-tabs {
+  position: relative;
+}
+
+.tab-slider {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px) / 3);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+  pointer-events: none;
+}
+
+html.dark .tab-slider {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255,255,255,0.1) inset;
+}
+
+.mode-tabs[data-active="cloud"] .tab-slider {
+  transform: translateX(100%);
+}
+
+/* Add this new rule for the 3rd tab */
+.mode-tabs[data-active="clipboard"] .tab-slider {
+  transform: translateX(200%);
+}
+
+/* --- INNER BORDER RADIUS --- */
+input, button, label {
+  border-radius: 20px !important;
+}
+
+/* --- DROP ZONE STATES --- */
+#drop-zone.drop-active {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 4px rgba(var(--theme-accent-rgb, 15, 118, 110), 0.14), 0 24px 64px -16px rgba(0,0,0,0.12);
+  transform: scale(1.01);
+}
+
+.drop-zone-inner {
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+#drop-zone.drop-active .drop-zone-inner {
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.08) !important;
+}
+
+/* Drop zone upload icon bounce */
+.upload-icon-wrap {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#drop-zone.drop-active .upload-icon-wrap {
+  transform: translateY(-6px) scale(1.1);
+}
+
+/* --- NAVIGATION --- */
+.nav-link {
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  color: rgba(51, 65, 85, 0.9);
+  transition: all 0.2s ease;
+}
+.nav-link:hover {
+  background: rgba(226, 232, 240, 0.7);
+  color: #0f172a;
+}
+.nav-link.is-active {
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
+  color: var(--theme-accent-color) !important;
+}
+html.dark .nav-link {
+  color: rgba(226, 232, 240, 0.85);
+}
+html.dark .nav-link:hover {
+  background: rgba(30, 41, 59, 0.9);
+  color: #fff;
+}
+html.dark .nav-link.is-active {
+  background: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.2) !important;
+  color: var(--theme-accent-color) !important;
+}
+
+#mobile-menu {
+  transition: opacity 0.2s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  transform-origin: top center;
+}
+
+/* --- FOOTER LINKS --- */
+.footer-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  color: rgba(51, 65, 85, 0.85);
+  transition: color 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.footer-link:hover {
+  color: #9C7E24;
+}
+html.dark .footer-link {
+  color: rgba(226, 232, 240, 0.85);
+}
+html.dark .footer-link:hover {
+  color: #F0E3B0;
+}
+
+/* --- SCREEN PANELS --- */
+.screen-panel {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  scroll-margin-top: var(--header-height);
+}
+.screen-panel.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* --- FILE LIST BOX --- */
+.file-list-box {
+  overflow: hidden;            /* keeps the scrollbar inside the rounded corners */
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.8);
+  padding: 12px 8px 12px 12px;
+}
+.file-list-box > #file-list {
+  max-height: 216px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+html.dark .file-list-box {
+  border-color: rgba(51, 65, 85, 0.8);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+/* --- RESET BUTTON --- */
+.reset-btn .reset-icon {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.reset-btn.compact .reset-label {
+  display: none;
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+#file-list::-webkit-scrollbar,
+#cloud-files-list::-webkit-scrollbar,
+.file-list-box::-webkit-scrollbar {
+  width: 4px;
+}
+#file-list::-webkit-scrollbar-track,
+#cloud-files-list::-webkit-scrollbar-track,
+.file-list-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+#file-list::-webkit-scrollbar-thumb,
+#cloud-files-list::-webkit-scrollbar-thumb,
+.file-list-box::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+}
+html.dark #file-list::-webkit-scrollbar-thumb,
+html.dark #cloud-files-list::-webkit-scrollbar-thumb,
+html.dark .file-list-box::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+/* --- FILE LIST ITEM ANIMATIONS --- */
+.file-item-enter {
+  animation: fileSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 60ms);
+}
+
+@keyframes fileSlideIn {
+  from { opacity: 0; transform: translateX(-12px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* --- PROGRESS BAR SHIMMER & GLOW --- */
+#progress-bar {
+  box-shadow: 0 0 12px var(--theme-accent-glow);
+  transition: width 0.2s ease-out;
+}
+
+#progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.6s infinite linear;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* --- PULSING STATUS DOT --- */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-dot.dot-cyan  { color: var(--theme-accent-color); animation: pulseDotBlue  1.8s ease-in-out infinite; }
+.status-dot.dot-green { color: rgb(16, 185, 129); animation: pulseDotGreen 1.8s ease-in-out infinite; }
+.status-dot.dot-amber { color: rgb(245, 158, 11); animation: pulseDotAmber 1.8s ease-in-out infinite; }
+
+@keyframes pulseDotBlue {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--theme-accent-rgb, 15, 118, 110), 0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(var(--theme-accent-rgb, 15, 118, 110), 0); }
+}
+@keyframes pulseDotGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+}
+@keyframes pulseDotAmber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.45); }
+  50%       { box-shadow: 0 0 0 5px rgba(245,158,11,0); }
+}
+
+/* --- CONNECTING WAVE DOTS --- */
+.connecting-dots {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.connecting-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--theme-accent-color);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.connecting-dots span:nth-child(2) { animation-delay: 0.2s; }
+.connecting-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40%            { transform: scale(1); opacity: 1; }
+}
+
+/* --- APP LOAD ANIMATION --- */
+.fade-up {
+  animation: fadeUp 0.65s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- TOAST NOTIFICATION ANIMATIONS --- */
+.toast-enter {
+  animation: toastIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.toast-exit {
+  animation: toastOut 0.28s ease-in forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-18px) scale(0.88); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.93); }
+}
+
+/* --- FADE IN --- */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- SUCCESS CHECKMARK --- */
+.animate-bounce-in {
+  animation: bounceIn 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+}
+
+@keyframes bounceIn {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.22); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- TRANSFER SCREEN SLIDE-IN --- */
+.transfer-enter {
+  animation: transferSlideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes transferSlideIn {
+  from { opacity: 0; transform: scale(0.97) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* --- QR CODE SCALE IN --- */
+.qr-enter {
+  animation: qrScaleIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes qrScaleIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- BUTTON RIPPLE ON CLICK --- */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.18);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity 0.15s ease;
+}
+.btn-ripple:active::after {
+  opacity: 1;
+}
+
+/* --- LOGO ICON ANIMATION --- */
+.logo-icon {
+  animation: logoSpin 20s linear infinite;
+  transform-origin: center;
+}
+@keyframes logoSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-icon { animation: none; }
+  .bg-blob, .bg-blob-2 { animation: none; }
+  .file-item-enter { animation: none; }
+  .connecting-dots span { animation: none; }
+  .status-dot.dot-cyan, .status-dot.dot-green, .status-dot.dot-amber { animation: none; }
+}
+
+/* --- RECEIVE CODE INPUT GLOW --- */
+#receive-code-input:focus {
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25), 0 0 16px rgba(212, 175, 55, 0.12);
+}
+
+/* --- SHARE CODE DISPLAY GLOW --- */
+#pairing-code-display {
+  text-shadow: 0 0 20px rgba(212, 175, 55,0.2);
+}
+html.dark #pairing-code-display {
+  text-shadow: 0 0 24px rgba(224, 197, 94,0.35);
+}
+
+/* --- CARD HOVER LIFT (for file manager cards) --- */
+.cloud-file-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.cloud-file-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+}
+html.dark .cloud-file-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+/* --- QR SCANNER LASER (GPU ACCELERATED) --- */
+.scan-laser {
+  will-change: transform, opacity;
+  /* Using a custom ease-in-out curve makes the bounce look natural instead of rigid */
+  animation: scanLaser 2.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes scanLaser {
+  0%   { transform: translateY(5%); opacity: 0; }
+  15%  { opacity: 1; }
+  50%  { transform: translateY(95%); opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(5%); opacity: 0; }
+}
+
+/* --- DYNAMIC CUSTOMIZER STYLING OVERRIDES --- */
+
+/* 1. Global Background Overrides */
+body {
+  background-color: var(--app-bg-light, #fafaf9) !important;
+}
+html.dark body {
+  background-color: var(--app-bg-dark, #09090b) !important;
+}
+
+/* 2. Header / Navigation Bar Overrides */
+header {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+html.dark header {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 3. Mobile Menu Dropdown Background Overrides */
+#mobile-menu {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.98) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+html.dark #mobile-menu {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 4. Footer & Footer Links Overrides */
+footer {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.5) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+html.dark footer {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+.footer-link:hover, html.dark .footer-link:hover {
+  color: var(--theme-accent-color) !important;
+}
+
+/* 5. Main Action Buttons Overrides */
+label[for="file-input"], 
+#cta-create, 
+#receive-btn, 
+#admin-login-btn, 
+#btn-save-style, 
+#confirm-extend-btn, 
+#confirm-install-btn,
+#start-clipboard-btn,
+#clipboard-receive-btn {
+  background: var(--theme-accent-color) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px var(--theme-accent-glow) !important;
+  transition: all 0.22s ease !important;
+}
+
+label[for="file-input"]:hover, 
+#cta-create:hover, 
+#receive-btn:hover, 
+#admin-login-btn:hover, 
+#btn-save-style:hover, 
+#confirm-extend-btn:hover, 
+#confirm-install-btn:hover,
+#start-clipboard-btn:hover,
+#clipboard-receive-btn:hover {
+  background: var(--theme-accent-color-hover) !important;
+  box-shadow: 0 6px 20px var(--theme-accent-glow) !important;
+  transform: translateY(-1px) scale(1.01);
+}
+
+label[for="file-input"]:active, 
+#cta-create:active, 
+#receive-btn:active, 
+#admin-login-btn:active, 
+#btn-save-style:active, 
+#confirm-extend-btn:active, 
+#confirm-install-btn:active,
+#start-clipboard-btn:active,
+#clipboard-receive-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 6. Outline & Sub Action Buttons (e.g., "Learn More" / "Scan QR") */
+button[data-screen-link="about"]:not(.footer-link):not(.nav-link) {
+  border-color: var(--theme-secondary-color) !important;
+  color: var(--theme-secondary-color) !important;
+  background: transparent !important;
+  transition: all 0.22s ease !important;
+}
+button[data-screen-link="about"]:not(.footer-link):not(.nav-link):hover {
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  border-color: var(--theme-secondary-color-hover) !important;
+}
+
+/* 7. Drop Zone Interior Icon & Border Overrides */
+.drop-zone-inner.custom-drop-zone-glass {
+  transition: border-color 0.25s ease, background-color 0.25s ease, backdrop-filter 0.25s ease !important;
+}
+.drop-zone-inner.custom-drop-zone-glass:hover {
+  border-color: var(--theme-secondary-color) !important;
+}
+.upload-icon-wrap {
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
+}
+html.dark .upload-icon-wrap {
+  background: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.15) !important;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.3) !important;
+  color: var(--theme-secondary-color) !important;
+}
+
+/* 8. QR Scanner Laser & Elements */
+.scan-laser > div {
+  background-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 14px 4px var(--theme-accent-glow) !important;
+}
+
+/* 9. FAQ Section and Boxes Customization */
+details.group {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.5) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.22s ease !important;
+}
+html.dark details.group {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+details.group summary {
+  transition: color 0.2s ease !important;
+}
+details.group summary:hover,
+details.group summary:hover * {
+  color: var(--theme-secondary-color) !important;
+}
+details.group[open] summary,
+details.group[open] summary * {
+  color: var(--theme-secondary-color) !important;
+}
+
+/* 10. General Tailwind Utility Class Replacements */
+.bg-teal-500, .bg-teal-600 {
+  background-color: var(--theme-accent-color) !important;
+}
+.hover\:bg-teal-600:hover, .hover\:bg-teal-500:hover {
+  background-color: var(--theme-accent-color-hover) !important;
+}
+.text-teal-500, .text-teal-600, .text-teal-700, .dark\:text-teal-400, .dark\:text-teal-300 {
+  color: var(--theme-accent-color) !important;
+}
+.border-teal-500, .border-teal-600, .dark\:border-teal-400 {
+  border-color: var(--theme-accent-color) !important;
+}
+.focus\:ring-teal-500:focus, .focus\:border-teal-500:focus, .focus\:ring-teal-600:focus, .focus\:border-teal-600:focus {
+  border-color: var(--theme-accent-color) !important;
+  --tw-ring-color: var(--theme-accent-glow) !important;
+}
+.hover\:border-teal-400\/70:hover, .dark\:hover\:border-teal-500\/50:hover {
+  border-color: var(--theme-accent-color) !important;
+}
+.border-teal-500\/20, .dark\:border-teal-500\/40, .border-teal-200\/50, .dark\:border-teal-500\/30 {
+  border-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.25) !important;
+}
+.bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
+}
+.dark\:from-teal-500\/15 {
+  --tw-gradient-from: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.15) !important;
+}
+.shadow-teal-500\/20, .shadow-teal-500\/30, .shadow-teal-500\/10 {
+  box-shadow: 0 4px 14px var(--theme-accent-glow) !important;
+}
+.accent-teal-500 {
+  accent-color: var(--theme-accent-color) !important;
+}
+
+/* 11. Extra Customizer Focus & Accent Refinements */
+input:focus, select:focus, textarea:focus, [contenteditable="true"]:focus {
+  border-color: var(--theme-accent-color) !important;
+  --tw-ring-color: var(--theme-accent-glow) !important;
+  box-shadow: 0 0 0 3px var(--theme-accent-glow) !important;
+}
+.custom-input-glass:focus {
+  border-color: var(--theme-accent-color) !important;
+  box-shadow: 0 0 0 3px var(--theme-accent-glow) !important;
+}
+
+/* 12. Dynamic Theme Toggle & Mobile Menu Adaptations */
+#theme-toggle, #mobile-menu-btn {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--theme-secondary-color) !important;
+  transition: all 0.2s ease !important;
+}
+#theme-toggle:hover, #mobile-menu-btn:hover {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 1) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
+}
+html.dark #theme-toggle, html.dark #mobile-menu-btn {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--theme-secondary-color) !important;
+}
+html.dark #theme-toggle:hover, html.dark #mobile-menu-btn:hover {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 1) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
+}
+
+/* 13. Dynamic Info / Tip Box Overrides */
+#receive-tip-box {
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
+}
+html.dark #receive-tip-box {
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.12) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+  color: var(--theme-secondary-color) !important;
+}
+
+/* 14. Manage Active Links Refresh Button styling */
+#refresh-cloud-links {
+  border-color: var(--theme-secondary-color) !important;
+  color: var(--theme-secondary-color) !important;
+  background: transparent !important;
+  transition: all 0.22s ease !important;
+}
+#refresh-cloud-links:hover {
+  background-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.08) !important;
+  color: var(--theme-secondary-color-hover) !important;
+  border-color: var(--theme-secondary-color-hover) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
+}
+
+/* 15. Progress Bar Color Sync */
+#progress-bar {
+  background: linear-gradient(90deg, var(--theme-accent-color), var(--theme-secondary-color)) !important;
+  box-shadow: 0 0 12px var(--theme-accent-glow) !important;
+}
+
+/* 16. Generated Share Code Box */
+#pairing-code-card {
+  background-image: linear-gradient(to bottom, rgba(var(--light-card-base, 255, 255, 255), 0.6), rgba(var(--light-card-base, 255, 255, 255), 0.3)) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+}
+html.dark #pairing-code-card {
+  background-image: linear-gradient(to bottom, rgba(var(--dark-card-base, 24, 24, 27), 0.65), rgba(var(--dark-card-base, 24, 24, 27), 0.35)) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.25) !important;
+}
+
+/* 17. Manage Links - Active Link File Box Background Color */
+.cloud-file-card {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.45) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.15) !important;
+  transition: all 0.22s ease !important;
+}
+html.dark .cloud-file-card {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.3) !important;
+  border-color: rgba(var(--theme-secondary-rgb, 45, 212, 191), 0.2) !important;
+}
+.cloud-file-card:hover {
+  background-color: rgba(var(--light-card-base, 255, 255, 255), 0.65) !important;
+  border-color: var(--theme-secondary-color) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
+}
+html.dark .cloud-file-card:hover {
+  background-color: rgba(var(--dark-card-base, 24, 24, 27), 0.45) !important;
+  border-color: var(--theme-secondary-color) !important;
+  box-shadow: 0 4px 12px var(--theme-secondary-glow) !important;
+}
+
+/* 18. Inline Dynamic Teal Class Adaptations */
+.bg-teal-50, .dark\:bg-teal-900\/20 {
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.08) !important;
+}
+.hover\:bg-teal-100:hover, .dark\:hover\:bg-teal-900\/40:hover {
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.18) !important;
+}
+.bg-teal-500\/10, .bg-teal-500\/20, .dark\:bg-teal-500\/10, .dark\:bg-teal-500\/15, .bg-teal-100 {
+  background-color: rgba(var(--theme-accent-rgb, 15, 118, 110), 0.12) !important;
+}
+
+
+/* --- Accessibility: visible keyboard focus + respect reduced-motion preference --- */
+:where(a, button, input, select, textarea, [tabindex], [contenteditable="true"]):focus-visible {
+  outline: 2px solid var(--theme-accent-color, #14b8a6);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* --- App feel: no accidental text selection / blue highlight / image dragging --- */
+html { -webkit-tap-highlight-color: transparent; }
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, select, [contenteditable="true"], .allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+img, svg, video, a {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* --- Success screen: share / open button --- */
+.share-open-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 13rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background-image: linear-gradient(to right, var(--theme-accent-color, #8b5cf6), var(--theme-secondary-color, #06b6d4));
+  box-shadow: 0 6px 20px rgba(var(--theme-accent-rgb, 139, 92, 246), 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.share-open-btn:hover { filter: brightness(1.08); box-shadow: 0 8px 26px rgba(var(--theme-accent-rgb, 139, 92, 246), 0.45); }
+.share-open-btn:active { transform: scale(0.97); }
+.share-open-btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* --- Swipe-to-dismiss notifications --- */
+#toast-container > div { touch-action: none; cursor: grab; }
+#toast-container > div.toast-dragging { cursor: grabbing; transition: none; }
+
+
+/* --- Theme switch: expanding wave from the toggle (View Transitions API) --- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) {
+  z-index: 2;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 0%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 0%, #000 62%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 0 0;   /* hidden until the wave animation starts (no one-frame flash) */
+  mask-size: 0 0;
+}
+/* While the snapshot is taken, nothing should be mid-way through a colour transition */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+
+/* --- Clipboard pad: "+" add-image button (uses the live theme colours) --- */
+.pad-add-btn {
+  background-image: linear-gradient(135deg, var(--theme-accent-color, #8b5cf6), var(--theme-secondary-color, #06b6d4));
+  box-shadow: 0 4px 14px rgba(var(--theme-accent-rgb, 139, 92, 246), 0.4);
+  transition: transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+.pad-add-btn:hover { filter: brightness(1.1); }
+.pad-add-btn:active { transform: scale(0.9); }

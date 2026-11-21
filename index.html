@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>SmartShare | Secure P2P File Sharing</title>
+<meta name="google-adsense-account" content="ca-pub-2828267500094266">
+    
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' https://*.firebaseio.com https://*.firebaseapp.com; 
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+        connect-src 'self' wss://* https://* stun:* turn:* wss://*.firebaseio.com; 
+        img-src 'self' data: blob: https:; 
+        media-src 'self' blob: data:; 
+        font-src 'self' data: https:;
+        worker-src 'self' blob:;
+    ">
+    
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
+    <meta name="description" content="SmartShare is a fast, secure, and account-free peer-to-peer file sharing and live clipboard web application built by B.Tech IT student Ambati Lalitha Sagar." />
+    <meta name="author" content="Ambati Lalitha Sagar" />
+    <link rel="canonical" href="https://23mh1a1202.github.io/smartshare/" />
+
+    <meta property="og:title" content="SmartShare | Secure P2P File Sharing" />
+    <meta property="og:description" content="A fast, account-free file sharing web app with Direct P2P transfer and Cloud Vault. Built by Ambati Lalitha Sagar." />
+        <meta property="og:image" content="https://23mh1a1202.github.io/smartshare/icon.png" />
+    <meta property="og:image:secure_url" content="https://23mh1a1202.github.io/smartshare/icon.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://23mh1a1202.github.io/smartshare/icon.png" />
+
+
+    <meta property="og:url" content="https://23mh1a1202.github.io/smartshare/" />
+    <meta property="og:type" content="website" />
+    <meta name="google-site-verification" content="LYr189UZImmGhxoNL2Q9R8DFqXjDYZ2WMrDi62YSg-A" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "SmartShare",
+      "url": "https://23mh1a1202.github.io/smartshare/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any (Web, Android PWA)",
+      "description": "Fast, secure, account-free peer-to-peer file sharing and live clipboard web app.",
+      "image": "https://23mh1a1202.github.io/smartshare/icon.png",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "Ambati Lalitha Sagar" }
+    }
+    </script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
+    
+    <script src="vendor/peerjs.min.js" defer></script>
+    <script src="vendor/qrcode.min.js" defer></script>
+    <script src="vendor/jsQR.min.js" defer></script>
+    <script src="vendor/jszip.min.js" defer></script>
+    <script src="vendor/purify.min.js" defer></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="tailwind.css">
+    <script>
+        // Apply theme immediately to prevent FOUC
+        if (localStorage.theme === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Apply custom style immediately to prevent FOUC
+        const storedStyle = localStorage.getItem('smartshare_custom_style');
+        if (storedStyle) {
+            try {
+                const config = JSON.parse(storedStyle);
+                const root = document.documentElement;
+                
+                function hexToRgb(hex) {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+                }
+                function hexToRgbComma(hex) {
+                    const rgb = hexToRgb(hex);
+                    return rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : '0, 0, 0';
+                }
+                function adjustColorBrightness(hex, percent) {
+                    const rgb = hexToRgb(hex);
+                    if (!rgb) return hex;
+                    const r = Math.min(255, Math.max(0, rgb.r + percent));
+                    const g = Math.min(255, Math.max(0, rgb.g + percent));
+                    const b = Math.min(255, Math.max(0, rgb.b + percent));
+                    const toHex = (n) => { const hex = n.toString(16); return hex.length === 1 ? "0" + hex : hex; };
+                    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+                }
+
+                if (config.accentColor) {
+                    const accent = config.accentColor;
+                    const hoverColor = adjustColorBrightness(accent, -25);
+                    const rgbAccent = hexToRgb(accent) || { r: 139, g: 92, b: 246 };
+                    root.style.setProperty('--theme-accent-color', accent);
+                    root.style.setProperty('--theme-accent-color-hover', hoverColor);
+                    root.style.setProperty('--theme-accent-rgb', `${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}`);
+                    root.style.setProperty('--theme-accent-glow', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.25)`);
+                    
+                    const lBg = config.lightBgColor || '#fafaf9';
+                    const dBg = config.darkBgColor || '#09090b';
+                    root.style.setProperty('--app-bg-light', lBg);
+                    root.style.setProperty('--app-bg-dark', dBg);
+                    
+                    root.style.setProperty('--theme-grad-1-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.06)`);
+                    root.style.setProperty('--theme-grad-3-light', lBg);
+                    root.style.setProperty('--theme-grad-1-dark', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.1)`);
+                    root.style.setProperty('--theme-grad-3-dark', dBg);
+                }
+
+                if (config.secondaryColor) {
+                    const secondary = config.secondaryColor;
+                    const secondaryHover = adjustColorBrightness(secondary, -25);
+                    const rgbSecondary = hexToRgb(secondary) || { r: 6, g: 182, b: 212 };
+                    root.style.setProperty('--theme-secondary-color', secondary);
+                    root.style.setProperty('--theme-secondary-color-hover', secondaryHover);
+                    root.style.setProperty('--theme-secondary-rgb', `${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}`);
+                    root.style.setProperty('--theme-secondary-glow', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.25)`);
+                    
+                    root.style.setProperty('--theme-grad-2-light', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.06)`);
+                    root.style.setProperty('--theme-grad-2-dark', `rgba(${rgbSecondary.r}, ${rgbSecondary.g}, ${rgbSecondary.b}, 0.1)`);
+                }
+
+                const lightCardBase = config.lightCardColor ? hexToRgbComma(config.lightCardColor) : (config.lightCardBase || '255, 255, 255');
+                const darkCardBase = config.darkCardColor ? hexToRgbComma(config.darkCardColor) : (config.darkCardBase || '24, 24, 27');
+                root.style.setProperty('--light-card-base', lightCardBase);
+                root.style.setProperty('--dark-card-base', darkCardBase);
+                root.style.setProperty('--panel-bg-light', `rgba(${lightCardBase}, ${(config.panelOpacity || 70) / 100})`);
+                root.style.setProperty('--panel-blur-light', `${config.panelBlur || 40}px`);
+                root.style.setProperty('--panel-bg-dark', `rgba(${darkCardBase}, ${(config.panelOpacity || 70) / 100})`);
+                root.style.setProperty('--panel-blur-dark', `${config.panelBlur || 40}px`);
+                
+                root.style.setProperty('--input-bg-light', `rgba(${lightCardBase}, ${(config.inputOpacity || 75) / 100})`);
+                root.style.setProperty('--input-blur-light', `${config.inputBlur || 20}px`);
+                root.style.setProperty('--input-bg-dark', `rgba(${darkCardBase}, ${(config.inputOpacity || 75) / 100})`);
+                root.style.setProperty('--input-blur-dark', `${config.inputBlur || 20}px`);
+
+                root.style.setProperty('--drop-bg-light', `rgba(${lightCardBase}, ${(config.dropOpacity || 65) / 100})`);
+                root.style.setProperty('--drop-blur-light', `${config.dropBlur || 15}px`);
+                root.style.setProperty('--drop-bg-dark', `rgba(${darkCardBase}, ${(config.dropOpacity || 65) / 100})`);
+                root.style.setProperty('--drop-blur-dark', `${config.dropBlur || 15}px`);
+
+            } catch (e) {
+                console.error("FOUC prevention failed:", e);
+            }
+        }
+    </script>
+</head>
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans overflow-x-hidden overflow-y-scroll transition-colors duration-300">
+    <!-- Global Drag Overlay -->
+    <div id="global-drag-overlay" class="fixed inset-0 z-[99999] hidden items-center justify-center bg-zinc-900/60 dark:bg-black/60 backdrop-blur-xl border-4 border-teal-500 border-dashed rounded-3xl m-4 transition-all duration-300 pointer-events-none opacity-0">
+        <div class="flex flex-col items-center justify-center text-white space-y-4 text-center">
+            <div class="w-24 h-24 bg-teal-500/20 rounded-full flex items-center justify-center animate-bounce">
+                <svg class="w-12 h-12 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            </div>
+            <h2 class="text-3xl font-bold tracking-tight">Drop anywhere to instantly share</h2>
+            <p class="text-lg text-white/80">Instantly switch to sharing mode</p>
+        </div>
+    </div>
+
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,#f5f3ff,transparent_55%),radial-gradient(circle_at_80%_0%,#f4f4f5,transparent_45%),radial-gradient(circle_at_50%_80%,#f8fafc,transparent_50%)] dark:bg-[radial-gradient(circle_at_20%_20%,#27272a,transparent_55%),radial-gradient(circle_at_80%_0%,#18181b,transparent_45%),radial-gradient(circle_at_50%_80%,#09090b,transparent_50%)] transition-colors duration-300"></div>
+    
+    <div class="bg-blob fixed top-[-12%] left-[-8%] w-[520px] h-[520px] bg-teal-500/20 dark:bg-teal-500/15 blur-[140px] rounded-full pointer-events-none"></div>
+    <div class="bg-blob-2 fixed bottom-[-12%] right-[-12%] w-[520px] h-[520px] bg-sky-400/20 dark:bg-sky-500/15 blur-[140px] rounded-full pointer-events-none"></div>
+
+    <div id="toast-container" class="fixed top-24 sm:top-24 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm pointer-events-none"></div>
+
+    <header class="sticky top-0 z-50 w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-sm transition-all">
+        <div class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
+            <div class="flex items-center gap-3">
+                <img src="./icon.png" alt="SmartShare Logo" class="w-11 h-11 object-cover rounded-[14px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
+                
+                <div class="flex flex-col">
+                    <span class="text-base font-bold tracking-tight">SmartShare</span>
+                    <span class="text-[11px] text-zinc-400 dark:text-zinc-400">Secure, Instant sharing</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <nav class="hidden md:flex items-center gap-3 text-sm font-semibold">
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="share">Home</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="manage">Manage Active Links</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="faq">FAQ</button>
+    <button class="nav-link px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" data-screen-link="about">About</button>
+    <button id="nav-admin-style" class="nav-link hidden px-4 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-teal-600 dark:text-teal-400 font-semibold" data-screen-link="admin-style">Admin Style</button>
+    <button class="nav-install-btn hidden px-4 py-2 rounded-xl text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-all items-center gap-2 ml-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        Install App
+    </button>
+</nav>
+
+                <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 transition-all shadow-md border border-zinc-200 dark:border-zinc-800 hover:scale-105 active:scale-95" aria-label="Toggle theme">
+                    <svg id="theme-icon-sun" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="theme-icon-moon" class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-300" aria-label="Open menu">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden absolute left-0 right-0 top-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shadow-2xl opacity-0 -translate-y-4 pointer-events-none transform transition-all duration-300 ease-out z-40">
+    <div class="flex flex-col px-4 py-4 gap-1">
+        <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="share">
+            Home
+            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="manage">
+            Manage Active Links
+            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="faq">
+            FAQ
+            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-link flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-zinc-900 dark:text-zinc-100 font-semibold text-[15px]" data-screen-link="about">
+            About
+            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button id="mobile-nav-admin-style" class="nav-link hidden flex items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors text-teal-600 dark:text-teal-400 font-semibold text-[15px]" data-screen-link="admin-style">
+            Admin Style
+            <svg class="w-4 h-4 text-teal-500/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <button class="nav-install-btn hidden items-center justify-between w-full px-5 py-4 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors text-teal-600 dark:text-teal-400 font-semibold text-[15px]">
+            <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Install App
+            </span>
+            <svg class="w-4 h-4 text-teal-400 dark:text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+</div>
+    </header>
+
+    <main class="mx-auto flex w-full max-w-5xl flex-col gap-16 px-4 pb-20 pt-0">
+
+
+        <section data-screen="share" id="screen-share" class="screen-panel min-h-[calc(100vh-120px)] flex items-center">
+            <div class="grid gap-12 md:gap-14 lg:gap-16 md:grid-cols-2 items-center">
+                <div class="pt-8 sm:pt-0">
+    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-3 sm:mb-8 lg:mb-10">
+        Trusted, secure, Fast
+    </div>
+    <div class="space-y-3 mb-8 lg:mb-10">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl leading-tight font-extrabold tracking-tight text-zinc-900 dark:text-white font-display">Share files with confidence.</h1>
+        <p class="text-base sm:text-lg text-zinc-600 dark:text-zinc-300">Create secure Direct or Link shares in seconds, or sync a Live Clipboard between devices. No accounts, no clutter, just clean sharing.</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        <button class="btn-ripple rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:bg-teal-600" data-screen-link="create" id="cta-create">Start Sharing</button>
+        <button class="btn-ripple rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800" data-screen-link="about">Learn More</button>
+    </div>
+</div>
+                <div class="glass-panel w-full max-w-lg md:max-w-none mx-auto p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
+                    <div class="flex items-center gap-2 text-zinc-900 dark:text-white">
+                        <div class="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-500/15 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-teal-600 dark:text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold font-display">Receive a file or link</h3>
+                    </div>
+                    <p class="text-sm text-zinc-400 dark:text-zinc-400 mt-3">Paste a share code, link ID, or clipboard code to connect instantly.</p>
+                    <div id="receive-section" class="mt-5 flex flex-col gap-3">
+                        <label class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Code or Link ID</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="receive-code-input" aria-label="Share code or ID" placeholder="Enter code or ID" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 transition-all uppercase placeholder:tracking-normal placeholder:text-xs placeholder:text-zinc-400 shadow-inner">
+                            
+                            <div class="flex gap-2 sm:gap-3 shrink-0 w-full sm:w-auto">
+                                <button id="scan-qr-btn" class="btn-ripple flex items-center justify-center px-4 py-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-white rounded-xl font-semibold shadow-inner active:scale-[0.97] transition-all shrink-0" aria-label="Scan QR Code">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                </button>
+                                <button id="receive-btn" class="btn-ripple flex items-center justify-center flex-1 w-full sm:px-8 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/20 active:scale-[0.97]">Open</button>
+                            </div>
+                        </div>
+                        
+                        <div id="qr-scanner-container" class="hidden relative w-full rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-black shadow-inner aspect-[4/3] sm:aspect-video animate-fade-in mt-2">
+                            <video id="qr-video" class="w-full h-full object-cover" playsinline></video>
+                            
+                            <div class="absolute inset-0 m-10 sm:m-14 pointer-events-none">
+                                <div class="absolute top-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-t-4 border-l-4 border-white/80 rounded-tl-xl drop-shadow-md"></div>
+                                <div class="absolute top-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-t-4 border-r-4 border-white/80 rounded-tr-xl drop-shadow-md"></div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 sm:w-12 sm:h-12 border-b-4 border-l-4 border-white/80 rounded-bl-xl drop-shadow-md"></div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 sm:w-12 sm:h-12 border-b-4 border-r-4 border-white/80 rounded-br-xl drop-shadow-md"></div>
+                                
+                               <!-- Moving Laser Line (GPU Accelerated Wrapper) -->
+                                <div class="scan-laser absolute inset-0">
+                                    <div class="absolute top-0 left-2 right-2 h-[2px] bg-teal-500 shadow-[0_0_14px_4px_rgba(212,175,55,0.8)] rounded-full"></div>
+                                </div>
+                            </div>
+                    
+                            <button id="close-scanner-btn" aria-label="Close scanner" class="absolute top-3 right-3 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors backdrop-blur-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                            <p class="absolute bottom-4 left-0 right-0 text-center text-white/90 text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase drop-shadow-md">Align QR code within frame</p>
+                        </div>
+                    </div>
+                    <div id="receive-tip-box" class="mt-4 rounded-xl border border-zinc-200/70 bg-zinc-50/70 px-4 py-3 text-xs text-zinc-500 dark:border-zinc-800/70 dark:bg-zinc-900/50 dark:text-zinc-400">
+                        Tip: You can also scan a QR code from the sender to connect instantly.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section data-screen="create" id="screen-create" class="screen-panel hidden">
+            <div class="max-w-3xl mx-auto text-center mb-8">
+                <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white font-display">Start Sharing</h2>
+                <p class="text-zinc-600 dark:text-zinc-300 mt-2">Choose Direct, Link, or Clipboard, then add files or create a sync code to start sharing.</p>
+            </div>
+            <div class="flex justify-center">
+               <div id="drop-zone" class="glass-panel w-[95%] sm:w-full max-w-xl p-5 sm:p-8 rounded-[2rem] transition-all duration-300 relative shadow-[0_20px_50px_rgba(27,48,34,0.08)] flex flex-col justify-center mx-auto">
+                    <div id="initial-state" class="flex flex-col items-center text-center w-full">
+                        <div class="mode-tabs flex bg-zinc-200/70 dark:bg-zinc-800/60 p-1.5 rounded-2xl mb-6 w-full max-w-md mx-auto shadow-inner border border-zinc-200/80 dark:border-zinc-700/60 relative z-20" data-active="p2p">
+                            <div class="tab-slider"></div>
+                            <button id="mode-p2p" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-teal-600 dark:text-teal-300 transition-colors relative z-10">Direct</button>
+                            <button id="mode-cloud" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-zinc-400 dark:text-zinc-400 transition-colors relative z-10">Link</button>
+                            <button id="mode-clipboard" class="flex-1 py-2.5 text-[11px] sm:text-xs font-semibold rounded-xl text-zinc-400 dark:text-zinc-400 transition-colors relative z-10">Clipboard</button>
+                        </div>
+
+                        <div id="file-upload-inner" class="w-full flex flex-col items-center transition-all duration-250">
+                            <div class="drop-zone-inner custom-drop-zone-glass w-full border border-dashed border-zinc-300/80 dark:border-zinc-700/70 hover:border-teal-400/70 dark:hover:border-teal-500/50 bg-white/30 dark:bg-zinc-900/20 backdrop-blur-sm rounded-[24px] p-8 mb-4 transition-all duration-250 flex flex-col items-center">
+                                <div class="upload-icon-wrap w-20 h-20 bg-gradient-to-br from-teal-100 to-white dark:from-teal-500/15 dark:to-teal-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-teal-400/30 dark:ring-teal-500/25 shadow-sm">
+                                    <svg class="w-10 h-10 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-zinc-700 dark:text-zinc-200 font-display">Drag &amp; drop files here</h3>
+                                <p class="text-sm text-zinc-400 dark:text-zinc-400 mt-1 mb-5">or browse from your device</p>
+                                <input type="file" id="file-input" multiple class="opacity-0 absolute -z-10 w-0 h-0 overflow-hidden">
+                                <label for="file-input" class="btn-ripple w-full py-3.5 bg-gradient-to-r from-teal-600 via-teal-500 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(212,175,55,0.35)] hover:shadow-[0_6px_24px_rgba(212,175,55,0.45)] active:scale-[0.97] cursor-pointer inline-block text-center text-base tracking-wide">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Select Files
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="staged-files-section" class="w-full mt-4 hidden flex-col gap-3">
+                                <div class="file-list-box">
+                                    <ul id="file-list" class="space-y-3"></ul>
+                                </div>
+                                <div id="cloud-settings" class="hidden flex-col gap-3 w-full mt-4 mb-2 text-left border-t border-zinc-200/80 dark:border-zinc-700/50 pt-4">
+                                    <div class="flex gap-3">
+                                        <div class="flex-1 flex flex-col gap-1">
+                                            <label class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Available For</label>
+                                            <select id="cloud-expire" aria-label="Link expiry time" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none appearance-none font-medium">
+                                                <option value="10m">10 Minutes</option>
+                                                <option value="1h" selected>1 Hour</option>
+                                                <option value="4h">4 Hours</option>
+                                            </select>
+                                        </div>
+                                        <div class="flex-1 flex flex-col gap-1">
+                                            <label class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Limit</label>
+                                            <select id="cloud-limit" aria-label="Download limit" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none appearance-none font-medium">
+                                                <option value="unlimited" selected>Unlimited Downloads</option>
+                                                <option value="one-time">Delete after 1 download</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-1 mt-1">
+                                        <label class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Custom Link Word (Optional)</label>
+                                        <input type="text" id="cloud-custom-code" aria-label="Custom code word (optional)" placeholder="e.g. myfiles" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none placeholder:text-zinc-400 font-mono">
+                                    </div>
+
+                                    <div class="mt-3 px-3 py-2.5 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800/50 rounded-xl flex items-start gap-2 text-cyan-700 dark:text-cyan-300 text-[11px] leading-tight">
+                                        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span><strong>Free Tier Limit:</strong> Max 10MB per file (100MB for Video).</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-2 w-full mt-2">
+                                    <label for="file-input" class="btn-ripple flex-1 py-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-white rounded-xl font-medium transition-all text-center cursor-pointer border border-zinc-200 dark:border-zinc-700/80 text-sm flex items-center justify-center gap-2 active:scale-[0.97]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add More
+                                    </label>
+                                    <button id="send-files-btn" class="btn-ripple flex-1 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_16px_rgba(16,185,129,0.35)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.45)] active:scale-[0.97] text-sm flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Share Files
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="clipboard-init-inner" class="hidden flex-col items-center w-full transition-all duration-250">
+                            <div class="w-16 h-16 bg-gradient-to-br from-teal-100 to-teal-50 dark:from-teal-500/15 dark:to-teal-600/5 rounded-2xl flex items-center justify-center mb-4 ring-1 ring-teal-400/30 dark:ring-teal-500/25 shadow-sm">
+                                <svg class="w-8 h-8 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-zinc-700 dark:text-zinc-200 font-display">Clipboard Sync</h3>
+                            <p class="text-sm text-zinc-400 dark:text-zinc-400 mt-1 mb-5 text-center">Connect two devices instantly and sync copied text, links, and images live between them in real time.</p>
+
+                            <div class="flex flex-col gap-1 w-full max-w-sm mt-2 mb-2 text-left">
+                                <label class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Your Device Name</label>
+                                <input type="text" id="my-device-name" aria-label="This device name" class="w-full bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none font-medium text-zinc-700 dark:text-zinc-200 shadow-inner text-center" placeholder="e.g. My Phone">
+                            </div>
+
+                            <div id="trusted-devices-container" class="w-full max-w-sm mx-auto hidden flex-col gap-2 mb-6">
+                                <label class="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ml-1">Trusted Devices</label>
+                                <div id="trusted-devices-list" class="flex flex-col gap-2"></div>
+                            </div>
+
+                            <button id="start-clipboard-btn" class="btn-ripple w-full max-w-sm h-14 mx-auto bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white rounded-xl font-semibold transition-all shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.45)] active:scale-[0.97] flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Create Sync Code
+                            </button>
+
+                            <div class="flex flex-col gap-4 w-full max-w-sm mx-auto mt-6">
+                                <div class="relative flex items-center py-1">
+                                    <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
+                                    <span class="flex-shrink-0 mx-4 text-zinc-400 dark:text-zinc-500 text-[11px] font-bold tracking-[0.18em] uppercase">Or Join</span>
+                                    <div class="flex-grow border-t border-zinc-200 dark:border-zinc-700/60"></div>
+                                </div>
+                                <div class="flex gap-2 h-14">
+                                    <input type="text" id="clipboard-receive-code" aria-label="Clipboard sync code" placeholder="ENTER SYNC CODE" class="custom-input-glass flex-1 min-w-0 h-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 text-center tracking-[0.15em] font-mono text-base text-zinc-900 dark:text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/25 uppercase shadow-inner">
+                                    <button id="clipboard-receive-btn" aria-label="Join clipboard session" class="btn-ripple w-14 h-full shrink-0 bg-gradient-to-br from-teal-600 to-teal-500 text-white rounded-xl font-medium shadow-[0_4px_16px_rgba(139,92,246,0.35)] active:scale-[0.97] flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="transfer-state" class="hidden flex-col items-center w-full relative">
+                        <div class="w-full flex justify-between items-center mb-8">
+                            <div class="flex items-center gap-3 flex-1 min-w-0 pr-3">
+                                <div id="transfer-icon-container" class="w-11 h-11 bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-800/60 rounded-xl flex items-center justify-center shrink-0 border border-zinc-200/80 dark:border-zinc-700/80 shadow-sm overflow-hidden relative">
+                                    <svg class="w-5 h-5 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div class="flex flex-col min-w-0 pl-1">
+                                    <span id="file-name" class="truncate font-semibold text-zinc-800 dark:text-zinc-100 text-sm">Waiting...</span>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <div id="status-dot" class="status-dot dot-cyan ml-1"></div>
+                                        <span id="status-text" class="text-xs text-zinc-400 dark:text-zinc-400 leading-snug pr-2">Connecting...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="reset-btn" class="btn-ripple reset-btn shrink-0 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800/60 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors border border-zinc-200/80 active:scale-[0.97] flex items-center gap-2" aria-label="Cancel transfer">
+                                <span class="reset-icon">✕</span>
+                                <span class="reset-label">Cancel</span>
+                            </button>
+                        </div>
+                        <div id="p2p-warning-receiver" class="w-full mb-6 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl hidden items-center gap-3 text-amber-800 dark:text-amber-300 text-xs font-medium animate-fade-in">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span>Keep this tab open until the transfer is 100% complete.</span>
+                        </div>
+                        <div id="p2p-warning-sender" class="w-full mb-6 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl hidden items-center gap-3 text-amber-800 dark:text-amber-300 text-xs font-medium animate-fade-in">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            
+                            <span>Do not close this tab until you see the green "Sent" screen!</span>
+                            
+                        </div>
+                        <div id="progress-area" class="w-full mb-8 hidden">
+                            <div class="flex justify-between text-sm mb-2.5 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <span class="connecting-dots"><span></span><span></span><span></span></span>
+                                    <span id="progress-text" class="text-zinc-600 dark:text-zinc-300">Preparing...</span>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <div class="flex items-end gap-2">
+                                        <span id="transfer-eta" class="text-[10px] text-zinc-400 dark:text-zinc-400 font-medium mb-[1px]"></span>
+                                        <span id="percentage" class="text-teal-600 dark:text-teal-400 font-bold tabular-nums leading-none">0%</span>
+                                    </div>
+                                    <span id="transfer-speed" class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-1 h-3"></span>
+                                </div>
+                            </div>
+                            <div class="h-2.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden border shadow-inner">
+                                <div id="progress-bar" class="h-full bg-gradient-to-r from-teal-500 via-teal-400 to-emerald-400 rounded-full w-0 relative"></div>
+                            </div>
+                        </div>
+
+                                                <div id="success-area" class="w-full mb-8 hidden flex-col items-center justify-center">
+                            <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-bounce-in ring-4 ring-emerald-400/25 shadow-lg">
+                                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                            </div>
+                            <span id="success-text" class="text-emerald-600 dark:text-emerald-400 font-bold text-3xl tracking-wide">Done</span>
+                            <p class="text-zinc-400 dark:text-zinc-400 text-sm mt-2">Transfer completed successfully</p>
+                            
+                            <div id="success-preview-container" class="w-full flex flex-col items-center gap-3 mt-3"></div>
+                        </div>
+
+
+                        <div id="share-options" class="flex flex-col items-center w-full hidden animate-fade-in">
+
+                            <div id="cloud-safe-msg" class="mb-5 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl hidden items-center gap-3 text-emerald-800 dark:text-emerald-300 text-xs font-medium w-full">
+                                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Ready! You can safely close this page now.</span>
+                            </div>
+
+    <div id="qr-wrapper" class="qr-enter bg-white p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] mb-5">
+        <div id="qr-container"></div>
+    </div>
+
+    <div id="pairing-code-card" class="bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-800/70 dark:to-zinc-900/70 border border-zinc-200/80 dark:border-zinc-700/80 rounded-2xl w-full p-4 text-center shadow-sm">
+        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-1.5 font-bold">Share Code</p>
+        <h2 id="pairing-code-display" role="button" tabindex="0" title="Tap to copy" class="text-4xl font-mono tracking-[0.3em] text-zinc-800 dark:text-white font-light cursor-pointer active:scale-95 transition-transform">------</h2>
+        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5 font-medium">Tap the code to copy</p>
+    </div>
+    <div id="session-timer-display" class="mt-3 px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-[10px] font-bold text-zinc-500 uppercase tracking-widest hidden">
+    Session expires in <span id="timer-value">10:00</span>
+    </div>
+    <div class="flex gap-3 mt-5">
+    <button id="copy-link-btn" class="btn-ripple px-6 py-2.5 bg-white dark:bg-zinc-800 text-sm text-teal-600 dark:text-teal-400 rounded-full shadow-lg active:scale-[0.97] font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        Copy Link
+    </button>
+    <button id="native-share-btn" class="btn-ripple hidden px-6 py-2.5 bg-teal-600 text-sm text-white rounded-full shadow-lg shadow-teal-500/20 active:scale-[0.97] font-medium items-center gap-2 hover:bg-teal-500 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+        Share
+    </button>
+</div>
+</div>
+                    </div>
+                    <div id="clipboard-active-state" class="hidden flex-col items-center w-full relative">
+                        <div class="w-full flex justify-between items-center mb-5 gap-2">
+                            <div class="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-lg shrink-0">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-1.5"></div>
+                                <span class="text-[10px] sm:text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Synced</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                                <button id="clipboard-sync-btn" class="btn-ripple flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 text-[11px] sm:text-xs font-bold rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-colors active:scale-95 shadow-sm border border-teal-100 dark:border-teal-800/50">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Sync
+                                </button>
+                                <button id="clipboard-disconnect-btn" class="text-[11px] sm:text-xs font-semibold text-zinc-400 hover:text-red-500 transition-colors">Disconnect</button>
+                            </div>
+                        </div>
+                        <div id="save-device-prompt" class="hidden w-full bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-500/30 rounded-xl p-3 mb-4 flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+                            <div class="flex flex-col truncate pr-3 w-full sm:w-auto">
+                                <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Save to trusted devices?</span>
+                                <span id="save-device-name" class="text-sm font-semibold text-zinc-900 dark:text-white truncate mt-0.5">Device Name</span>
+                            </div>
+                            <div class="flex gap-2 shrink-0 self-end sm:self-auto">
+                                <button id="btn-save-device-no" class="px-3 py-1.5 bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 text-xs font-bold rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">Skip</button>
+                                <button id="btn-save-device-yes" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">Save Device</button>
+                            </div>
+                        </div>
+                        <div id="clipboard-pad-wrap" class="relative w-full mb-4">
+                            <div id="shared-textpad" contenteditable="true" data-placeholder="Type, paste text, drop links, or paste images here..." class="w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 focus:border-teal-400 focus:outline-none focus:ring-4 focus:ring-teal-400/20 rounded-2xl p-4 pb-14 text-zinc-800 dark:text-zinc-100 shadow-inner transition-all text-sm sm:text-base leading-relaxed min-h-[150px] max-h-[350px] overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-400 break-words"></div>
+                            <button id="clipboard-add-image-btn" type="button" aria-label="Add image from gallery or files" title="Add image" class="pad-add-btn absolute bottom-3 left-3 w-9 h-9 rounded-full flex items-center justify-center text-white">
+                                <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 5v14M5 12h14"></path></svg>
+                            </button>
+                            <input type="file" id="clipboard-image-input" accept="image/*" multiple class="hidden" tabindex="-1" aria-hidden="true">
+                        </div>
+                        <div class="flex gap-3 w-full">
+                            <button id="copy-clipboard-btn" class="btn-ripple flex-[2] py-3.5 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-zinc-900 rounded-xl font-bold transition-all shadow-lg active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                Copy to Device
+                            </button>
+                            <button id="clear-clipboard-btn" class="btn-ripple flex-[1] py-3.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 rounded-xl font-bold transition-all shadow-sm active:scale-[0.97] flex items-center justify-center gap-2 text-sm sm:text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section data-screen="manage" id="screen-manage" class="screen-panel hidden">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">Manage Active Links</h2>
+                        <p class="text-zinc-600 dark:text-zinc-300 mt-2">Track your active Link shares, extend time, or remove them anytime.</p>
+                    </div>
+                    <button id="refresh-cloud-links" class="btn-ripple w-fit self-start sm:self-auto rounded-full border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">     Refresh </button>
+                </div>
+                <div class="glass-panel p-6 sm:p-8 lg:p-10 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
+                    <div id="cloud-files-list" class="flex-1 overflow-y-auto space-y-4 px-1 py-3 max-h-[420px]">
+                        <p class="text-center text-sm text-zinc-500 py-10">Loading your files...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+                
+        <section data-screen="about" id="screen-about" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto mb-16 text-center">
+                <h2 class="text-4xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-4 font-display">Instant sharing, zero friction.</h2>
+                <p class="text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto">SmartShare is designed for speed, security, and precision. No clutter, no sign-ups, just your content moving exactly where it needs to go.</p>
+            </div>
+
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+                    <div>
+                        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Blazing Fast Direct Sharing</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">Files stream directly between devices via WebRTC. Because data never touches our servers, you enjoy maximum transfer speeds and absolute privacy.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+                    <div>
+                        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">End-to-End Encryption</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">Only you and the receiver can access your files. Your data is encrypted end-to-end, utilizing an implementation of DTLS 1.3 for military-grade security.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+                    <div>
+                        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Unlimited File Size</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">Direct sharing bypasses server storage limits. Send entire photo albums, heavy videos, or raw project files without worrying about artificial size restrictions.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300 lg:col-span-2">
+                    <div>
+                        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Real-Time Clipboard Sync</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl">Instantly sync text, links, and images across devices. Save frequent hardware to your <strong>Trusted Devices</strong> list for one-tap reconnects. Our continuous background heartbeat technology ensures your connection stays alive even during inactivity.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+                    <div>
+                        <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Self-cleaning Cloud Links</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">For asynchronous sharing, generate secure Link shares that expire automatically on your schedule. Set a timer and let SmartShare clean up.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300 md:col-span-2 lg:col-span-3 text-center items-center">
+                    <div class="max-w-2xl">
+                        <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-3xl flex items-center justify-center mb-6 shadow-inner mx-auto">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-zinc-900 dark:text-white mb-3 font-display">Native OS Share Integration</h3>
+                        <p class="text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">Install SmartShare as a PWA and it seamlessly integrates into your device's native share menu. Select files directly from your Gallery or Files app, tap "Share", and beam them instantly without opening your browser.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+                
+
+        <section data-screen="faq" id="screen-faq" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="text-center space-y-3">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-2">
+                        Help & Support
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white font-display">Frequently Asked Questions</h2>
+                    <p class="text-zinc-600 dark:text-zinc-300">Everything you need to know about using SmartShare securely and efficiently.</p>
+                </div>
+
+                <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)]">
+                    <div class="flex flex-col gap-4">
+                        
+                        <!-- FAQ Item 1 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Is SmartShare really free? Do I need an account?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                Yes! SmartShare is 100% free. There are no accounts, no logins, no subscriptions, and no tracking. You can start sharing files instantly while remaining completely anonymous.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 2 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>What is the maximum file size I can send?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                <strong>Direct (P2P):</strong> Unlimited! Because Direct mode sends files straight from your device to the receiver without using our servers, there are no file size limits. <br><br>
+                                <strong>Link Share (Cloud):</strong> Limited to 10MB per file (or 100MB for video files) to ensure our free cloud infrastructure remains fast for everyone.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 3 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Are my files secure and encrypted?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                Absolutely. <strong>Direct Transfers</strong> use WebRTC with DTLS 1.3 encryption, creating a secure, end-to-end encrypted tunnel between the sender and receiver. We cannot see, intercept, or store your files.<br><br>
+                                <strong>Link Shares</strong> are securely transmitted via HTTPS and stored in an isolated Firebase vault, which automatically permanently deletes your files once the timer expires or the download limit is reached.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 4 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>My Direct Transfer is stuck on "Connecting...". Why?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                This usually happens if one or both devices are on a strict corporate/university network, a VPN, or a "Symmetric NAT" firewall that blocks WebRTC P2P traffic.<br><br>
+                                <strong>The Fix:</strong> Try switching one of the devices from Wi-Fi to Mobile Data (Cellular), or use the <strong>Link Share</strong> mode instead, which easily bypasses local network restrictions.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 5 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>Can I close the tab while sending a file?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                <strong>For Direct Transfers: No.</strong> Because the file is streaming directly from your device's memory, closing the tab will instantly kill the connection and cancel the transfer.<br><br>
+                                <strong>For Link Shares: Yes!</strong> Once the progress bar reaches 100% and you see the "Share Code" screen, the file is safely in the cloud. You can close the tab and share the code whenever you want.
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 6 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>How do I use the Native OS Share feature?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                To unlock native sharing, click the <strong>"Install App"</strong> button in the SmartShare menu (or select "Add to Home Screen" in your browser). <br><br>
+                                Once installed as a Progressive Web App (PWA), SmartShare will appear in your phone's default share menu. You can open your Gallery or Files app, select a photo, tap "Share", and select SmartShare to instantly beam it to another device without ever opening your browser!
+                            </div>
+                        </details>
+
+                        <!-- FAQ Item 7 -->
+                        <details class="group bg-white/50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-700/80 overflow-hidden">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer list-none p-5 text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors [&::-webkit-details-marker]:hidden">
+                                <span>What are "Trusted Devices" in Live Clipboard?</span>
+                                <span class="transition-transform duration-300 group-open:rotate-180 text-zinc-400 group-hover:text-teal-500">
+                                    <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="px-5 pb-5 text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed animate-fade-in border-t border-zinc-100 dark:border-zinc-800/50 mt-1 pt-4">
+                                If you frequently sync your clipboard between the same two devices (like your phone and your laptop), you can save them as "Trusted". <br><br>
+                                Once saved, you'll see a button for that device in the Clipboard menu. Clicking it will instantly ping the other device and reconnect your clipboard—no need to scan a QR code or type a 6-digit sync ID ever again!
+                            </div>
+                        </details>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section data-screen="privacy" id="screen-privacy" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="text-center space-y-3">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-2">
+                        Legal
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white font-display">Privacy Policy</h2>
+                    <p class="text-zinc-600 dark:text-zinc-300 text-sm">Last updated: July 2026</p>
+                </div>
+                
+                <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)] prose dark:prose-invert prose-teal max-w-none text-zinc-700 dark:text-zinc-300">
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white mt-0">1. Information Collection</h3>
+                    <p>SmartShare is designed with privacy as a priority. We do not require accounts, sign-ups, or personal information. 
+                    When using Direct Share and Live Clipboard, we process your data directly between devices using WebRTC (peer-to-peer technology). 
+                    No file data is stored on our servers for these modes.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">2. Link Share Storage</h3>
+                    <p>For the "Link Share" feature, files are temporarily uploaded to our secure cloud storage. 
+                    These files are strictly kept for the duration of the expiry time you select (up to 24 hours), after which they are permanently and automatically deleted. 
+                    Files are not scanned, analyzed, or shared with third parties.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">3. Local Storage</h3>
+                    <p>We use your browser's local storage to save your preferences, theme settings, active link IDs, and trusted devices for Live Clipboard. 
+                    This data never leaves your device unless explicitly shared by you.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">4. Changes to this Policy</h3>
+                    <p>We may update our Privacy Policy from time to time. Since we don't collect email addresses, we cannot notify users directly. 
+                    Please review this page periodically for any changes.</p>
+                    
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">5. Contact</h3>
+                    <p>If you have any questions or concerns about this privacy policy, please contact alalithasagar355@gmail.com.</p>
+                </div>
+            </div>
+        </section>
+
+        <section data-screen="admin-style" id="screen-admin-style" class="screen-panel hidden">
+            <!-- 1. Password Protection Authentication Card -->
+            <div id="admin-auth-container" class="max-w-md mx-auto py-12">
+                <div class="glass-panel p-8 rounded-[2rem] shadow-xl text-center space-y-6 border border-zinc-200/50 dark:border-zinc-800/40">
+                    <div class="w-16 h-16 mx-auto bg-teal-100 dark:bg-teal-500/10 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-zinc-900 dark:text-white font-display">Admin Authentication</h3>
+                        <p class="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">Enter your secure credentials to modify the global application styles. Once unlocked, your adjustments will immediately publish to all users.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="password" id="admin-password-input" placeholder="••••••••••••" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3.5 text-center text-zinc-800 dark:text-white tracking-widest focus:ring-2 focus:ring-teal-500 outline-none text-lg">
+                        <button id="admin-login-btn" class="btn-ripple w-full py-3.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm flex items-center justify-center gap-2">
+                            Unlock Customizer
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Authorized actions only. Settings are securely stored in the cloud database.</p>
+                </div>
+            </div>
+
+            <!-- 2. Main Visual Customizer Interface (Hidden by Default) -->
+            <div id="admin-customizer-controls" class="hidden max-w-5xl mx-auto space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-1">
+                        Control Center
+                    </div>
+                    <h2 class="text-3xl font-bold text-zinc-900 dark:text-white font-display">App Style Customizer</h2>
+                    <p class="text-zinc-600 dark:text-zinc-300 text-xs max-w-xl mx-auto">Visually adjust color schemes, transparency, and background blurs of UI components with dynamic real-time live preview.</p>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-12">
+                    <!-- Left Panel: Controls (7 cols) -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <!-- Tabs Navigation -->
+                        <div class="flex bg-zinc-200/50 dark:bg-zinc-800/40 p-1 rounded-2xl shadow-inner border border-zinc-200/40 dark:border-zinc-700/40">
+                            <button type="button" class="customizer-tab flex-1 py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-zinc-900 text-teal-600 dark:text-teal-300 shadow-sm transition-all flex items-center justify-center gap-1.5" data-tab="colors">
+                                <span>🎨</span> Colors & Presets
+                            </button>
+                            <button type="button" class="customizer-tab flex-1 py-2.5 text-xs font-semibold rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all flex items-center justify-center gap-1.5" data-tab="transparency">
+                                <span>✨</span> Transparency
+                            </button>
+                            <button type="button" class="customizer-tab flex-1 py-2.5 text-xs font-semibold rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all flex items-center justify-center gap-1.5" data-tab="blurs">
+                                <span>💧</span> Blurs
+                            </button>
+                        </div>
+
+                        <!-- Panel 1: Colors & Presets -->
+                        <div id="customizer-panel-colors" class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm space-y-6">
+                            <div>
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                                    <span>🌟</span> Designer Style Presets
+                                </h3>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="color-presets-container">
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="teal">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #0f766e;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #2dd4bf;"></span>
+                                        </span>
+                                        Teal Breeze
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="emerald">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #064e3b;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #34d399;"></span>
+                                        </span>
+                                        Emerald Mint
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="nordic">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #2f5233;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #f28482;"></span>
+                                        </span>
+                                        Nordic Rose
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="royal">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #312e81;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #f59e0b;"></span>
+                                        </span>
+                                        Royal Gold
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="orchid">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #581c87;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #f472b6;"></span>
+                                        </span>
+                                        Cosmic Orchid
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="cyber">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #8b5cf6;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #06b6d4;"></span>
+                                        </span>
+                                        Cyber Horizon
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="sunset">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #3f3f46;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #f43f5e;"></span>
+                                        </span>
+                                        Sunset Coral
+                                    </button>
+                                    <button class="preset-btn p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left flex items-center gap-2 transition-all text-xs font-semibold" data-preset="sapphire">
+                                        <span class="flex items-center -space-x-1 shrink-0">
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900 relative z-10" style="background-color: #1e3a8a;"></span>
+                                            <span class="w-3 h-3 rounded-full border border-white dark:border-zinc-900" style="background-color: #38bdf8;"></span>
+                                        </span>
+                                        Sapphire Ice
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Custom Accent Color Picker -->
+                            <div class="border-t border-zinc-100 dark:border-zinc-800/80 pt-4 space-y-3">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                                    <span>✨</span> Custom Brand Primary Accent
+                                </h3>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="custom-color-picker" value="#0f766e" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                    <div class="flex-grow">
+                                        <input type="text" id="custom-color-text" value="#0f766e" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Custom Secondary Color Picker -->
+                            <div class="border-t border-zinc-100 dark:border-zinc-800/80 pt-4 space-y-3">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                                    <span>🌟</span> Custom Brand Secondary Accent
+                                </h3>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="custom-secondary-picker" value="#2dd4bf" class="w-12 h-12 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                    <div class="flex-grow">
+                                        <input type="text" id="custom-secondary-text" value="#2dd4bf" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 font-mono text-sm uppercase focus:ring-2 focus:ring-teal-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Page Background Customization -->
+                            <div class="border-t border-zinc-100 dark:border-zinc-800/80 pt-4 space-y-4">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                                    <span>🎨</span> Page Background Colors
+                                </h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <!-- Light BG -->
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Light Mode Background</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="custom-light-bg-picker" value="#fafaf9" class="w-10 h-10 rounded-xl border border-zinc-200 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-light-bg-text" value="#fafaf9" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                    <!-- Dark BG -->
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dark Mode Background</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="custom-dark-bg-picker" value="#09090b" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-dark-bg-text" value="#09090b" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Background Customization -->
+                            <div class="border-t border-zinc-100 dark:border-zinc-800/80 pt-4 space-y-4">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                                    <span>🧊</span> Glass Card Base Colors
+                                </h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <!-- Light Card -->
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Light Mode Card Base</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="custom-light-card-picker" value="#FFFFFF" class="w-10 h-10 rounded-xl border border-zinc-200 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-light-card-text" value="#FFFFFF" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                    <!-- Dark Card -->
+                                    <div class="space-y-1.5">
+                                        <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dark Mode Card Base</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="custom-dark-card-picker" value="#09090b" class="w-10 h-10 rounded-xl border border-zinc-700 bg-transparent cursor-pointer p-0.5 shrink-0">
+                                            <input type="text" id="custom-dark-card-text" value="#09090b" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-1.5 font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2: Transparency Controls -->
+                        <div id="customizer-panel-transparency" class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm space-y-5 hidden">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white font-display flex items-center gap-2.5">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                Transparency Controls
+                            </h3>
+
+                            <!-- Glass Panel Opacity -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Main Cards Opacity</span>
+                                    <span id="label-panel-opacity" class="font-mono text-teal-600 dark:text-teal-400">70%</span>
+                                </div>
+                                <input type="range" id="slider-panel-opacity" min="10" max="95" value="70" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Controls general panel backgrounds across the app</p>
+                            </div>
+
+                            <!-- Input Opacity -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>"Receive Code" Input Opacity</span>
+                                    <span id="label-input-opacity" class="font-mono text-teal-600 dark:text-teal-400">75%</span>
+                                </div>
+                                <input type="range" id="slider-input-opacity" min="15" max="98" value="75" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Finer control of input box opacity to ensure crisp text visibility</p>
+                            </div>
+
+                            <!-- Drop Zone Opacity -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>"Select Files" Drag Box Opacity</span>
+                                    <span id="label-drop-opacity" class="font-mono text-teal-600 dark:text-teal-400">65%</span>
+                                </div>
+                                <input type="range" id="slider-drop-opacity" min="10" max="95" value="65" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">Adjust the transparency of the file drop area box</p>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3: Blur Controls Panel -->
+                        <div id="customizer-panel-blurs" class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-sm space-y-5 hidden">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white font-display flex items-center gap-2.5">
+                                <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Backdrop Blur Strength
+                            </h3>
+
+                            <!-- Glass Panel Blur -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Main Cards Blur</span>
+                                    <span id="label-panel-blur" class="font-mono text-teal-600 dark:text-teal-400">40px</span>
+                                </div>
+                                <input type="range" id="slider-panel-blur" min="0" max="80" value="40" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+
+                            <!-- Input Blur -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Input Fields Blur</span>
+                                    <span id="label-input-blur" class="font-mono text-teal-600 dark:text-teal-400">20px</span>
+                                </div>
+                                <input type="range" id="slider-input-blur" min="0" max="60" value="20" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+
+                            <!-- Drop Zone Blur -->
+                            <div class="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
+                                <div class="flex justify-between text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                                    <span>Drag Box Blur</span>
+                                    <span id="label-drop-blur" class="font-mono text-teal-600 dark:text-teal-400">15px</span>
+                                </div>
+                                <input type="range" id="slider-drop-blur" min="0" max="40" value="15" class="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                            <button id="btn-reset-style" class="btn-ripple flex-1 py-3.5 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-white rounded-xl font-bold transition-all text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Restore Defaults
+                            </button>
+                            <button id="btn-save-style" class="btn-ripple flex-1 py-3.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold transition-all shadow-md shadow-teal-500/20 text-sm flex items-center justify-center gap-2">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Save Configuration
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Live Preview sandbox (5 cols) -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div class="sticky top-24 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Live Preview Simulator</p>
+                                <div class="flex gap-1 bg-zinc-200/50 dark:bg-zinc-800/40 p-1 rounded-xl border border-zinc-200/20 dark:border-zinc-700/20">
+                                    <button id="preview-toggle-light" type="button" class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">Light</button>
+                                    <button id="preview-toggle-dark" type="button" class="px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all bg-teal-500 text-white shadow-sm font-semibold">Dark</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic preview container to simulate page BG -->
+                            <div id="demo-preview-container" class="p-6 rounded-[2.5rem] border border-zinc-200/60 dark:border-zinc-800/60 transition-all duration-300 shadow-md">
+                                <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-lg space-y-6 relative overflow-hidden border border-white/40 dark:border-zinc-800/60" id="demo-card-preview">
+                                    <!-- Mock floating orb in preview card bg -->
+                                    <div id="demo-accent-blob" class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-teal-500/15 blur-2xl pointer-events-none transition-all duration-300"></div>
+
+                                    <div class="flex items-center gap-3 relative z-10">
+                                        <div id="demo-accent-icon" class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 transition-colors duration-300">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1zm14 0a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1zM4 19a1 1 0 011-3h2a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1z"></path></svg>
+                                        </div>
+                                        <div>
+                                            <h4 id="demo-title" class="font-bold text-sm text-zinc-900 dark:text-white font-display">Simulated Glass Card</h4>
+                                            <p id="demo-subtitle" class="text-[10px] text-zinc-400 dark:text-zinc-500">Live reflection of customized presets</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 1. Input Box Preview -->
+                                    <div class="space-y-1.5 relative z-10">
+                                        <label id="demo-input-label" class="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Mock Text Field</label>
+                                        <input type="text" readonly value="G-7A9X" id="demo-input-preview" class="custom-input-glass w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-center tracking-[0.2em] font-mono text-sm text-zinc-800 dark:text-white focus:outline-none cursor-default select-none shadow-inner transition-all duration-300">
+                                    </div>
+
+                                    <!-- 2. Drop Zone File Box Preview -->
+                                    <div id="demo-drop-preview" class="custom-drop-zone-glass border border-dashed border-zinc-300 dark:border-zinc-700 bg-white/30 dark:bg-zinc-900/20 rounded-[20px] p-6 text-center flex flex-col items-center relative z-10 transition-all duration-300">
+                                        <div id="demo-drop-icon" class="w-10 h-10 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center mb-3 transition-all duration-300">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9"></path></svg>
+                                        </div>
+                                        <span id="demo-drop-text" class="text-xs font-semibold text-zinc-700 dark:text-zinc-300 font-display">Mock Drag &amp; Drop Box</span>
+                                        <span id="demo-drop-subtext" class="text-[9px] text-zinc-400 dark:text-zinc-500 mt-0.5">Drag files to share</span>
+                                    </div>
+
+                                    <!-- 3. Button Preview -->
+                                    <button class="w-full py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-teal-500/10 transition-all duration-300" id="demo-btn-preview">
+                                        Accent Button Action
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section data-screen="terms" id="screen-terms" class="screen-panel hidden">
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="text-center space-y-3">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:border-teal-500/40 dark:bg-teal-500/10 dark:text-teal-300 mb-2">
+                        Legal
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white font-display">Terms and Conditions</h2>
+                    <p class="text-zinc-600 dark:text-zinc-300 text-sm">Last updated: July 2026</p>
+                </div>
+                
+                <div class="glass-panel p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_50px_rgba(27,48,34,0.08)] prose dark:prose-invert prose-teal max-w-none text-zinc-700 dark:text-zinc-300">
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white mt-0">1. Acceptance of Terms</h3>
+                    <p>By accessing and using SmartShare, you agree to be bound by these Terms and Conditions. 
+                    If you disagree with any part of these terms, you may not access or use the service.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">2. Acceptable Use</h3>
+                    <p>You agree not to use SmartShare to share illegal, copyrighted, or malicious content, including malware or viruses. 
+                    SmartShare is a tool for personal and legal file sharing. We are not responsible for the content transmitted using our service.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">3. Disclaimer of Warranties</h3>
+                    <p>SmartShare is provided "as is" without warranty of any kind. 
+                    While we strive for high reliability and security, we do not guarantee that the service will be uninterrupted, error-free, or completely secure. 
+                    We are not liable for any data loss, intercepted data, or damages arising from the use of this service.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">4. Service Limitations</h3>
+                    <p>We reserve the right to limit file sizes, restrict transfer speeds, or modify/discontinue features at any time without notice. 
+                    Link Share files are automatically deleted after their expiry time and cannot be recovered.</p>
+
+                    <h3 class="text-xl font-bold text-zinc-900 dark:text-white">5. Governing Law</h3>
+                    <p>These Terms shall be governed and construed in accordance with the laws, without regard to its conflict of law provisions.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white mt-auto border-t border-zinc-200 dark:border-zinc-800">
+        <div class="mx-auto max-w-7xl px-4 py-12 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-12">
+            <div class="space-y-3 sm:col-span-2 md:col-span-3 lg:col-span-3">
+                <div class="flex items-center gap-2">
+                    <img src="./icon.png" alt="SmartShare Logo" class="w-8 h-8 object-cover rounded-[10px] shadow-sm border border-zinc-200 dark:border-zinc-700/80 shrink-0">
+                    <span class="font-bold text-lg text-zinc-900 dark:text-white">SmartShare</span>
+                </div>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">Fast, secure file sharing with Direct, Link, and Clipboard modes.</p>
+            </div>
+            <div class="space-y-2 text-sm font-semibold text-zinc-900 dark:text-white lg:col-span-2">
+                <p class="uppercase tracking-wider text-xs text-zinc-500 dark:text-zinc-400">Navigate</p>
+                <div class="flex flex-col gap-2">
+    <button class="footer-link" data-screen-link="share">Home</button>
+    <button class="footer-link" data-screen-link="manage">Manage Active Links</button>
+    <button class="footer-link" data-screen-link="faq">FAQs</button>
+    <button class="footer-link" data-screen-link="about">About</button>
+    <button id="footer-admin-style" class="footer-link hidden font-semibold text-teal-600 dark:text-teal-400" data-screen-link="admin-style">Admin Style</button>
+</div>
+            </div>
+
+            <div class="space-y-2 text-sm font-semibold text-zinc-900 dark:text-white lg:col-span-2">
+                <p class="uppercase tracking-wider text-xs text-zinc-500 dark:text-zinc-400">Legal</p>
+                <div class="flex flex-col gap-2">
+                    <button class="footer-link" data-screen-link="privacy">Privacy Policy</button>
+                    <button class="footer-link" data-screen-link="terms">Terms & Conditions</button>
+                </div>
+            </div>
+            <div class="space-y-2 text-sm font-semibold text-zinc-900 dark:text-white lg:col-span-2">
+                <p class="uppercase tracking-wider text-xs text-zinc-500 dark:text-zinc-400">Contact</p>
+                <p><a class="text-teal-600 dark:text-teal-400" href="mailto:lalithasagarambati@gmail.com">Email Me</a></p>
+                <p><a class="text-teal-600 dark:text-teal-400" href="https://23mh1a1202.github.io/portfolio/">Portfolio</a></p>
+                <p class="font-normal text-zinc-600 dark:text-zinc-400">Made with ❤️ by Ambati Lalitha Sagar</p>
+            </div>
+            <div class="space-y-4 sm:col-span-2 md:col-span-3 lg:col-span-3 lg:border-l border-zinc-200/70 dark:border-zinc-800/70 pt-6 lg:pt-0 lg:pl-8">
+                <p class="uppercase tracking-wider text-xs text-zinc-400 dark:text-zinc-400 font-semibold mb-2">FAQs</p>
+                <div class="space-y-3">
+                    <details class="group cursor-pointer bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 p-4 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm">
+                        <summary class="font-medium text-[13px] text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors list-none flex justify-between items-center select-none [&::-webkit-details-marker]:hidden">
+                            Are my files secure?
+                            <span class="transition-transform duration-200 group-open:rotate-180 text-zinc-400">
+                                <svg fill="none" height="16" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-[13px] text-zinc-500 dark:text-zinc-400 mt-3 leading-relaxed">Yes! Direct mode uses WebRTC for peer-to-peer encryption. Link mode files are securely stored and automatically deleted after expiry.</p>
+                    </details>
+                    <details class="group cursor-pointer bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 p-4 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm">
+                        <summary class="font-medium text-[13px] text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors list-none flex justify-between items-center select-none [&::-webkit-details-marker]:hidden">
+                            What is the file size limit?
+                            <span class="transition-transform duration-200 group-open:rotate-180 text-zinc-400">
+                                <svg fill="none" height="16" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-[13px] text-zinc-500 dark:text-zinc-400 mt-3 leading-relaxed">Direct mode has no limits. Link mode supports videos up to 100MB and other files up to 10MB.</p>
+                    </details>
+                    <details class="group cursor-pointer bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200/70 dark:border-zinc-800/70 p-4 transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm">
+                        <summary class="font-medium text-[13px] text-zinc-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors list-none flex justify-between items-center select-none [&::-webkit-details-marker]:hidden">
+                            How does Clipboard Sync work?
+                            <span class="transition-transform duration-200 group-open:rotate-180 text-zinc-400">
+                                <svg fill="none" height="16" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="16"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-[13px] text-zinc-500 dark:text-zinc-400 mt-3 leading-relaxed">It securely connects your devices in real-time. Text, links, and small images you paste will instantly appear on connected devices.</p>
+                    </details>
+                </div>
+            </div>
+
+        </div>
+        <div class="text-center text-xs text-zinc-400 dark:text-zinc-400 pb-6">© 2026 SmartShare. All rights reserved.</div>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+    <div id="extend-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-zinc-900/40 dark:bg-zinc-950/60 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-white/60 dark:border-zinc-700/50 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-6 w-[90%] max-w-xs transform scale-95 transition-transform">
+            <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Extend Link Expiry</h3>
+            <p class="text-sm text-zinc-400 dark:text-zinc-400 mb-5">How many extra minutes would you like to add? (Max: 60)</p>
+            <input type="number" id="extend-mins-input" value="15" min="1" max="60" class="w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-teal-500 outline-none text-zinc-900 dark:text-white font-medium mb-6">
+            <div class="flex justify-end gap-3">
+                <button id="cancel-extend-btn" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Cancel</button>
+                <button id="confirm-extend-btn" class="btn-ripple px-5 py-2.5 rounded-xl text-sm font-semibold bg-teal-500 hover:bg-teal-600 text-white shadow-md shadow-teal-500/30 transition-all active:scale-95">Extend Time</button>
+            </div>
+        </div>
+    </div>
+    <div id="rename-device-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-zinc-900/40 dark:bg-zinc-950/60 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-white/60 dark:border-zinc-700/50 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-6 w-[90%] max-w-xs transform scale-95 transition-transform">
+            <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2 font-display">Rename Device</h3>
+            <p class="text-sm text-zinc-400 dark:text-zinc-400 mb-5">Enter a new name for this trusted device:</p>
+            <input type="text" id="rename-device-input" placeholder="New Device Name" class="w-full bg-white/40 dark:bg-zinc-900/30 backdrop-blur-xl border border-white/60 dark:border-zinc-700/50 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-teal-500 outline-none text-zinc-900 dark:text-white font-medium mb-6">
+            <div class="flex justify-end gap-3">
+                <button id="cancel-rename-btn" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Cancel</button>
+                <button id="confirm-rename-btn" class="btn-ripple px-5 py-2.5 rounded-xl text-sm font-semibold bg-teal-500 hover:bg-teal-600 text-white shadow-md shadow-teal-500/30 transition-all active:scale-95">Save</button>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
