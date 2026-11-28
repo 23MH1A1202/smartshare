@@ -1,0 +1,153 @@
+/* =========================================================
+   SmartShare motion layer — animated logo loader, page
+   transitions, press feedback and small UI polish.
+   Everything here is additive and respects reduced motion.
+   ========================================================= */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- ANIMATED LOGO MARK ---------- */
+.ss-mark { display: block; overflow: visible; }
+.ss-mark .tile-b, .ss-mark .tile-p, .ss-mark .arr-b, .ss-mark .arr-p { transform-box: view-box; will-change: transform; }
+.ss-mark .tile-b { animation: ssTileB 1.9s ease-in-out infinite; }
+.ss-mark .tile-p { animation: ssTileP 1.9s ease-in-out infinite; }
+.ss-mark .arr-b  { animation: ssArrB 1.9s ease-in-out infinite; }
+.ss-mark .arr-p  { animation: ssArrP 1.9s ease-in-out infinite; }
+.ss-mark .ring   { transform-origin: 100px 100px; animation: ssSpin 2.4s linear infinite; }
+.ss-mark .glow   { transform-origin: 100px 100px; animation: ssGlow 1.9s ease-in-out infinite; }
+@keyframes ssTileB { 0%,100% { transform: translate(0,0); }   50% { transform: translate(-9px, 9px); } }
+@keyframes ssTileP { 0%,100% { transform: translate(0,0); }   50% { transform: translate(9px, -9px); } }
+@keyframes ssArrB  { 0%,100% { transform: translate(-4px, 4px); opacity: .7; } 50% { transform: translate(5px,-5px); opacity: 1; } }
+@keyframes ssArrP  { 0%,100% { transform: translate(4px,-4px); opacity: .7; }  50% { transform: translate(-5px, 5px); opacity: 1; } }
+@keyframes ssSpin  { to { transform: rotate(360deg); } }
+@keyframes ssGlow  { 0%,100% { opacity: .5; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
+
+/* ---------- LAUNCH SPLASH ---------- */
+.ss-splash {
+  position: fixed; inset: 0; z-index: 100000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: #fafafa;
+  transition: opacity .5s var(--ease-out), transform .5s var(--ease-out), filter .5s var(--ease-out), visibility 0s .5s;
+  /* failsafe: if scripts never run, the splash still goes away */
+  animation: ssSplashFailsafe 0s 5s forwards;
+}
+html.dark .ss-splash { background: #09090b; }
+.ss-splash::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 42%, rgba(56,132,255,.16), transparent 55%);
+}
+.ss-splash .ss-mark { width: 124px; height: 124px; position: relative; filter: drop-shadow(0 14px 30px rgba(70,90,255,.35)); }
+.ss-splash .tile-b { animation: ssInB .8s var(--ease-spring) both, ssTileB 1.9s .8s ease-in-out infinite; }
+.ss-splash .tile-p { animation: ssInP .8s var(--ease-spring) both, ssTileP 1.9s .8s ease-in-out infinite; }
+.ss-splash .arr-b, .ss-splash .arr-p { animation-delay: .5s; }
+.ss-splash .ring, .ss-splash .glow { animation-delay: .4s; opacity: 0; animation-fill-mode: forwards; }
+.ss-splash .ring { animation: ssSpin 2.4s .4s linear infinite, ssFadeIn .6s .4s both; }
+@keyframes ssInB { from { transform: translate(70px,-70px) scale(.4) rotate(18deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ssInP { from { transform: translate(-70px,70px) scale(.4) rotate(-18deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ssFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ss-wordmark {
+  font-weight: 800; font-size: 28px; letter-spacing: -0.02em;
+  color: #0f172a; display: flex; overflow: hidden;
+}
+html.dark .ss-wordmark { color: #f4f4f5; }
+.ss-wordmark span { display: inline-block; animation: ssLetter .6s var(--ease-out) both; }
+@keyframes ssLetter { from { transform: translateY(110%); opacity: 0; } to { transform: none; opacity: 1; } }
+.ss-tagline { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #94a3b8; animation: ssFadeIn .8s 1s both; }
+.ss-splash.is-leaving { opacity: 0; transform: scale(1.06); filter: blur(8px); visibility: hidden; pointer-events: none; }
+.ss-splash.is-leaving .ss-mark { transition: transform .5s var(--ease-out); transform: scale(.8); }
+@keyframes ssSplashFailsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+
+/* ---------- IN-APP LOADER (connecting) ---------- */
+#ss-connect-loader { display: none; flex-direction: column; align-items: center; gap: 10px; margin: 4px 0 26px; width: 100%; }
+#ss-connect-loader .ss-mark { width: 84px; height: 84px; filter: drop-shadow(0 8px 18px rgba(70,90,255,.28)); }
+#ss-connect-loader .ss-loader-text { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #94a3b8; font-weight: 600; }
+#transfer-state:not(:has(#progress-area:not(.hidden), #share-options:not(.hidden), #success-area:not(.hidden))) #ss-connect-loader { display: flex; animation: ssFadeIn .4s both; }
+.ss-loader-inline { width: 40px; height: 40px; }
+
+/* ---------- PAGE TRANSITIONS ---------- */
+.screen-enter { animation: screenIn .6s var(--ease-out) both; }
+@keyframes screenIn {
+  from { opacity: 0; transform: translate3d(var(--enter-x, 0px), 18px, 0) scale(.985); filter: blur(6px); }
+  60%  { filter: blur(0); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+.screen-enter :is(.glass-panel) { animation: panelRise .7s var(--ease-out) both; }
+@keyframes panelRise { from { opacity: 0; transform: translateY(22px) scale(.98); } to { opacity: 1; transform: none; } }
+.pop-enter { animation: popEnter .5s var(--ease-spring) both; }
+@keyframes popEnter { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* staggered reveal for direct children of a freshly-shown block */
+.stagger-enter > * { animation: popEnter .55s var(--ease-out) both; }
+.stagger-enter > *:nth-child(1) { animation-delay: .02s; }
+.stagger-enter > *:nth-child(2) { animation-delay: .07s; }
+.stagger-enter > *:nth-child(3) { animation-delay: .12s; }
+.stagger-enter > *:nth-child(4) { animation-delay: .17s; }
+.stagger-enter > *:nth-child(5) { animation-delay: .22s; }
+.stagger-enter > *:nth-child(6) { animation-delay: .27s; }
+.stagger-enter > *:nth-child(n+7) { animation-delay: .32s; }
+
+/* ---------- PRESS FEEDBACK + RIPPLE ---------- */
+button, [role="button"], .nav-link, label[for] {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button:not(:disabled), [role="button"]) {
+  transition: scale .18s var(--ease-spring), transform .25s var(--ease-out), box-shadow .25s ease, background-color .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease, filter .25s ease;
+}
+button:not(:disabled):active, [role="button"]:active { scale: .965; }
+@media (hover: hover) {
+  .btn-ripple:not(:disabled):hover { filter: brightness(1.06) saturate(1.05); }
+  .glass-panel { transition: box-shadow .35s ease, transform .35s var(--ease-out); }
+}
+.ss-ripple-host { overflow: hidden; isolation: isolate; } /* position is set inline by motion.js only for static elements, so absolute buttons stay absolute */
+.ss-ripple {
+  position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,.25) 45%, transparent 70%);
+  transform: scale(0); opacity: .9;
+  animation: ssRipple .65s var(--ease-out) forwards;
+}
+html:not(.dark) .ss-ripple.on-light { background: radial-gradient(circle, rgba(20,184,166,.28) 0%, rgba(20,184,166,.12) 45%, transparent 70%); }
+@keyframes ssRipple { to { transform: scale(1); opacity: 0; } }
+
+/* ---------- DETAIL POLISH ---------- */
+:focus-visible { outline: 2px solid rgba(45,140,255,.85); outline-offset: 2px; transition: outline-offset .15s ease; }
+input:focus-visible, textarea:focus-visible { outline: none; }
+#percentage, #transfer-speed, #transfer-eta, #timer-value { font-variant-numeric: tabular-nums; }
+#progress-bar { transition: width .35s var(--ease-out); box-shadow: 0 0 14px rgba(45,212,191,.45); overflow: hidden; }
+#progress-bar::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.55) 50%, transparent 80%);
+  transform: translateX(-100%); animation: barSheen 1.6s ease-in-out infinite;
+}
+@keyframes barSheen { to { transform: translateX(100%); } }
+#success-area:not(.hidden) svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: checkDraw .6s .25s var(--ease-out) forwards; }
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+#success-area:not(.hidden) > div:first-child { animation: successPop .7s var(--ease-spring) both, successRing 1.6s .5s ease-out 1; }
+@keyframes successPop { from { transform: scale(.2) rotate(-25deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes successRing { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.5); } 100% { box-shadow: 0 0 0 28px rgba(52,211,153,0); } }
+#success-text { animation: popEnter .6s .3s var(--ease-out) both; }
+header img[alt="SmartShare Logo"] { transition: transform .5s var(--ease-spring); }
+header img[alt="SmartShare Logo"]:hover { transform: rotate(-8deg) scale(1.08); }
+header { transition: box-shadow .3s ease, background-color .3s ease; }
+header.is-scrolled { box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+.nav-link { position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; left: 50%; bottom: 3px; height: 2px; width: 0; border-radius: 2px;
+  background: linear-gradient(90deg,#2a8bff,#8a5cff); transform: translateX(-50%); transition: width .35s var(--ease-out);
+}
+.nav-link.is-active::after, .nav-link:hover::after { width: 46%; }
+#pairing-code-display { transition: letter-spacing .3s var(--ease-out), color .2s ease, scale .18s var(--ease-spring); }
+@media (hover: hover) { #pairing-code-display:hover { letter-spacing: .34em; } }
+.toast-item, #toast-container > * { will-change: transform, opacity; }
+::selection { background: rgba(45,140,255,.28); }
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-mark *, .screen-enter, .screen-enter .glass-panel, .pop-enter, .stagger-enter > *,
+  #progress-bar::after, #success-area *, .ss-wordmark span, .ss-tagline { animation: none !important; }
+  .ss-splash { transition: opacity .2s linear; }
+  .ss-splash.is-leaving { transform: none; filter: none; }
+  button:not(:disabled):active { scale: 1; }
+  .ss-ripple { display: none; }
+}

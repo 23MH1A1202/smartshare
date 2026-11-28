@@ -1,0 +1,96 @@
+{
+  "id": "./",
+  "name": "SmartShare",
+  "short_name": "SmartShare",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "appicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "appicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "appicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./share-receive/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": [
+            "image/*",
+            "video/*",
+            "audio/*",
+            "text/*",
+            "application/*",
+            "*/*"
+          ]
+        }
+      ]
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Send files (Direct)",
+      "short_name": "Send",
+      "url": "./?mode=p2p",
+      "icons": [
+        {
+          "src": "appicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Link share",
+      "short_name": "Link",
+      "url": "./?mode=cloud",
+      "icons": [
+        {
+          "src": "appicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Live clipboard",
+      "short_name": "Clipboard",
+      "url": "./?mode=clipboard",
+      "icons": [
+        {
+          "src": "appicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "description": "Fast, account-free peer-to-peer file sharing and live clipboard.",
+  "categories": [
+    "utilities",
+    "productivity"
+  ]
+}
